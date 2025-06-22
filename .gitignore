@@ -1,0 +1,65 @@
+# Credentials and sensitive files
+*.json
+*.p8
+*.txt
+*.log
+*.csv
+
+# Apple Music credentials and tokens
+musickit/
+concrete-spider-*.json
+*-token.txt
+*-token.js
+AuthKey_*.p8
+
+# Python virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.pytest_cache/
+
+# Node.js (for any Apple Music token generation)
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Build artifacts (keep build/ for deployment)
+# Note: We want to keep build/ so it can be deployed
+# but you can uncomment the line below if you prefer to exclude it
+# build/
+
+# Logs
+*.log
+logs/
