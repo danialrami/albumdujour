@@ -1,16 +1,24 @@
 #!/bin/bash
 
-# Music Library Website Builder
-# This script builds a static website from your Google Sheets music data
+# Music Library Website Builder with Git Deployment
+# This script builds a static website from your Google Sheets music data and deploys it
 
 set -e  # Exit on any error
 
-echo "🎵 Music Library Website Builder"
-echo "================================"
+echo "🎵 Music Library Website Builder with Git Deployment"
+echo "===================================================="
 
 # Get the current directory (should be the v3 website directory)
 WEBSITE_DIR="$(pwd)"
 echo "📁 Website directory: $WEBSITE_DIR"
+
+# Check if we're in a git repository
+if [ ! -d ".git" ]; then
+    echo "❌ Error: Not in a git repository!"
+    echo "Please run this script from the root of your git repository."
+    exit 1
+fi
+echo "✅ Git repository detected"
 
 # Check if credentials file exists in current directory
 CREDENTIALS_FILE="concrete-spider-446700-f9-4646496845d1.json"
@@ -55,8 +63,23 @@ PYTHON_CMD="python3"
 echo ""
 echo "🔧 Setting up Python environment..."
 
-# Check if virtual environment exists
-if [ ! -d "$VENV_DIR" ]; then
+# Check if virtual environment exists and is valid
+if [ -d "$VENV_DIR" ]; then
+    # Test if the venv is working properly
+    if "$VENV_DIR/bin/python" --version &>/dev/null; then
+        echo "✅ Virtual environment already exists and is valid"
+    else
+        echo "⚠️  Virtual environment exists but is broken, recreating..."
+        rm -rf "$VENV_DIR"
+        $PYTHON_CMD -m venv "$VENV_DIR"
+        if [ $? -eq 0 ]; then
+            echo "✅ Virtual environment recreated successfully"
+        else
+            echo "❌ Failed to recreate virtual environment"
+            exit 1
+        fi
+    fi
+else
     echo "📦 Creating virtual environment..."
     $PYTHON_CMD -m venv "$VENV_DIR"
     if [ $? -eq 0 ]; then
@@ -65,8 +88,6 @@ if [ ! -d "$VENV_DIR" ]; then
         echo "❌ Failed to create virtual environment"
         exit 1
     fi
-else
-    echo "✅ Virtual environment already exists"
 fi
 
 # Activate virtual environment
@@ -75,7 +96,9 @@ source "$VENV_DIR/bin/activate"
 
 if [ $? -eq 0 ]; then
     echo "✅ Virtual environment activated"
-    echo "🐍 Using Python: $(which python)"
+    echo "🐍 Using Python: $(which python 2>/dev/null || echo 'python not found')"
+    echo "🐍 Python3 available: $(which python3 2>/dev/null || echo 'python3 not found')"
+    echo "🔍 Virtual env: $VIRTUAL_ENV"
 else
     echo "❌ Failed to activate virtual environment"
     exit 1
@@ -96,14 +119,14 @@ trap cleanup EXIT
 
 # Upgrade pip and install required packages
 echo "📥 Installing/updating required packages..."
-pip install --upgrade pip --quiet
+"$VENV_DIR/bin/pip" install --upgrade pip --quiet
 if [ $? -eq 0 ]; then
     echo "✅ pip upgraded"
 else
     echo "⚠️  pip upgrade failed, continuing anyway"
 fi
 
-pip install gspread --quiet
+"$VENV_DIR/bin/pip" install gspread --quiet
 if [ $? -eq 0 ]; then
     echo "✅ gspread installed/updated"
 else
@@ -119,8 +142,9 @@ echo "🚀 Building website..."
 echo "📊 Reading from Google Sheets..."
 echo "🎵 Processing music data..."
 
-# Run the Python script (it will auto-detect paths in current directory)
-python "$BUILD_SCRIPT"
+# Run the Python script using the venv's Python directly
+echo "🐍 Using venv Python: $VENV_DIR/bin/python"
+"$VENV_DIR/bin/python" "$BUILD_SCRIPT"
 
 # Check if build was successful
 if [ -d "build" ] && [ -f "build/index.html" ]; then
@@ -146,25 +170,140 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     echo "📄 Build contents:"
     ls -la build/ | head -10
     
+    # Deactivate virtual environment before git operations
+    cleanup
+    trap - EXIT  # Remove the trap since we're manually cleaning up
+    
+    # Git operations start here
+    echo ""
+    echo "🔄 Starting Git deployment process..."
+    
+    # Store current branch name
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+    echo "📍 Current branch: $CURRENT_BRANCH"
+    
+    # Create timestamp for commit message
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    # 1. First, commit any changes to the current branch (main/master)
+    echo ""
+    echo "📝 Committing source changes to $CURRENT_BRANCH branch..."
+    
+    # Check if there are any changes to commit
+    if git diff --staged --quiet && git diff --quiet; then
+        echo "ℹ️  No source changes to commit"
+    else
+        git add .
+        git commit -m "Update website source - $TIMESTAMP" || {
+            echo "⚠️  Nothing to commit or commit failed, continuing..."
+        }
+        echo "✅ Source changes committed to $CURRENT_BRANCH"
+    fi
+    
+    # 2. Create/switch to build branch and deploy build files
+    echo ""
+    echo "🌿 Setting up build branch..."
+    
+    # Check if build branch exists
+    if git show-ref --verify --quiet refs/heads/build; then
+        echo "✅ Build branch exists, switching to it"
+        git checkout build
+    else
+        echo "📝 Creating new build branch"
+        git checkout -b build
+    fi
+    
+    # Clear the build branch (keep only build files)
+    echo "🧹 Cleaning build branch..."
+    
+    # Remove all files except .git, build/, and .gitignore
+    find . -maxdepth 1 -not -name '.git' -not -name 'build' -not -name '.gitignore' -not -path '.' -exec rm -rf {} + 2>/dev/null || true
+    
+    # Move build contents to root
+    echo "📦 Moving build files to repository root..."
+    if [ -d "build" ]; then
+        mv build/* . 2>/dev/null || true
+        mv build/.* . 2>/dev/null || true  # Move hidden files if any
+        rmdir build 2>/dev/null || true
+    fi
+    
+    # Create a simple .gitignore for the build branch
+    echo "# Build branch - only contains generated website files" > .gitignore
+    
+    # Add and commit build files
+    echo "📤 Committing build files..."
+    git add .
+    git commit -m "Deploy website build - $TIMESTAMP" || {
+        echo "⚠️  No build changes to commit"
+    }
+    
+    # 3. Push both branches
+    echo ""
+    echo "🚀 Pushing to remote repository..."
+    
+    # Push build branch
+    echo "📤 Pushing build branch..."
+    git push origin build || {
+        echo "❌ Failed to push build branch"
+        git checkout "$CURRENT_BRANCH"
+        exit 1
+    }
+    echo "✅ Build branch pushed successfully"
+    
+    # Switch back to original branch and push it too
+    echo "📤 Pushing $CURRENT_BRANCH branch..."
+    git checkout "$CURRENT_BRANCH"
+    git push origin "$CURRENT_BRANCH" || {
+        echo "⚠️  Failed to push $CURRENT_BRANCH branch (may be up to date)"
+    }
+    echo "✅ Source branch pushed successfully"
+    
+    # 4. Clean up - rebuild the build directory locally for testing
+    echo ""
+    echo "🔧 Rebuilding local build directory for testing..."
+    
+    # Re-run just the Python build script to regenerate build folder locally
+    source "$VENV_DIR/bin/activate" 2>/dev/null || {
+        echo "⚠️  Could not reactivate virtual environment"
+        echo "💡 You may need to run the build script again if you want to test locally"
+    }
+    
+    if [ -n "$VIRTUAL_ENV" ]; then
+        # Use venv Python directly
+        "$VENV_DIR/bin/python" "$BUILD_SCRIPT" || {
+            echo "⚠️  Could not rebuild local build directory"
+        }
+        deactivate
+    fi
+    
+    # Final status
+    echo ""
+    echo "🎊 Deployment complete!"
+    echo "================================"
+    echo "✅ Source code: $CURRENT_BRANCH branch"
+    echo "✅ Website: build branch"
+    echo ""
+    echo "🌐 Your website is now deployed on the 'build' branch"
+    echo "📋 Hostinger setup:"
+    echo "   1. Connect your GitHub repository to Hostinger"
+    echo "   2. Set deployment branch to: build"
+    echo "   3. Set build directory to: / (root)"
+    echo ""
+    echo "🔗 Branch URLs:"
+    echo "   Source: https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\([^.]*\).*/\1/')/tree/$CURRENT_BRANCH"
+    echo "   Website: https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\([^.]*\).*/\1/')/tree/build"
+    echo ""
+    echo "🔄 To rebuild and redeploy: just run ./build.sh again"
+    
     # Optional: Open in browser (macOS)
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ "$OSTYPE" == "darwin"* ]] && [ -f "build/index.html" ]; then
         echo ""
-        read -p "Open in browser? (y/n): " -n 1 -r
+        read -p "Open local build in browser? (y/n): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             open "build/index.html"
         fi
     fi
-    
-    # Deploy suggestions
-    echo ""
-    echo "💡 To deploy:"
-    echo "   - Upload the 'build' folder to any web server"
-    echo "   - Or use: python3 -m http.server 8000 (from build directory)"
-    echo "   - Or deploy to GitHub Pages, Netlify, Vercel, etc."
-    echo ""
-    echo "🔄 To rebuild: just run ./build.sh again"
-    echo "🗂️  Files ready for deployment are in the ./build/ directory"
     
 else
     echo ""
