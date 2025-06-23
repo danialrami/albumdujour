@@ -61,8 +61,17 @@ cleanup() {
             log_success "Virtual environment deactivated"
         fi
         
+        # Clean up any uncommitted changes on build branch
+        local current_branch
+        current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+        if [ "$current_branch" = "build" ]; then
+            log_info "Cleaning up build branch state..."
+            git reset --hard HEAD 2>/dev/null || true
+            git clean -fd 2>/dev/null || true
+        fi
+        
         # Return to original branch if we changed it
-        if [ -n "$ORIGINAL_BRANCH" ] && [ "$ORIGINAL_BRANCH" != "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')" ]; then
+        if [ -n "$ORIGINAL_BRANCH" ] && [ "$ORIGINAL_BRANCH" != "$current_branch" ]; then
             log_info "Returning to original branch: $ORIGINAL_BRANCH"
             git checkout "$ORIGINAL_BRANCH" 2>/dev/null || log_warning "Could not return to original branch"
         fi
@@ -188,8 +197,8 @@ build_website() {
 commit_source_changes() {
     log_header "📝 Committing Source Changes"
     
-    # Switch to main branch if not already there
-    if [ "$ORIGINAL_BRANCH" != "main" ]; then
+    # Make sure we're on main branch
+    if [ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]; then
         log_info "Switching to main branch..."
         git checkout main
     fi
@@ -229,7 +238,40 @@ create_safe_backup() {
     log_success "Safety backup created and verified"
 }
 
-setup_build_gitignore() {
+create_orphan_build_branch() {
+    log_header "🌿 Creating Clean Build Branch"
+    
+    # Check if build branch exists and delete it to start fresh
+    if git show-ref --verify --quiet refs/heads/build; then
+        log_info "Deleting existing build branch to start fresh..."
+        git branch -D build 2>/dev/null || true
+    fi
+    
+    # Create a completely new orphan branch (no history from main)
+    log_info "Creating fresh orphan build branch..."
+    git checkout --orphan build
+    
+    # Remove all files from the new branch (they're still staged from main)
+    log_info "Clearing all files from build branch..."
+    git rm -rf . 2>/dev/null || true
+    
+    # Clean any remaining untracked files
+    git clean -fd 2>/dev/null || true
+    
+    # Verify we have a clean slate
+    if [ "$(ls -A . 2>/dev/null | wc -l)" -ne 0 ]; then
+        log_error "Build branch is not clean after reset"
+        ls -la
+        exit 1
+    fi
+    
+    log_success "Clean build branch created"
+}
+
+setup_build_branch() {
+    log_header "🔧 Setting Up Build Branch"
+    
+    # Create security-focused gitignore FIRST
     log_info "Setting up build branch .gitignore..."
     cat > .gitignore << 'EOF'
 # Credentials and sensitive files - NEVER commit these
@@ -258,83 +300,6 @@ Thumbs.db
 *~
 EOF
     log_success "Build branch .gitignore configured"
-}
-
-verify_no_credentials() {
-    log_info "Verifying no credentials in build branch..."
-    
-    # Define patterns for credential files
-    local credential_patterns=(
-        "concrete-spider-446700-f9-*.json"
-        "musickit"
-        "*.key"
-        "*.pem"
-        "*.p8"
-        ".env"
-        "build_music_site.py"
-        "build.sh"
-        "venv"
-    )
-    
-    local found_credentials=false
-    
-    for pattern in "${credential_patterns[@]}"; do
-        if find . -name "$pattern" -type f -o -name "$pattern" -type d | grep -q .; then
-            log_error "Found sensitive files/directories matching pattern: $pattern"
-            find . -name "$pattern" -type f -o -name "$pattern" -type d | head -5
-            found_credentials=true
-        fi
-    done
-    
-    if [ "$found_credentials" = true ]; then
-        log_error "SECURITY VIOLATION: Credentials or build tools found in build branch!"
-        log_error "Aborting deployment to prevent credential exposure"
-        exit 1
-    fi
-    
-    log_success "✓ No credentials or build tools found in build branch"
-}
-
-deploy_to_build_branch() {
-    log_header "🌿 Deploying to Build Branch"
-    
-    # Check if build branch exists
-    if ! git show-ref --verify --quiet refs/heads/build; then
-        log_info "Creating build branch..."
-        git checkout -b build
-    else
-        log_info "Switching to build branch..."
-        git checkout build
-    fi
-    
-    # Verify we're on build branch
-    local current_branch
-    current_branch=$(git rev-parse --abbrev-ref HEAD)
-    if [ "$current_branch" != "build" ]; then
-        log_error "Failed to switch to build branch (currently on: $current_branch)"
-        exit 1
-    fi
-    
-    # Set up security-focused gitignore FIRST
-    setup_build_gitignore
-    
-    # SAFE cleanup: Only remove web files, preserve .git and .gitignore
-    log_info "Safely cleaning build branch..."
-    
-    # Remove only web artifacts, using explicit whitelist approach
-    local items_to_remove=(
-        "index.html"
-        "styles.css"
-        "scripts.js"
-        "assets"
-    )
-    
-    for item in "${items_to_remove[@]}"; do
-        if [ -e "$item" ]; then
-            rm -rf "$item"
-            log_info "Removed old: $item"
-        fi
-    done
     
     # Copy ONLY web files from backup (whitelist approach for maximum security)
     log_info "Copying web files to build branch..."
@@ -363,39 +328,73 @@ deploy_to_build_branch() {
         log_info "✓ Copied assets directory"
     fi
     
-    # CRITICAL: Verify no credentials were copied
-    verify_no_credentials
-    
     # Verify deployment
     if [ ! -f "index.html" ]; then
         log_error "Deployment verification failed: index.html not found in build branch"
         exit 1
     fi
     
-    # Show what's in the build branch
+    log_success "Build branch setup completed"
+}
+
+verify_build_security() {
+    log_header "🔒 Security Verification"
+    
+    log_info "Verifying no credentials in build branch..."
+    
+    # Define patterns for credential files
+    local credential_patterns=(
+        "concrete-spider-446700-f9-*.json"
+        "musickit"
+        "*.key"
+        "*.pem"
+        "*.p8"
+        ".env"
+        "build_music_site.py"
+        "build.sh"
+        "venv"
+    )
+    
+    local found_credentials=false
+    
+    for pattern in "${credential_patterns[@]}"; do
+        if find . -name "$pattern" -type f -o -name "$pattern" -type d 2>/dev/null | grep -q .; then
+            log_error "Found sensitive files/directories matching pattern: $pattern"
+            find . -name "$pattern" -type f -o -name "$pattern" -type d 2>/dev/null | head -5
+            found_credentials=true
+        fi
+    done
+    
+    if [ "$found_credentials" = true ]; then
+        log_error "SECURITY VIOLATION: Credentials or build tools found in build branch!"
+        log_error "Aborting deployment to prevent credential exposure"
+        exit 1
+    fi
+    
+    # Show what's actually in the build branch
     log_info "Build branch contents:"
     ls -la
     
-    # Add only the web files (selective git add for security)
-    log_info "Adding web files to git..."
-    git add .gitignore
-    git add index.html 2>/dev/null || true
-    git add styles.css 2>/dev/null || true
-    git add scripts.js 2>/dev/null || true
-    git add assets/ 2>/dev/null || true
+    log_success "✓ Security verification passed - no credentials found"
+}
+
+commit_build_branch() {
+    log_header "📦 Committing Build Branch"
     
-    # Final security check before commit
-    verify_no_credentials
+    # Add all web files
+    git add .
+    
+    # Check if there are changes to commit
+    if git diff-index --quiet HEAD -- 2>/dev/null; then
+        log_info "No changes to commit in build branch"
+        return 0
+    fi
     
     # Commit build files
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    if ! git diff-index --quiet HEAD --; then
-        git commit -m "Deploy website build - $timestamp"
-        log_success "Build files committed to build branch"
-    else
-        log_info "No changes to commit in build branch"
-    fi
+    git commit -m "Deploy website build - $timestamp"
+    log_success "Build files committed to build branch"
 }
 
 push_to_remote() {
@@ -415,16 +414,15 @@ push_to_remote() {
     log_info "Pushing build branch..."
     git checkout build
     
-    # Handle potential conflicts with force-with-lease (safer than force)
-    if git push origin build; then
+    # Since we created a fresh orphan branch, we need to force push
+    if git push --force-with-lease origin build; then
         log_success "Build branch pushed successfully"
     else
-        log_warning "Normal push failed, attempting force-with-lease..."
-        if git push --force-with-lease origin build; then
+        log_warning "Force push failed, trying regular force push..."
+        if git push --force origin build; then
             log_success "Build branch force-pushed successfully"
         else
             log_error "Failed to push build branch"
-            log_info "You may need to manually resolve conflicts"
             exit 1
         fi
     fi
@@ -443,7 +441,10 @@ main() {
     build_website
     commit_source_changes
     create_safe_backup
-    deploy_to_build_branch
+    create_orphan_build_branch
+    setup_build_branch
+    verify_build_security
+    commit_build_branch
     push_to_remote
     
     # Return to original branch
