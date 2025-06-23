@@ -268,7 +268,7 @@ class MusicSiteBuilder:
     <div class="container">
         <header class="site-header">
             <h1><img src="assets/favicon.svg" alt="Album du Jour" class="title-icon"> Album du Jour</h1>
-            <p class="subtitle">Personal Music Discovery</p>
+            <p class="subtitle">🤖💕</p>
             <p class="generation-time">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
             <div class="stats-badges">
                 <span class="badge current">{len(current_listening)} Current</span>
@@ -289,7 +289,7 @@ class MusicSiteBuilder:
                target="_blank" class="sheets-link">
                 📊 View Full Library
             </a>
-            <p>Built with ❤️</p>
+            <p>Built with 🩷</p>
         </footer>
     </div>
     
