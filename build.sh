@@ -1,330 +1,353 @@
 #!/bin/bash
 
-# Music Library Website Builder with Git Deployment
-# This script builds a static website from your Google Sheets music data and deploys it
+# Music Library Website Builder with Safe Git Deployment
+# Enhanced version with proper error handling and file safety
 
-set -e  # Exit on any error
+set -euo pipefail  # Exit on any error, undefined variable, or pipe failure
 
-echo "🎵 Music Library Website Builder with Git Deployment"
-echo "===================================================="
+# Color codes for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
 
-# Get the current directory (should be the v3 website directory)
-WEBSITE_DIR="$(pwd)"
-echo "📁 Website directory: $WEBSITE_DIR"
+# Configuration
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly WEBSITE_DIR="$SCRIPT_DIR"
+readonly BUILD_DIR="$WEBSITE_DIR/build"
+readonly PYTHON_SCRIPT="$WEBSITE_DIR/build_music_site.py"
+readonly VENV_DIR="$WEBSITE_DIR/venv"
+readonly CREDENTIALS_FILE="$WEBSITE_DIR/concrete-spider-446700-f9-4646496845d1.json"
+readonly APPLE_TOKENS_DIR="$WEBSITE_DIR/musickit"
 
-# Check if we're in a git repository
-if [ ! -d ".git" ]; then
-    echo "❌ Error: Not in a git repository!"
-    echo "Please run this script from the root of your git repository."
-    exit 1
-fi
-echo "✅ Git repository detected"
+# Global variables
+ORIGINAL_BRANCH=""
+TEMP_BACKUP_DIR=""
+CLEANUP_NEEDED=false
 
-# Check if credentials file exists in current directory
-CREDENTIALS_FILE="concrete-spider-446700-f9-4646496845d1.json"
-if [ ! -f "$CREDENTIALS_FILE" ]; then
-    echo "❌ Error: Credentials file not found at '$CREDENTIALS_FILE'"
-    echo "Expected: $WEBSITE_DIR/$CREDENTIALS_FILE"
-    exit 1
-fi
-echo "✅ Found credentials file"
+# Logging functions
+log_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
 
-# Check if Apple Music tokens exist in current directory
-APPLE_TOKEN_DIR="$WEBSITE_DIR/musickit"
-if [ ! -d "$APPLE_TOKEN_DIR" ]; then
-    echo "❌ Error: Apple Music token directory not found at '$APPLE_TOKEN_DIR'"
-    exit 1
-fi
+log_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
 
-if [ ! -f "$APPLE_TOKEN_DIR/musickit-developer-token.txt" ]; then
-    echo "❌ Error: Apple Music developer token not found at '$APPLE_TOKEN_DIR/musickit-developer-token.txt'"
-    exit 1
-fi
+log_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
 
-if [ ! -f "$APPLE_TOKEN_DIR/music_user_token.txt" ]; then
-    echo "❌ Error: Apple Music user token not found at '$APPLE_TOKEN_DIR/music_user_token.txt'"
-    exit 1
-fi
-echo "✅ Found Apple Music tokens"
+log_error() {
+    echo -e "${RED}❌ $1${NC}" >&2
+}
 
-# Check if Python script exists
-BUILD_SCRIPT="build_music_site.py"
-if [ ! -f "$BUILD_SCRIPT" ]; then
-    echo "❌ Error: Build script '$BUILD_SCRIPT' not found!"
-    echo "Please make sure the build script is in the current directory."
-    exit 1
-fi
-echo "✅ Found build script"
+log_header() {
+    echo -e "${BLUE}$1${NC}"
+    echo "$(printf '=%.0s' $(seq 1 ${#1}))"
+}
 
-# Virtual environment management
-VENV_DIR="venv"
-PYTHON_CMD="python3"
-
-echo ""
-echo "🔧 Setting up Python environment..."
-
-# Check if virtual environment exists and is valid
-if [ -d "$VENV_DIR" ]; then
-    # Test if the venv is working properly
-    if "$VENV_DIR/bin/python" --version &>/dev/null; then
-        echo "✅ Virtual environment already exists and is valid"
-    else
-        echo "⚠️  Virtual environment exists but is broken, recreating..."
-        rm -rf "$VENV_DIR"
-        $PYTHON_CMD -m venv "$VENV_DIR"
-        if [ $? -eq 0 ]; then
-            echo "✅ Virtual environment recreated successfully"
-        else
-            echo "❌ Failed to recreate virtual environment"
-            exit 1
+# Cleanup function
+cleanup() {
+    local exit_code=$?
+    
+    if [ "$CLEANUP_NEEDED" = true ]; then
+        log_info "Performing cleanup..."
+        
+        # Deactivate virtual environment if active
+        if [ -n "${VIRTUAL_ENV:-}" ]; then
+            deactivate 2>/dev/null || true
+            log_success "Virtual environment deactivated"
+        fi
+        
+        # Return to original branch if we changed it
+        if [ -n "$ORIGINAL_BRANCH" ] && [ "$ORIGINAL_BRANCH" != "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')" ]; then
+            log_info "Returning to original branch: $ORIGINAL_BRANCH"
+            git checkout "$ORIGINAL_BRANCH" 2>/dev/null || log_warning "Could not return to original branch"
+        fi
+        
+        # Clean up temporary backup
+        if [ -n "$TEMP_BACKUP_DIR" ] && [ -d "$TEMP_BACKUP_DIR" ]; then
+            rm -rf "$TEMP_BACKUP_DIR"
+            log_success "Temporary backup cleaned up"
         fi
     fi
-else
-    echo "📦 Creating virtual environment..."
-    $PYTHON_CMD -m venv "$VENV_DIR"
-    if [ $? -eq 0 ]; then
-        echo "✅ Virtual environment created successfully"
+    
+    if [ $exit_code -eq 0 ]; then
+        log_success "Script completed successfully!"
     else
-        echo "❌ Failed to create virtual environment"
+        log_error "Script failed with exit code $exit_code"
+    fi
+    
+    exit $exit_code
+}
+
+# Set up trap for cleanup
+trap cleanup EXIT INT TERM
+
+# Validation functions
+validate_environment() {
+    log_header "🔍 Environment Validation"
+    
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        log_error "Not in a git repository"
         exit 1
     fi
-fi
-
-# Activate virtual environment
-echo "🔌 Activating virtual environment..."
-source "$VENV_DIR/bin/activate"
-
-if [ $? -eq 0 ]; then
-    echo "✅ Virtual environment activated"
-    echo "🐍 Using Python: $(which python 2>/dev/null || echo 'python not found')"
-    echo "🐍 Python3 available: $(which python3 2>/dev/null || echo 'python3 not found')"
-    echo "🔍 Virtual env: $VIRTUAL_ENV"
-else
-    echo "❌ Failed to activate virtual environment"
-    exit 1
-fi
-
-# Function to cleanup and deactivate venv on exit
-cleanup() {
-    echo ""
-    echo "🧹 Cleaning up..."
-    if [ -n "$VIRTUAL_ENV" ]; then
-        deactivate 2>/dev/null || true
-        echo "✅ Virtual environment deactivated"
+    log_success "Git repository detected"
+    
+    # Store original branch
+    ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    log_info "Current branch: $ORIGINAL_BRANCH"
+    
+    # Check for required files
+    local required_files=("$PYTHON_SCRIPT" "$CREDENTIALS_FILE")
+    for file in "${required_files[@]}"; do
+        if [ ! -f "$file" ]; then
+            log_error "Required file not found: $file"
+            exit 1
+        fi
+    done
+    log_success "All required files found"
+    
+    # Check for Apple Music tokens directory
+    if [ ! -d "$APPLE_TOKENS_DIR" ]; then
+        log_warning "Apple Music tokens directory not found: $APPLE_TOKENS_DIR"
+    else
+        log_success "Apple Music tokens directory found"
+    fi
+    
+    # Check git status
+    if ! git diff-index --quiet HEAD --; then
+        log_warning "Working directory has uncommitted changes"
+    else
+        log_success "Working directory is clean"
     fi
 }
 
-# Set up trap to ensure cleanup happens
-trap cleanup EXIT
-
-# Upgrade pip and install required packages
-echo "📥 Installing/updating required packages..."
-"$VENV_DIR/bin/pip" install --upgrade pip --quiet
-if [ $? -eq 0 ]; then
-    echo "✅ pip upgraded"
-else
-    echo "⚠️  pip upgrade failed, continuing anyway"
-fi
-
-"$VENV_DIR/bin/pip" install gspread --quiet
-if [ $? -eq 0 ]; then
-    echo "✅ gspread installed/updated"
-else
-    echo "❌ Failed to install gspread"
-    exit 1
-fi
-
-echo "✅ All dependencies ready"
-
-# Run the build script
-echo ""
-echo "🚀 Building website..."
-echo "📊 Reading from Google Sheets..."
-echo "🎵 Processing music data..."
-
-# Run the Python script using the venv's Python directly
-echo "🐍 Using venv Python: $VENV_DIR/bin/python"
-"$VENV_DIR/bin/python" "$BUILD_SCRIPT"
-
-# Check if build was successful
-if [ -d "build" ] && [ -f "build/index.html" ]; then
-    echo ""
-    echo "🎉 Build successful!"
-    echo "📂 Website generated in: ./build/"
-    echo "🌐 Open build/index.html in your browser"
-    echo ""
+setup_python_environment() {
+    log_header "🐍 Python Environment Setup"
     
-    # Show some stats about the generated site
-    if [ -f "build/index.html" ]; then
-        CARD_COUNT=$(grep -o "music-card" build/index.html | wc -l | tr -d ' ' 2>/dev/null || echo "0")
-        echo "📊 Generated $CARD_COUNT music cards"
+    # Create virtual environment if it doesn't exist
+    if [ ! -d "$VENV_DIR" ]; then
+        log_info "Creating virtual environment..."
+        python3 -m venv "$VENV_DIR"
+        log_success "Virtual environment created"
+    else
+        log_success "Virtual environment already exists"
     fi
     
-    # Show build folder size
-    if command -v du &> /dev/null; then
-        BUILD_SIZE=$(du -sh build/ 2>/dev/null | cut -f1 || echo "unknown")
-        echo "💾 Build size: $BUILD_SIZE"
+    # Activate virtual environment
+    log_info "Activating virtual environment..."
+    # shellcheck source=/dev/null
+    source "$VENV_DIR/bin/activate"
+    CLEANUP_NEEDED=true
+    log_success "Virtual environment activated"
+    
+    # Install/upgrade required packages
+    log_info "Installing required packages..."
+    pip install --quiet --upgrade pip
+    pip install --quiet gspread
+    log_success "All dependencies ready"
+}
+
+build_website() {
+    log_header "🚀 Building Website"
+    
+    # Remove old build directory
+    if [ -d "$BUILD_DIR" ]; then
+        log_info "Removing old build directory..."
+        rm -rf "$BUILD_DIR"
     fi
     
-    # List build contents
-    echo "📄 Build contents:"
-    ls -la build/ | head -10
-    
-    # Deactivate virtual environment before git operations
-    cleanup
-    trap - EXIT  # Remove the trap since we're manually cleaning up
-    
-    # Git operations start here
-    echo ""
-    echo "🔄 Starting Git deployment process..."
-    
-    # Store current branch name
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
-    echo "📍 Current branch: $CURRENT_BRANCH"
-    
-    # Create timestamp for commit message
-    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-    
-    # First, verify the build directory exists and has content
-    if [ ! -d "build" ] || [ ! "$(ls -A build 2>/dev/null)" ]; then
-        echo "❌ Error: Build directory is empty or doesn't exist on main branch"
-        echo "📋 Cannot proceed with deployment"
+    # Run the Python build script
+    log_info "Running website build script..."
+    if ! python "$PYTHON_SCRIPT"; then
+        log_error "Website build failed"
         exit 1
     fi
     
-    echo "✅ Build directory verified with content"
-    
-    # Create a temporary copy of build files outside the repo
-    TEMP_BUILD_DIR="/tmp/albumdujour_build_$(date +%s)"
-    echo "🗂️  Creating temporary backup of build files at: $TEMP_BUILD_DIR"
-    cp -r build "$TEMP_BUILD_DIR"
-    
-    # 1. First, commit any changes to the current branch (main/master)
-    echo ""
-    echo "📝 Committing source changes to $CURRENT_BRANCH branch..."
-    
-    # Check if there are any changes to commit (exclude build directory from main branch)
-    git add . || true
-    if git diff --staged --quiet; then
-        echo "ℹ️  No source changes to commit"
-    else
-        git commit -m "Update website source - $TIMESTAMP" || {
-            echo "⚠️  Nothing to commit or commit failed, continuing..."
-        }
-        echo "✅ Source changes committed to $CURRENT_BRANCH"
-    fi
-    
-    # 2. Create/switch to build branch and deploy build files
-    echo ""
-    echo "🌿 Setting up build branch..."
-    
-    # Check if build branch exists
-    if git show-ref --verify --quiet refs/heads/build; then
-        echo "✅ Build branch exists, switching to it"
-        git checkout build
-    else
-        echo "📝 Creating new build branch"
-        git checkout -b build
-    fi
-    
-    # Clear the build branch completely (keep only .git)
-    echo "🧹 Cleaning build branch..."
-    
-    # Remove all files and directories except .git
-    find . -maxdepth 1 -not -name '.git' -not -path '.' -exec rm -rf {} + 2>/dev/null || true
-    
-    # Copy build files from temporary location
-    echo "📦 Copying build files to build branch..."
-    if [ -d "$TEMP_BUILD_DIR" ] && [ "$(ls -A "$TEMP_BUILD_DIR" 2>/dev/null)" ]; then
-        cp -r "$TEMP_BUILD_DIR"/* . 2>/dev/null || true
-        cp -r "$TEMP_BUILD_DIR"/. . 2>/dev/null || true  # Copy hidden files if any
-        echo "✅ Build files copied successfully"
-        
-        # Verify files were copied
-        echo "📋 Build branch contents:"
-        ls -la | head -10
-    else
-        echo "❌ Error: Could not copy build files from temporary location"
-        git checkout "$CURRENT_BRANCH"
-        rm -rf "$TEMP_BUILD_DIR" 2>/dev/null || true
+    # Verify build was successful
+    if [ ! -f "$BUILD_DIR/index.html" ]; then
+        log_error "Build verification failed: index.html not found"
         exit 1
     fi
     
-    # Clean up temporary directory
-    rm -rf "$TEMP_BUILD_DIR" 2>/dev/null || true
+    # Show build statistics
+    local build_size
+    build_size=$(du -sh "$BUILD_DIR" 2>/dev/null | cut -f1 || echo "unknown")
+    local file_count
+    file_count=$(find "$BUILD_DIR" -type f | wc -l | tr -d ' ')
     
-    # Create a simple .gitignore for the build branch
-    echo "# Build branch - only contains generated website files" > .gitignore
+    log_success "Build completed successfully!"
+    log_info "Build size: $build_size"
+    log_info "Files generated: $file_count"
+}
+
+commit_source_changes() {
+    log_header "📝 Committing Source Changes"
     
-    # Add and commit build files
-    echo "📤 Committing build files..."
+    # Switch to main branch if not already there
+    if [ "$ORIGINAL_BRANCH" != "main" ]; then
+        log_info "Switching to main branch..."
+        git checkout main
+    fi
+    
+    # Add all changes
     git add .
     
-    # Check if there are actually files to commit
-    if git diff --staged --quiet; then
-        echo "⚠️  No new build files to commit"
-    else
-        git commit -m "Deploy website build - $TIMESTAMP" || {
-            echo "⚠️  Commit failed, but files are staged"
-        }
-        echo "✅ Build files committed"
+    # Check if there are changes to commit
+    if git diff-index --quiet HEAD --; then
+        log_info "No source changes to commit"
+        return 0
     fi
     
-    # 3. Push both branches
-    echo ""
-    echo "🚀 Pushing to remote repository..."
+    # Commit changes
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    git commit -m "Update website source - $timestamp"
+    log_success "Source changes committed to main"
+}
+
+create_safe_backup() {
+    log_header "💾 Creating Safety Backup"
+    
+    # Create temporary backup directory
+    TEMP_BACKUP_DIR=$(mktemp -d)
+    log_info "Creating backup in: $TEMP_BACKUP_DIR"
+    
+    # Copy build files to backup
+    cp -r "$BUILD_DIR" "$TEMP_BACKUP_DIR/"
+    
+    # Verify backup
+    if [ ! -f "$TEMP_BACKUP_DIR/build/index.html" ]; then
+        log_error "Backup verification failed"
+        exit 1
+    fi
+    
+    log_success "Safety backup created and verified"
+}
+
+deploy_to_build_branch() {
+    log_header "🌿 Deploying to Build Branch"
+    
+    # Check if build branch exists
+    if ! git show-ref --verify --quiet refs/heads/build; then
+        log_info "Creating build branch..."
+        git checkout -b build
+    else
+        log_info "Switching to build branch..."
+        git checkout build
+    fi
+    
+    # Verify we're on build branch
+    local current_branch
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
+    if [ "$current_branch" != "build" ]; then
+        log_error "Failed to switch to build branch (currently on: $current_branch)"
+        exit 1
+    fi
+    
+    # SAFE cleanup: Only remove specific files/directories, keep source files safe
+    log_info "Safely cleaning build branch..."
+    
+    # Remove only the old build artifacts, not source files
+    local items_to_remove=(
+        "index.html"
+        "styles.css" 
+        "scripts.js"
+        "assets"
+    )
+    
+    for item in "${items_to_remove[@]}"; do
+        if [ -e "$item" ]; then
+            rm -rf "$item"
+            log_info "Removed old: $item"
+        fi
+    done
+    
+    # Copy new build files from backup (safer than from original location)
+    log_info "Copying new build files..."
+    cp -r "$TEMP_BACKUP_DIR/build/"* .
+    
+    # Verify deployment
+    if [ ! -f "index.html" ]; then
+        log_error "Deployment verification failed: index.html not found in build branch"
+        exit 1
+    fi
+    
+    # Show what's in the build branch
+    log_info "Build branch contents:"
+    ls -la
+    
+    # Commit build files
+    git add .
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    if ! git diff-index --quiet HEAD --; then
+        git commit -m "Deploy website build - $timestamp"
+        log_success "Build files committed to build branch"
+    else
+        log_info "No changes to commit in build branch"
+    fi
+}
+
+push_to_remote() {
+    log_header "🚀 Pushing to Remote Repository"
+    
+    # Push main branch first
+    log_info "Pushing main branch..."
+    git checkout main
+    if git push origin main; then
+        log_success "Main branch pushed successfully"
+    else
+        log_warning "Failed to push main branch (may be up to date)"
+    fi
     
     # Push build branch
-    echo "📤 Pushing build branch..."
-    git push origin build || {
-        echo "❌ Failed to push build branch"
-        git checkout "$CURRENT_BRANCH"
-        exit 1
-    }
-    echo "✅ Build branch pushed successfully"
+    log_info "Pushing build branch..."
+    git checkout build
     
-    # Switch back to original branch and push it too
-    echo "📤 Pushing $CURRENT_BRANCH branch..."
-    git checkout "$CURRENT_BRANCH"
-    git push origin "$CURRENT_BRANCH" || {
-        echo "⚠️  Failed to push $CURRENT_BRANCH branch (may be up to date)"
-    }
-    echo "✅ Source branch pushed successfully"
-    
-    # REMOVED: The problematic rebuild section that was trying to re-run the script
-    # without credentials. Instead, just inform the user.
-    
-    # Final status
-    echo ""
-    echo "🎊 Deployment complete!"
-    echo "================================"
-    echo "✅ Source code: $CURRENT_BRANCH branch"
-    echo "✅ Website: build branch"
-    echo ""
-    echo "🌐 Your website is now deployed on the 'build' branch"
-    echo "📋 Hostinger setup:"
-    echo "   1. Connect your GitHub repository to Hostinger"
-    echo "   2. Set deployment branch to: build"
-    echo "   3. Set build directory to: / (root)"
-    echo ""
-    echo "🔗 Branch URLs:"
-    echo "   Source: https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\([^.]*\).*/\1/')/tree/$CURRENT_BRANCH"
-    echo "   Website: https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\([^.]*\).*/\1/')/tree/build"
-    echo ""
-    echo "🔄 To rebuild and redeploy: just run ./build.sh again"
-    
-else
-    echo ""
-    echo "❌ Build failed - no output files generated"
-    echo "🔍 Checking for error details..."
-    
-    if [ ! -d "build" ]; then
-        echo "   - build/ directory was not created"
+    # Handle potential conflicts with force-with-lease (safer than force)
+    if git push origin build; then
+        log_success "Build branch pushed successfully"
+    else
+        log_warning "Normal push failed, attempting force-with-lease..."
+        if git push --force-with-lease origin build; then
+            log_success "Build branch force-pushed successfully"
+        else
+            log_error "Failed to push build branch"
+            log_info "You may need to manually resolve conflicts"
+            exit 1
+        fi
     fi
+}
+
+# Main execution
+main() {
+    log_header "🎵 Music Library Website Builder with Safe Git Deployment"
     
-    if [ ! -f "build/index.html" ]; then
-        echo "   - index.html was not generated"
-    fi
+    # Change to website directory
+    cd "$WEBSITE_DIR"
     
-    exit 1
-fi
+    # Execute all steps
+    validate_environment
+    setup_python_environment
+    build_website
+    commit_source_changes
+    create_safe_backup
+    deploy_to_build_branch
+    push_to_remote
+    
+    # Return to original branch
+    git checkout "$ORIGINAL_BRANCH"
+    
+    log_success "🎉 Deployment completed successfully!"
+    log_info "Website is now live on the build branch"
+    log_info "Source code remains safe on the main branch"
+}
+
+# Run main function
+main "$@"
