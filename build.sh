@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Music Library Website Builder with Safe Git Deployment
-# Enhanced version with clean build branch deployment (website files only)
+# Enhanced version with proper error handling and file safety
 
 set -euo pipefail  # Exit on any error, undefined variable, or pipe failure
 
@@ -230,44 +230,15 @@ create_safe_backup() {
 }
 
 deploy_to_build_branch() {
-    log_header "🌿 Deploying to Build Branch (Clean Deployment)"
+    log_header "🌿 Deploying to Build Branch"
     
-    # Ensure we're up to date with remote build branch
-    log_info "Fetching latest remote changes..."
-    git fetch origin 2>/dev/null || log_warning "Could not fetch from origin"
-    
-    # Check if build branch exists locally
+    # Check if build branch exists
     if ! git show-ref --verify --quiet refs/heads/build; then
-        # Check if it exists on remote
-        if git show-ref --verify --quiet refs/remotes/origin/build; then
-            log_info "Creating local build branch from remote..."
-            git checkout -b build origin/build
-        else
-            log_info "Creating new clean build branch..."
-            git checkout --orphan build
-            git rm -rf . 2>/dev/null || true
-            echo "# Website Build Branch" > README.md
-            echo "" >> README.md
-            echo "This branch contains only the built website files for deployment." >> README.md
-            echo "Source code and build logic are maintained in the main branch." >> README.md
-            echo "" >> README.md
-            echo "## Contents" >> README.md
-            echo "- \`index.html\` - Main website page" >> README.md
-            echo "- \`styles.css\` - Website styling" >> README.md
-            echo "- \`scripts.js\` - Client-side JavaScript" >> README.md
-            echo "- \`assets/\` - Images, fonts, and other static files" >> README.md
-            git add README.md
-            git commit -m "Initialize clean build branch for deployment"
-        fi
+        log_info "Creating build branch..."
+        git checkout -b build
     else
-        log_info "Switching to existing build branch..."
+        log_info "Switching to build branch..."
         git checkout build
-        
-        # Try to pull latest changes if remote exists
-        if git show-ref --verify --quiet refs/remotes/origin/build; then
-            log_info "Pulling latest build branch changes..."
-            git pull origin build 2>/dev/null || log_warning "Could not pull latest changes"
-        fi
     fi
     
     # Verify we're on build branch
@@ -278,12 +249,26 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # CLEAN DEPLOYMENT: Remove everything except .git and README.md
-    log_info "Cleaning build branch for secure deployment..."
-    find . -maxdepth 1 -not -name '.git' -not -name 'README.md' -not -path '.' -exec rm -rf {} + 2>/dev/null || true
+    # SAFE cleanup: Only remove specific files/directories, keep source files safe
+    log_info "Safely cleaning build branch..."
     
-    # Copy ONLY the website files from backup
-    log_info "Copying website files for clean deployment..."
+    # Remove only the old build artifacts, not source files
+    local items_to_remove=(
+        "index.html"
+        "styles.css" 
+        "scripts.js"
+        "assets"
+    )
+    
+    for item in "${items_to_remove[@]}"; do
+        if [ -e "$item" ]; then
+            rm -rf "$item"
+            log_info "Removed old: $item"
+        fi
+    done
+    
+    # Copy new build files from backup (safer than from original location)
+    log_info "Copying new build files..."
     cp -r "$TEMP_BACKUP_DIR/build/"* .
     
     # Verify deployment
@@ -292,37 +277,21 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # Show clean build branch contents
-    log_info "Clean build branch contents (website files only):"
+    # Show what's in the build branch
+    log_info "Build branch contents:"
     ls -la
     
-    # Stage all changes
-    git add -A
-    
-    # Check if there are actually changes to commit
-    if git diff-index --quiet HEAD --; then
-        log_info "No changes to commit in build branch"
-        return 0
-    fi
-    
-    # Commit with detailed message
+    # Commit build files
+    git add .
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local file_count
-    file_count=$(find . -name "*.html" -o -name "*.css" -o -name "*.js" | wc -l | tr -d ' ')
-    local asset_count
-    asset_count=$(find assets -type f 2>/dev/null | wc -l | tr -d ' ' || echo "0")
     
-    git commit -m "Deploy clean website build - $timestamp
-
-- Clean deployment with only website files
-- Generated $file_count web files
-- Included $asset_count asset files
-- Build size: $(du -sh . 2>/dev/null | cut -f1 || echo 'unknown')
-- Source code maintained separately in main branch"
-    
-    log_success "Clean build files committed to build branch with preserved history"
-    log_info "🔒 Security: Only website files deployed, no source code exposed"
+    if ! git diff-index --quiet HEAD --; then
+        git commit -m "Deploy website build - $timestamp"
+        log_success "Build files committed to build branch"
+    else
+        log_info "No changes to commit in build branch"
+    fi
 }
 
 push_to_remote() {
@@ -331,40 +300,27 @@ push_to_remote() {
     # Push main branch first
     log_info "Pushing main branch..."
     git checkout main
-    if git push origin main 2>/dev/null; then
+    if git push origin main; then
         log_success "Main branch pushed successfully"
     else
-        log_info "Main branch is up to date"
+        log_warning "Failed to push main branch (may be up to date)"
     fi
     
-    # Push build branch with clean deployment
-    log_info "Pushing clean build branch..."
+    # Push build branch
+    log_info "Pushing build branch..."
     git checkout build
     
-    # Normal push should work now since we're preserving history
-    if git push origin build 2>/dev/null; then
+    # Handle potential conflicts with force-with-lease (safer than force)
+    if git push origin build; then
         log_success "Build branch pushed successfully"
     else
-        # If it still fails, it might be because remote is ahead
-        log_info "Normal push failed, trying to merge remote changes..."
-        
-        if git pull origin build 2>/dev/null; then
-            log_info "Merged remote changes, pushing again..."
-            if git push origin build 2>/dev/null; then
-                log_success "Build branch pushed successfully after merge"
-            else
-                log_error "Failed to push build branch even after merge"
-                exit 1
-            fi
+        log_warning "Normal push failed, attempting force-with-lease..."
+        if git push --force-with-lease origin build; then
+            log_success "Build branch force-pushed successfully"
         else
-            log_warning "Could not merge remote changes, using force-with-lease as fallback..."
-            if git push --force-with-lease origin build 2>/dev/null; then
-                log_success "Build branch force-pushed successfully"
-            else
-                log_error "Failed to push build branch"
-                log_info "You may need to manually resolve conflicts"
-                exit 1
-            fi
+            log_error "Failed to push build branch"
+            log_info "You may need to manually resolve conflicts"
+            exit 1
         fi
     fi
 }
@@ -389,10 +345,8 @@ main() {
     git checkout "$ORIGINAL_BRANCH"
     
     log_success "🎉 Deployment completed successfully!"
-    log_info "🌐 Website is now live on the build branch"
-    log_info "🔒 Source code remains secure on the main branch"
-    log_info "📚 Both branches maintain their complete Git history"
-    log_info "🛡️  Only website files are exposed to Hostinger"
+    log_info "Website is now live on the build branch"
+    log_info "Source code remains safe on the main branch"
 }
 
 # Run main function
