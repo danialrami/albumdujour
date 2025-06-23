@@ -364,11 +364,11 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card with larger, more prominent sizing"""
+        """Generate HTML for a single album card with better embed integration"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
-            # For current music (album du jour), show embeds prominently
+            # For current music (album du jour), show embeds prominently with borders
             if album['spotify_embed']:
                 embed_html = f"""
                 <div class="embed-container current-embed-container">
@@ -400,7 +400,7 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use larger grid embeds
+            # For other sections (Recently Added/Finished), seamless integration
             if album['spotify_embed']:
                 embed_html = f"""
                 <div class="embed-container grid-embed-container">
@@ -412,7 +412,7 @@ class MusicSiteBuilder:
                             allowtransparency="true" 
                             allow="encrypted-media"
                             title="Spotify - {album['album']}"
-                            style="border-radius: 10px;"></iframe>
+                            style="border: none;"></iframe>
                 </div>
                 """
             elif album['apple_embed']:
@@ -424,7 +424,7 @@ class MusicSiteBuilder:
                             class="dynamic-embed grid-embed apple-embed lazy-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
-                            style="overflow: hidden; border-radius: 10px;"
+                            style="overflow: hidden; border: none;"
                             title="Apple Music - {album['album']}"></iframe>
                 </div>
                 """
@@ -808,7 +808,7 @@ body {
     }
 }
 
-/* Album Cards - Now larger with better proportions */
+/* Album Cards - Better styling to match embeds */
 .album-card {
     background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
@@ -819,7 +819,23 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 480px; /* Increased minimum height for better proportions */
+    min-height: 480px;
+}
+
+.album-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(120, 190, 186, 0.1);
+    border-color: rgba(120, 190, 186, 0.3);
+}
+
+/* Remove card border for better embed integration */
+.album-card .embed-container {
+    margin: 1rem -1.5rem; /* Negative margins to touch card edges */
+    border-radius: 0; /* Remove border radius to match card */
+}
+
+.album-card .embed-container iframe {
+    border-radius: 0; /* Remove iframe border radius */
 }
 
 .album-card:hover {
@@ -862,15 +878,21 @@ body {
     color: var(--lufs-yellow);
 }
 
-/* Dynamic Embed Containers */
+/* Dynamic Embed Containers - Better integration */
 .embed-container {
     margin: 1rem 0;
-    border-radius: var(--border-radius);
+    border-radius: 0; /* Remove border radius for seamless integration */
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
-    flex: 1; /* This makes the embed container grow to fill available space */
+    background: transparent; /* Let Spotify provide the background */
+    flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+/* Special styling for currently listening */
+.album-du-jour .album-card .embed-container {
+    margin: 1rem 0; /* Normal margins for currently listening */
+    border-radius: var(--border-radius); /* Keep border radius for currently listening */
 }
 
 /* Currently Listening Embeds - Large and prominent */
@@ -1147,16 +1169,15 @@ body {
         print(f"✅ CSS generated with dynamic responsive embeds: {output_file}")
     
     def generate_javascript(self):
-        """Generate JavaScript for interactions with dynamic responsive embeds"""
-        print("⚡ Generating JavaScript with dynamic responsive embed support...")
+        """Generate JavaScript for interactions with proper collapsible functionality"""
+        print("⚡ Generating JavaScript with fixed collapsible sections...")
         
-        js_content = """// Album du Jour - Interactive Functionality with Dynamic Responsive Embeds
+        js_content = """// Album du Jour - Interactive Functionality with Fixed Collapsible Sections
 class AlbumSections {
     constructor() {
         this.initializeCollapsibleSections();
         this.initializeLazyLoading();
         this.initializeAccessibility();
-        this.initializeDynamicEmbeds();
     }
     
     initializeCollapsibleSections() {
@@ -1168,8 +1189,10 @@ class AlbumSections {
             });
         });
         
-        // Restore saved states
-        this.restoreSectionStates();
+        // Restore saved states after a short delay
+        setTimeout(() => {
+            this.restoreSectionStates();
+        }, 100);
     }
     
     toggleSection(button) {
@@ -1183,19 +1206,16 @@ class AlbumSections {
         
         if (!isExpanded) {
             // Expanding
-            content.style.maxHeight = content.scrollHeight + 'px';
+            content.style.maxHeight = 'none';
+            content.style.overflow = 'visible';
             icon.style.transform = 'rotate(180deg)';
             
             // Load any lazy embeds in this section
             this.loadLazyEmbedsInSection(section);
-            
-            // Trigger dynamic embed resize after content is visible
-            setTimeout(() => {
-                this.resizeDynamicEmbeds(section);
-            }, 300);
         } else {
             // Collapsing
             content.style.maxHeight = '0';
+            content.style.overflow = 'hidden';
             icon.style.transform = 'rotate(0deg)';
         }
         
@@ -1209,10 +1229,9 @@ class AlbumSections {
             const savedState = localStorage.getItem(`section-${section.dataset.section}`);
             if (savedState === 'true') {
                 const button = section.querySelector('.section-toggle');
-                // Delay to ensure DOM is ready
-                setTimeout(() => {
+                if (button && button.getAttribute('aria-expanded') !== 'true') {
                     this.toggleSection(button);
-                }, 100);
+                }
             }
         });
     }
@@ -1248,9 +1267,6 @@ class AlbumSections {
             iframe.addEventListener('load', () => {
                 iframe.style.transition = 'opacity 0.3s ease';
                 iframe.style.opacity = '1';
-                
-                // Resize embed after load
-                this.resizeSingleEmbed(iframe);
             });
         }
     }
@@ -1260,69 +1276,6 @@ class AlbumSections {
         lazyEmbeds.forEach(iframe => {
             this.loadEmbed(iframe);
         });
-    }
-    
-    initializeDynamicEmbeds() {
-        // Handle responsive embed sizing on window resize
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                this.resizeDynamicEmbeds();
-            }, 150);
-        });
-        
-        // Initial resize after page load
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                this.resizeDynamicEmbeds();
-            }, 500);
-        });
-        
-        // Initial adjustment
-        this.resizeDynamicEmbeds();
-    }
-    
-    resizeDynamicEmbeds(container = document) {
-        const embedContainers = container.querySelectorAll('.embed-container');
-        
-        embedContainers.forEach(embedContainer => {
-            const iframe = embedContainer.querySelector('.dynamic-embed');
-            if (iframe) {
-                this.resizeSingleEmbed(iframe);
-            }
-        });
-    }
-    
-    resizeSingleEmbed(iframe) {
-        const embedContainer = iframe.closest('.embed-container');
-        if (!embedContainer) return;
-        
-        const albumCard = iframe.closest('.album-card');
-        if (!albumCard) return;
-        
-        // Calculate available space
-        const cardHeight = albumCard.offsetHeight;
-        const header = albumCard.querySelector('.card-header');
-        const links = albumCard.querySelector('.card-links');
-        
-        const headerHeight = header ? header.offsetHeight : 0;
-        const linksHeight = links ? links.offsetHeight : 0;
-        const padding = 32; // Account for card padding and margins
-        
-        // Calculate ideal embed height
-        const availableHeight = cardHeight - headerHeight - linksHeight - padding;
-        const minHeight = iframe.classList.contains('current-embed') ? 300 : 160;
-        const maxHeight = iframe.classList.contains('current-embed') ? 500 : 300;
-        
-        const idealHeight = Math.max(minHeight, Math.min(maxHeight, availableHeight));
-        
-        // Apply the calculated height
-        embedContainer.style.height = idealHeight + 'px';
-        iframe.style.height = idealHeight + 'px';
-        
-        // Log for debugging (remove in production)
-        console.log(`Resized embed: ${idealHeight}px (card: ${cardHeight}px, available: ${availableHeight}px)`);
     }
     
     initializeAccessibility() {
@@ -1401,7 +1354,7 @@ function initializeEmbedErrorHandling() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎵 Album du Jour - Initializing with dynamic responsive embeds...');
+    console.log('🎵 Album du Jour - Initializing with fixed collapsible sections...');
     
     try {
         new AlbumSections();
