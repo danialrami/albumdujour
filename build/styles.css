@@ -274,28 +274,28 @@ body {
     }
 }
 
-/* Desktop: Three columns */
+/* Desktop: Two columns for better visibility */
 @media (min-width: 1024px) and (max-width: 1439px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Large Desktop: Three columns */
+@media (min-width: 1440px) {
     .album-grid {
         grid-template-columns: 1fr 1fr 1fr;
     }
 }
 
-/* Large Desktop: Four columns */
-@media (min-width: 1440px) {
+/* Ultra-wide: Four columns max */
+@media (min-width: 1920px) {
     .album-grid {
         grid-template-columns: 1fr 1fr 1fr 1fr;
     }
 }
 
-/* Ultra-wide: Five columns */
-@media (min-width: 1920px) {
-    .album-grid {
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    }
-}
-
-/* Album Cards - Now expand to fill grid cells */
+/* Album Cards - Now larger with better proportions */
 .album-card {
     background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
@@ -306,7 +306,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 400px; /* Minimum height for consistency */
+    min-height: 480px; /* Increased minimum height for better proportions */
 }
 
 .album-card:hover {
@@ -362,22 +362,22 @@ body {
 
 /* Currently Listening Embeds - Large and prominent */
 .current-embed-container {
-    min-height: 380px;
+    min-height: 450px;
 }
 
 .current-embed-container .dynamic-embed {
-    height: 100%;
-    min-height: 380px;
+    height: 450px;
+    min-height: 450px;
 }
 
-/* Grid Embeds - Dynamically sized based on card space */
+/* Grid Embeds - Larger for better usability */
 .grid-embed-container {
-    min-height: 200px;
+    min-height: 280px;
 }
 
 .grid-embed-container .dynamic-embed {
-    height: 100%;
-    min-height: 200px;
+    height: 280px;
+    min-height: 280px;
 }
 
 /* Dynamic embeds fill their containers */
@@ -388,17 +388,20 @@ body {
     flex: 1;
 }
 
-/* Apple Music gets a bit more height */
+/* Apple Music gets extra height */
 .apple-embed {
-    min-height: calc(100% + 30px) !important;
+    height: 320px !important;
+    min-height: 320px !important;
 }
 
 .current-embed-container .apple-embed {
-    min-height: 430px !important;
+    height: 500px !important;
+    min-height: 500px !important;
 }
 
 .grid-embed-container .apple-embed {
-    min-height: 230px !important;
+    height: 320px !important;
+    min-height: 320px !important;
 }
 
 .no-embed {

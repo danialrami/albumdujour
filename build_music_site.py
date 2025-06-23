@@ -364,7 +364,7 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card with truly responsive embed sizing"""
+        """Generate HTML for a single album card with larger, more prominent sizing"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
@@ -374,6 +374,7 @@ class MusicSiteBuilder:
                 <div class="embed-container current-embed-container">
                     <iframe src="{album['spotify_embed']}" 
                             width="100%" 
+                            height="450"
                             class="dynamic-embed current-embed spotify-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
@@ -387,6 +388,7 @@ class MusicSiteBuilder:
                 <div class="embed-container current-embed-container">
                     <iframe src="{album['apple_embed']}" 
                             width="100%" 
+                            height="500"
                             class="dynamic-embed current-embed apple-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
@@ -398,12 +400,13 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use dynamic grid embeds
+            # For other sections (Recently Added/Finished), use larger grid embeds
             if album['spotify_embed']:
                 embed_html = f"""
                 <div class="embed-container grid-embed-container">
                     <iframe data-src="{album['spotify_embed']}" 
                             width="100%" 
+                            height="280"
                             class="dynamic-embed grid-embed spotify-embed lazy-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
@@ -417,6 +420,7 @@ class MusicSiteBuilder:
                 <div class="embed-container grid-embed-container">
                     <iframe data-src="{album['apple_embed']}" 
                             width="100%" 
+                            height="320"
                             class="dynamic-embed grid-embed apple-embed lazy-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
@@ -426,6 +430,44 @@ class MusicSiteBuilder:
                 """
             else:
                 embed_html = '<div class="embed-container grid-embed-container"><p class="no-embed">No embed available</p></div>'
+        
+        # Build links
+        links_html = ""
+        if album['apple_link']:
+            links_html += f'<a href="{album["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
+        if album['spotify_link']:
+            links_html += f'<a href="{album["spotify_link"]}" target="_blank" class="music-link spotify">🎵 Spotify</a>'
+        
+        # Format dates
+        date_display = ""
+        if album['date_added']:
+            date_display = f'<span class="date">Added: {self.format_date_display(album["date_added"])}</span>'
+        elif album['date_finished']:
+            date_display = f'<span class="date">Finished: {self.format_date_display(album["date_finished"])}</span>'
+        
+        rating_display = f'<span class="rating">{album["rating"]}</span>' if album['rating'] else ""
+        
+        # Add special styling class for current music
+        card_class = "album-card current-card" if is_current else "album-card"
+        
+        return f"""
+        <div class="{card_class}" data-status="{album['status'].lower()}">
+            <div class="card-header">
+                <h3 class="album-title">{album['album']}</h3>
+                <p class="artist-name">{album['artist']}</p>
+                <div class="card-meta">
+                    {date_display}
+                    {rating_display}
+                </div>
+            </div>
+            
+            {embed_html}
+            
+            <div class="card-links">
+                {links_html}
+            </div>
+        </div>
+        """
         
         # Build links
         links_html = ""
@@ -745,28 +787,28 @@ body {
     }
 }
 
-/* Desktop: Three columns */
+/* Desktop: Two columns for better visibility */
 @media (min-width: 1024px) and (max-width: 1439px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Large Desktop: Three columns */
+@media (min-width: 1440px) {
     .album-grid {
         grid-template-columns: 1fr 1fr 1fr;
     }
 }
 
-/* Large Desktop: Four columns */
-@media (min-width: 1440px) {
+/* Ultra-wide: Four columns max */
+@media (min-width: 1920px) {
     .album-grid {
         grid-template-columns: 1fr 1fr 1fr 1fr;
     }
 }
 
-/* Ultra-wide: Five columns */
-@media (min-width: 1920px) {
-    .album-grid {
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    }
-}
-
-/* Album Cards - Now expand to fill grid cells */
+/* Album Cards - Now larger with better proportions */
 .album-card {
     background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
@@ -777,7 +819,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 400px; /* Minimum height for consistency */
+    min-height: 480px; /* Increased minimum height for better proportions */
 }
 
 .album-card:hover {
@@ -833,22 +875,22 @@ body {
 
 /* Currently Listening Embeds - Large and prominent */
 .current-embed-container {
-    min-height: 380px;
+    min-height: 450px;
 }
 
 .current-embed-container .dynamic-embed {
-    height: 100%;
-    min-height: 380px;
+    height: 450px;
+    min-height: 450px;
 }
 
-/* Grid Embeds - Dynamically sized based on card space */
+/* Grid Embeds - Larger for better usability */
 .grid-embed-container {
-    min-height: 200px;
+    min-height: 280px;
 }
 
 .grid-embed-container .dynamic-embed {
-    height: 100%;
-    min-height: 200px;
+    height: 280px;
+    min-height: 280px;
 }
 
 /* Dynamic embeds fill their containers */
@@ -859,17 +901,20 @@ body {
     flex: 1;
 }
 
-/* Apple Music gets a bit more height */
+/* Apple Music gets extra height */
 .apple-embed {
-    min-height: calc(100% + 30px) !important;
+    height: 320px !important;
+    min-height: 320px !important;
 }
 
 .current-embed-container .apple-embed {
-    min-height: 430px !important;
+    height: 500px !important;
+    min-height: 500px !important;
 }
 
 .grid-embed-container .apple-embed {
-    min-height: 230px !important;
+    height: 320px !important;
+    min-height: 320px !important;
 }
 
 .no-embed {
