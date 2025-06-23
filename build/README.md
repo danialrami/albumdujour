@@ -4,11 +4,11 @@ This directory contains the generated static website files for Album du Jour.
 
 ## Generated Files
 
-- `index.html` - Main website page with enhanced design
-- `styles.css` - Stylesheet with LUFS branding and responsive design
+- `index.html` - Main website page with simplified design
+- `styles.css` - Stylesheet with LUFS branding and clean layout
 - `scripts.js` - Interactive functionality for collapsible sections
-- `assets/` - Images and static assets including custom favicon
-- `favicon.svg` - Custom Album du Jour vinyl record favicon
+- `assets/` - Images and static assets including simplified favicon
+- `favicon.svg` - Clean, abstract vinyl record favicon
 
 ## Features
 
@@ -18,7 +18,8 @@ This directory contains the generated static website files for Album du Jour.
 - **Recently Finished**: Last 20 albums completed (collapsible)
 
 ### Design Features
-- LUFS brand colors and animated background
+- LUFS brand colors with simplified background animation
+- Clean album cards that let Spotify embeds provide color
 - Responsive design for all devices
 - Collapsible sections with localStorage persistence
 - Lazy loading for music embeds
@@ -53,6 +54,6 @@ These files are ready for deployment to any static hosting service:
 
 ---
 
-**Generated on:** 2025-06-23 12:01:35  
-**Source:** Album du Jour Enhanced Build System  
+**Generated on:** 2025-06-23 12:26:23  
+**Source:** Album du Jour Enhanced Build System v2  
 **Version:** 2.0  

@@ -2,7 +2,7 @@
 """
 Enhanced Music Library Website Builder
 Reads from Google Sheets and generates a static website with embedded music players
-Enhanced with timestamp-based categorization and improved design
+Enhanced with timestamp-based categorization and simplified design
 """
 
 import gspread
@@ -11,15 +11,20 @@ from pathlib import Path
 from datetime import datetime
 import re
 from urllib.parse import urlparse, parse_qs
+import shutil
 
 class MusicSiteBuilder:
     def __init__(self):
         # Set up paths for local credential structure
         self.website_dir = Path(__file__).parent  # Current directory
         
-        # Paths to credentials and tokens (now in current directory)
-        self.credentials_path = self.website_dir / 'concrete-spider-446700-f9-4646496845d1.json'
-        self.apple_token_dir = self.website_dir / 'musickit'
+        # Alternative credential paths (external to repo)
+        self.alt_credentials_path = Path("/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json")
+        self.alt_apple_tokens_path = Path("/Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit")
+        
+        # Temporary credential paths (copied during build, never committed)
+        self.temp_credentials_path = self.website_dir / 'temp_credentials.json'
+        self.temp_apple_tokens_dir = self.website_dir / 'temp_musickit'
         
         # Output directory (build folder in website directory)
         self.output_dir = self.website_dir / "build"
@@ -29,17 +34,49 @@ class MusicSiteBuilder:
         self.worksheet_index = 0
         
         print(f"🗂️  Website directory: {self.website_dir}")
-        print(f"🔑 Credentials path: {self.credentials_path}")
-        print(f"🍎 Apple tokens dir: {self.apple_token_dir}")
+        print(f"🔑 Alternative credentials path: {self.alt_credentials_path}")
+        print(f"🍎 Alternative Apple tokens path: {self.alt_apple_tokens_path}")
+        
+    def setup_temporary_credentials(self):
+        """Copy credentials from alternative paths for build process"""
+        print("🔑 Setting up temporary credentials...")
+        
+        # Copy Google Sheets credentials
+        if self.alt_credentials_path.exists():
+            shutil.copy2(self.alt_credentials_path, self.temp_credentials_path)
+            print(f"✅ Copied Google Sheets credentials")
+        else:
+            raise FileNotFoundError(f"Google Sheets credentials not found at: {self.alt_credentials_path}")
+        
+        # Copy Apple Music tokens if they exist
+        if self.alt_apple_tokens_path.exists():
+            if self.temp_apple_tokens_dir.exists():
+                shutil.rmtree(self.temp_apple_tokens_dir)
+            shutil.copytree(self.alt_apple_tokens_path, self.temp_apple_tokens_dir)
+            print(f"✅ Copied Apple Music tokens")
+        else:
+            print(f"⚠️  Apple Music tokens not found at: {self.alt_apple_tokens_path}")
+    
+    def cleanup_temporary_credentials(self):
+        """Remove temporary credential files"""
+        print("🧹 Cleaning up temporary credentials...")
+        
+        if self.temp_credentials_path.exists():
+            self.temp_credentials_path.unlink()
+            print("✅ Removed temporary Google Sheets credentials")
+        
+        if self.temp_apple_tokens_dir.exists():
+            shutil.rmtree(self.temp_apple_tokens_dir)
+            print("✅ Removed temporary Apple Music tokens")
         
     def setup_google_sheets(self):
         """Initialize Google Sheets connection"""
         print("🔗 Connecting to Google Sheets...")
         
-        if not self.credentials_path.exists():
-            raise FileNotFoundError(f"Google Sheets credentials not found at: {self.credentials_path}")
+        if not self.temp_credentials_path.exists():
+            raise FileNotFoundError(f"Temporary credentials not found at: {self.temp_credentials_path}")
             
-        gc = gspread.service_account(filename=str(self.credentials_path))
+        gc = gspread.service_account(filename=str(self.temp_credentials_path))
         spreadsheet = gc.open(self.spreadsheet_name)
         sheet = spreadsheet.get_worksheet(self.worksheet_index)
         return sheet
@@ -190,7 +227,6 @@ class MusicSiteBuilder:
         # Copy assets if they exist in the website directory
         source_assets = self.website_dir / "assets"
         if source_assets.exists():
-            import shutil
             for asset_file in source_assets.glob("*"):
                 if asset_file.is_file():
                     shutil.copy2(asset_file, assets_dir / asset_file.name)
@@ -208,7 +244,7 @@ class MusicSiteBuilder:
             return ""
     
     def generate_html(self, categorized_data):
-        """Generate the main HTML file with enhanced design"""
+        """Generate the main HTML file with simplified design"""
         print("🎨 Generating HTML...")
         
         current_listening = categorized_data['current_listening']
@@ -231,7 +267,7 @@ class MusicSiteBuilder:
     <div class="animated-background"></div>
     <div class="container">
         <header class="site-header">
-            <h1>🎵 Album du Jour</h1>
+            <h1><img src="assets/favicon.svg" alt="Album du Jour" class="title-icon"> Album du Jour</h1>
             <p class="subtitle">Personal Music Discovery</p>
             <p class="generation-time">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
             <div class="stats-badges">
@@ -253,7 +289,7 @@ class MusicSiteBuilder:
                target="_blank" class="sheets-link">
                 📊 View Full Library
             </a>
-            <p>Built with ❤️ by <strong>LUFS Audio</strong></p>
+            <p>Built with ❤️</p>
         </footer>
     </div>
     
@@ -328,7 +364,7 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card"""
+        """Generate HTML for a single album card with simplified design"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
@@ -420,10 +456,10 @@ class MusicSiteBuilder:
         """
     
     def generate_css(self):
-        """Generate the enhanced CSS file with LUFS branding"""
-        print("🎨 Generating enhanced CSS...")
+        """Generate the simplified CSS file with LUFS branding"""
+        print("🎨 Generating simplified CSS...")
         
-        css_content = """/* LUFS Brand Colors and Enhanced Design */
+        css_content = """/* LUFS Brand Colors and Simplified Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -434,14 +470,13 @@ class MusicSiteBuilder:
     --lufs-white: #fbf9e2;
     
     /* Derived colors */
-    --lufs-teal-alpha: rgba(120, 190, 186, 0.1);
-    --lufs-red-alpha: rgba(211, 82, 51, 0.1);
-    --lufs-yellow-alpha: rgba(231, 178, 37, 0.1);
-    --lufs-blue-alpha: rgba(32, 105, 175, 0.1);
+    --lufs-teal-alpha: rgba(120, 190, 186, 0.08);
+    --lufs-red-alpha: rgba(211, 82, 51, 0.08);
+    --lufs-yellow-alpha: rgba(231, 178, 37, 0.08);
+    --lufs-blue-alpha: rgba(32, 105, 175, 0.08);
     
-    /* Gradients */
+    /* Simplified gradients */
     --lufs-gradient: linear-gradient(135deg, var(--lufs-teal), var(--lufs-blue));
-    --lufs-border-gradient: linear-gradient(90deg, var(--lufs-teal), var(--lufs-yellow), var(--lufs-red), var(--lufs-blue));
     
     /* Layout */
     --container-max-width: 1400px;
@@ -465,7 +500,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Animated Background */
+/* Simplified Animated Background */
 .animated-background {
     position: fixed;
     top: 0;
@@ -485,25 +520,21 @@ body {
     width: 200%;
     height: 200%;
     background: 
-        radial-gradient(circle at 20% 80%, var(--lufs-teal-alpha) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, var(--lufs-red-alpha) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, var(--lufs-yellow-alpha) 0%, transparent 50%),
-        radial-gradient(circle at 60% 60%, var(--lufs-blue-alpha) 0%, transparent 50%);
-    animation: float 20s ease-in-out infinite;
+        radial-gradient(circle at 25% 75%, var(--lufs-teal-alpha) 0%, transparent 40%),
+        radial-gradient(circle at 75% 25%, var(--lufs-blue-alpha) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, var(--lufs-yellow-alpha) 0%, transparent 30%);
+    animation: float 25s ease-in-out infinite;
 }
 
 @keyframes float {
     0%, 100% { 
         transform: translate(0, 0) rotate(0deg); 
     }
-    25% { 
-        transform: translate(30px, -30px) rotate(90deg); 
+    33% { 
+        transform: translate(20px, -20px) rotate(120deg); 
     }
-    50% { 
-        transform: translate(-20px, 20px) rotate(180deg); 
-    }
-    75% { 
-        transform: translate(20px, -10px) rotate(270deg); 
+    66% { 
+        transform: translate(-15px, 15px) rotate(240deg); 
     }
 }
 
@@ -531,6 +562,16 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.title-icon {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
 }
 
 .subtitle {
@@ -606,12 +647,11 @@ body {
 .album-du-jour .album-card {
     max-width: 600px;
     width: 100%;
-    background: var(--lufs-gradient);
-    border: 3px solid var(--lufs-yellow);
+    background: rgba(251, 249, 226, 0.05);
+    border: 2px solid var(--lufs-teal);
     box-shadow: 
-        0 0 30px rgba(231, 178, 37, 0.3),
+        0 0 20px rgba(120, 190, 186, 0.2),
         0 10px 40px rgba(0, 0, 0, 0.3);
-    transform: scale(1.02);
 }
 
 /* Collapsible Sections */
@@ -619,7 +659,7 @@ body {
     margin-bottom: 2rem;
     border-radius: var(--border-radius);
     overflow: hidden;
-    background: rgba(251, 249, 226, 0.05);
+    background: rgba(251, 249, 226, 0.03);
     border: 1px solid rgba(251, 249, 226, 0.1);
 }
 
@@ -639,7 +679,7 @@ body {
 }
 
 .section-toggle:hover {
-    background: rgba(251, 249, 226, 0.1);
+    background: rgba(251, 249, 226, 0.05);
 }
 
 .section-toggle h2 {
@@ -680,34 +720,21 @@ body {
     padding: 1.5rem;
 }
 
-/* Album Cards */
+/* Simplified Album Cards */
 .album-card {
-    background: rgba(251, 249, 226, 0.05);
+    background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
     padding: 1.5rem;
-    border: 1px solid transparent;
-    background-image: var(--lufs-border-gradient);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    border: 1px solid rgba(251, 249, 226, 0.1);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
 }
 
-.album-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(17, 17, 17, 0.8);
-    z-index: -1;
-}
-
 .album-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 32px rgba(120, 190, 186, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(120, 190, 186, 0.1);
+    border-color: rgba(120, 190, 186, 0.3);
 }
 
 .card-header {
@@ -743,12 +770,12 @@ body {
     color: var(--lufs-yellow);
 }
 
-/* Embed Container */
+/* Embed Container - Let Spotify provide the color */
 .embed-container {
     margin: 1rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .embed-container iframe {
@@ -764,7 +791,7 @@ body {
     font-style: italic;
 }
 
-/* Music Links */
+/* Simplified Music Links */
 .card-links {
     display: flex;
     gap: 0.75rem;
@@ -780,22 +807,15 @@ body {
     font-weight: 600;
     font-size: 0.9rem;
     transition: var(--transition);
-    border: 2px solid transparent;
-}
-
-.music-link.apple {
-    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-    color: white;
-}
-
-.music-link.spotify {
-    background: linear-gradient(135deg, #1db954, #1ed760);
-    color: white;
+    border: 1px solid rgba(251, 249, 226, 0.2);
+    background: rgba(251, 249, 226, 0.05);
+    color: var(--lufs-white);
 }
 
 .music-link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+    border-color: var(--lufs-teal);
+    background: rgba(120, 190, 186, 0.1);
 }
 
 /* Empty Section */
@@ -876,6 +896,11 @@ body {
     
     .section-toggle h2 {
         font-size: 1.2rem;
+    }
+    
+    .site-header h1 {
+        flex-direction: column;
+        gap: 0.25rem;
     }
 }
 
@@ -1145,26 +1170,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('❌ Album du Jour - Initialization error:', error);
     }
 });
-
-// Service worker registration for offline support (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Only register if service worker file exists
-        fetch('/sw.js', { method: 'HEAD' })
-            .then(() => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            })
-            .catch(() => {
-                // Service worker file doesn't exist, skip registration
-            });
-    });
-}
 """
         
         output_file = self.output_dir / "scripts.js"
@@ -1183,11 +1188,11 @@ This directory contains the generated static website files for Album du Jour.
 
 ## Generated Files
 
-- `index.html` - Main website page with enhanced design
-- `styles.css` - Stylesheet with LUFS branding and responsive design
+- `index.html` - Main website page with simplified design
+- `styles.css` - Stylesheet with LUFS branding and clean layout
 - `scripts.js` - Interactive functionality for collapsible sections
-- `assets/` - Images and static assets including custom favicon
-- `favicon.svg` - Custom Album du Jour vinyl record favicon
+- `assets/` - Images and static assets including simplified favicon
+- `favicon.svg` - Clean, abstract vinyl record favicon
 
 ## Features
 
@@ -1197,7 +1202,8 @@ This directory contains the generated static website files for Album du Jour.
 - **Recently Finished**: Last 20 albums completed (collapsible)
 
 ### Design Features
-- LUFS brand colors and animated background
+- LUFS brand colors with simplified background animation
+- Clean album cards that let Spotify embeds provide color
 - Responsive design for all devices
 - Collapsible sections with localStorage persistence
 - Lazy loading for music embeds
@@ -1233,7 +1239,7 @@ These files are ready for deployment to any static hosting service:
 ---
 
 **Generated on:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
-**Source:** Album du Jour Enhanced Build System  
+**Source:** Album du Jour Enhanced Build System v2  
 **Version:** 2.0  
 """
         
@@ -1246,7 +1252,10 @@ These files are ready for deployment to any static hosting service:
     def run(self):
         """Main execution method"""
         try:
-            print("🚀 Starting Album du Jour Enhanced Build Process...")
+            print("🚀 Starting Album du Jour Enhanced Build Process v2...")
+            
+            # Setup temporary credentials from alternative paths
+            self.setup_temporary_credentials()
             
             # Setup and data fetching
             sheet = self.setup_google_sheets()
@@ -1260,12 +1269,17 @@ These files are ready for deployment to any static hosting service:
             self.generate_javascript()
             self.generate_build_readme()
             
+            # Clean up temporary credentials
+            self.cleanup_temporary_credentials()
+            
             print("🎉 Album du Jour Enhanced Build Complete!")
             print(f"📁 Output directory: {self.output_dir}")
             print(f"🌐 Open {self.output_dir}/index.html to view the site")
             
         except Exception as e:
             print(f"❌ Build failed: {str(e)}")
+            # Clean up on failure
+            self.cleanup_temporary_credentials()
             raise
 
 if __name__ == "__main__":

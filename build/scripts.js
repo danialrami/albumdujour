@@ -190,23 +190,3 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('❌ Album du Jour - Initialization error:', error);
     }
 });
-
-// Service worker registration for offline support (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Only register if service worker file exists
-        fetch('/sw.js', { method: 'HEAD' })
-            .then(() => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            })
-            .catch(() => {
-                // Service worker file doesn't exist, skip registration
-            });
-    });
-}
