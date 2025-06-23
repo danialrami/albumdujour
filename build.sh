@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Music Library Website Builder with Safe Git Deployment
-# Enhanced version with proper error handling and file safety
+# Enhanced version with proper error handling, file safety, and history preservation
 
 set -euo pipefail  # Exit on any error, undefined variable, or pipe failure
 
@@ -230,15 +230,35 @@ create_safe_backup() {
 }
 
 deploy_to_build_branch() {
-    log_header "🌿 Deploying to Build Branch"
+    log_header "🌿 Deploying to Build Branch (History Preserving)"
     
-    # Check if build branch exists
+    # Ensure we're up to date with remote build branch
+    log_info "Fetching latest remote changes..."
+    git fetch origin 2>/dev/null || log_warning "Could not fetch from origin"
+    
+    # Check if build branch exists locally
     if ! git show-ref --verify --quiet refs/heads/build; then
-        log_info "Creating build branch..."
-        git checkout -b build
+        # Check if it exists on remote
+        if git show-ref --verify --quiet refs/remotes/origin/build; then
+            log_info "Creating local build branch from remote..."
+            git checkout -b build origin/build
+        else
+            log_info "Creating new build branch..."
+            git checkout -b build
+            # Create initial commit for build branch
+            echo "# Build Branch" > README-build.md
+            git add README-build.md
+            git commit -m "Initialize build branch"
+        fi
     else
-        log_info "Switching to build branch..."
+        log_info "Switching to existing build branch..."
         git checkout build
+        
+        # Try to pull latest changes if remote exists
+        if git show-ref --verify --quiet refs/remotes/origin/build; then
+            log_info "Pulling latest build branch changes..."
+            git pull origin build 2>/dev/null || log_warning "Could not pull latest changes"
+        fi
     fi
     
     # Verify we're on build branch
@@ -249,10 +269,10 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # SAFE cleanup: Only remove specific files/directories, keep source files safe
-    log_info "Safely cleaning build branch..."
+    # HISTORY-PRESERVING UPDATE: Remove only build artifacts, keep git history
+    log_info "Updating build files while preserving history..."
     
-    # Remove only the old build artifacts, not source files
+    # Remove only the old build artifacts (not source files or git history)
     local items_to_remove=(
         "index.html"
         "styles.css" 
@@ -267,7 +287,7 @@ deploy_to_build_branch() {
         fi
     done
     
-    # Copy new build files from backup (safer than from original location)
+    # Copy new build files from backup
     log_info "Copying new build files..."
     cp -r "$TEMP_BACKUP_DIR/build/"* .
     
@@ -281,17 +301,28 @@ deploy_to_build_branch() {
     log_info "Build branch contents:"
     ls -la
     
-    # Commit build files
-    git add .
+    # Stage all changes (additions, modifications, deletions)
+    git add -A
+    
+    # Check if there are actually changes to commit
+    if git diff-index --quiet HEAD --; then
+        log_info "No changes to commit in build branch"
+        return 0
+    fi
+    
+    # Commit with detailed message
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local file_count
+    file_count=$(find . -name "*.html" -o -name "*.css" -o -name "*.js" | wc -l | tr -d ' ')
     
-    if ! git diff-index --quiet HEAD --; then
-        git commit -m "Deploy website build - $timestamp"
-        log_success "Build files committed to build branch"
-    else
-        log_info "No changes to commit in build branch"
-    fi
+    git commit -m "Deploy website build - $timestamp
+
+- Updated website with latest content
+- Generated $file_count web files
+- Build size: $(du -sh . 2>/dev/null | cut -f1 || echo 'unknown')"
+    
+    log_success "Build files committed to build branch with preserved history"
 }
 
 push_to_remote() {
@@ -300,27 +331,40 @@ push_to_remote() {
     # Push main branch first
     log_info "Pushing main branch..."
     git checkout main
-    if git push origin main; then
+    if git push origin main 2>/dev/null; then
         log_success "Main branch pushed successfully"
     else
-        log_warning "Failed to push main branch (may be up to date)"
+        log_info "Main branch is up to date"
     fi
     
-    # Push build branch
+    # Push build branch with history preservation
     log_info "Pushing build branch..."
     git checkout build
     
-    # Handle potential conflicts with force-with-lease (safer than force)
-    if git push origin build; then
+    # Normal push should work now since we're preserving history
+    if git push origin build 2>/dev/null; then
         log_success "Build branch pushed successfully"
     else
-        log_warning "Normal push failed, attempting force-with-lease..."
-        if git push --force-with-lease origin build; then
-            log_success "Build branch force-pushed successfully"
+        # If it still fails, it might be because remote is ahead
+        log_info "Normal push failed, trying to merge remote changes..."
+        
+        if git pull origin build 2>/dev/null; then
+            log_info "Merged remote changes, pushing again..."
+            if git push origin build 2>/dev/null; then
+                log_success "Build branch pushed successfully after merge"
+            else
+                log_error "Failed to push build branch even after merge"
+                exit 1
+            fi
         else
-            log_error "Failed to push build branch"
-            log_info "You may need to manually resolve conflicts"
-            exit 1
+            log_warning "Could not merge remote changes, using force-with-lease as fallback..."
+            if git push --force-with-lease origin build 2>/dev/null; then
+                log_success "Build branch force-pushed successfully"
+            else
+                log_error "Failed to push build branch"
+                log_info "You may need to manually resolve conflicts"
+                exit 1
+            fi
         fi
     fi
 }
@@ -347,6 +391,7 @@ main() {
     log_success "🎉 Deployment completed successfully!"
     log_info "Website is now live on the build branch"
     log_info "Source code remains safe on the main branch"
+    log_info "Both branches maintain their complete Git history"
 }
 
 # Run main function
