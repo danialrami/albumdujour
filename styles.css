@@ -1,4 +1,4 @@
-/* LUFS Brand Colors and Simplified Design with Responsive Embeds */
+/* LUFS Brand Colors and Dynamic Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -22,14 +22,6 @@
     --container-padding: 2rem;
     --border-radius: 12px;
     --transition: all 0.3s ease;
-    
-    /* Responsive Embed Heights */
-    --current-embed-height-mobile: 350px;
-    --current-embed-height-tablet: 420px;
-    --current-embed-height-desktop: 450px;
-    --grid-embed-height-mobile: 200px;
-    --grid-embed-height-tablet: 220px;
-    --grid-embed-height-desktop: 240px;
 }
 
 /* Reset and base styles */
@@ -259,15 +251,51 @@ body {
     max-height: none;
 }
 
-/* Album Grid */
+/* Dynamic Album Grid - Now fills available space */
 .album-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     padding: 1.5rem;
 }
 
-/* Simplified Album Cards */
+/* Mobile: Single column, full width */
+@media (max-width: 767px) {
+    .album-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+}
+
+/* Tablet: Two columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Desktop: Three columns */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+/* Large Desktop: Four columns */
+@media (min-width: 1440px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+/* Ultra-wide: Five columns */
+@media (min-width: 1920px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+}
+
+/* Album Cards - Now expand to fill grid cells */
 .album-card {
     background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
@@ -276,6 +304,9 @@ body {
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px; /* Minimum height for consistency */
 }
 
 .album-card:hover {
@@ -286,6 +317,7 @@ body {
 
 .card-header {
     margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 .album-title {
@@ -317,117 +349,56 @@ body {
     color: var(--lufs-yellow);
 }
 
-/* Responsive Embed Container */
+/* Dynamic Embed Containers */
 .embed-container {
     margin: 1rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
     background: rgba(0, 0, 0, 0.2);
+    flex: 1; /* This makes the embed container grow to fill available space */
+    display: flex;
+    flex-direction: column;
 }
 
-.embed-container iframe {
+/* Currently Listening Embeds - Large and prominent */
+.current-embed-container {
+    min-height: 380px;
+}
+
+.current-embed-container .dynamic-embed {
+    height: 100%;
+    min-height: 380px;
+}
+
+/* Grid Embeds - Dynamically sized based on card space */
+.grid-embed-container {
+    min-height: 200px;
+}
+
+.grid-embed-container .dynamic-embed {
+    height: 100%;
+    min-height: 200px;
+}
+
+/* Dynamic embeds fill their containers */
+.dynamic-embed {
     width: 100%;
     border: none;
     border-radius: var(--border-radius);
+    flex: 1;
 }
 
-/* Responsive Embed Heights - Mobile First */
-.responsive-embed {
-    transition: height 0.3s ease;
+/* Apple Music gets a bit more height */
+.apple-embed {
+    min-height: calc(100% + 30px) !important;
 }
 
-/* Mobile: Default heights */
-.responsive-embed.current-embed {
-    height: var(--current-embed-height-mobile);
+.current-embed-container .apple-embed {
+    min-height: 430px !important;
 }
 
-.responsive-embed.grid-embed {
-    height: var(--grid-embed-height-mobile);
-}
-
-/* Tablet: 768px and up */
-@media (min-width: 768px) {
-    .responsive-embed.current-embed {
-        height: var(--current-embed-height-tablet);
-    }
-    
-    .responsive-embed.grid-embed {
-        height: var(--grid-embed-height-tablet);
-    }
-    
-    /* Wider grid cards for better embed visibility */
-    .album-grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    }
-}
-
-/* Desktop: 1024px and up */
-@media (min-width: 1024px) {
-    .responsive-embed.current-embed {
-        height: var(--current-embed-height-desktop);
-    }
-    
-    .responsive-embed.grid-embed {
-        height: var(--grid-embed-height-desktop);
-    }
-    
-    /* Even wider grid cards for desktop */
-    .album-grid {
-        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    }
-}
-
-/* Large Desktop: 1440px and up */
-@media (min-width: 1440px) {
-    :root {
-        --current-embed-height-desktop: 480px;
-        --grid-embed-height-desktop: 260px;
-    }
-    
-    .album-grid {
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    }
-}
-
-/* Ultra-wide screens: 1920px and up */
-@media (min-width: 1920px) {
-    :root {
-        --current-embed-height-desktop: 520px;
-        --grid-embed-height-desktop: 280px;
-    }
-}
-
-/* Apple Music specific adjustments (they tend to need more height) */
-.responsive-embed.apple-embed.current-embed {
-    height: calc(var(--current-embed-height-mobile) + 50px);
-}
-
-@media (min-width: 768px) {
-    .responsive-embed.apple-embed.current-embed {
-        height: calc(var(--current-embed-height-tablet) + 50px);
-    }
-}
-
-@media (min-width: 1024px) {
-    .responsive-embed.apple-embed.current-embed {
-        height: calc(var(--current-embed-height-desktop) + 50px);
-    }
-}
-
-.responsive-embed.apple-embed.grid-embed {
-    height: calc(var(--grid-embed-height-mobile) + 25px);
-}
-
-@media (min-width: 768px) {
-    .responsive-embed.apple-embed.grid-embed {
-        height: calc(var(--grid-embed-height-tablet) + 25px);
-    }
-}
-
-@media (min-width: 1024px) {
-    .responsive-embed.apple-embed.grid-embed {
-        height: calc(var(--grid-embed-height-desktop) + 25px);
-    }
+.grid-embed-container .apple-embed {
+    min-height: 230px !important;
 }
 
 .no-embed {
@@ -435,13 +406,18 @@ body {
     color: rgba(251, 249, 226, 0.5);
     padding: 2rem;
     font-style: italic;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Simplified Music Links */
+/* Music Links */
 .card-links {
     display: flex;
     gap: 0.75rem;
     margin-top: 1rem;
+    flex-shrink: 0;
 }
 
 .music-link {
@@ -510,19 +486,30 @@ body {
     font-size: 0.9rem;
 }
 
-/* Responsive Design Adjustments */
+/* Mobile Specific Adjustments */
 @media (max-width: 767px) {
     :root {
         --container-padding: 1rem;
-        /* Mobile-specific embed heights for smaller screens */
-        --current-embed-height-mobile: 320px;
-        --grid-embed-height-mobile: 180px;
     }
     
-    .album-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 1rem;
+    .album-card {
+        min-height: 350px;
+    }
+    
+    .current-embed-container {
+        min-height: 300px;
+    }
+    
+    .current-embed-container .dynamic-embed {
+        min-height: 300px;
+    }
+    
+    .grid-embed-container {
+        min-height: 180px;
+    }
+    
+    .grid-embed-container .dynamic-embed {
+        min-height: 180px;
     }
     
     .stats-badges {
@@ -554,10 +541,9 @@ body {
 }
 
 @media (max-width: 480px) {
-    :root {
-        /* Extra small mobile adjustments */
-        --current-embed-height-mobile: 300px;
-        --grid-embed-height-mobile: 160px;
+    .album-card {
+        padding: 1rem;
+        min-height: 320px;
     }
     
     .site-header {
@@ -565,8 +551,12 @@ body {
         padding: 1rem 0;
     }
     
-    .album-card {
-        padding: 1rem;
+    .current-embed-container {
+        min-height: 280px;
+    }
+    
+    .grid-embed-container {
+        min-height: 160px;
     }
 }
 
@@ -612,13 +602,9 @@ body {
     .animated-background::before {
         animation: none;
     }
-    
-    .responsive-embed {
-        transition: none;
-    }
 }
 
-/* Custom scrollbar for embed containers */
+/* Scrollbar styling for embed containers */
 .embed-container::-webkit-scrollbar {
     width: 8px;
 }
