@@ -1,15 +1,15 @@
-# Album du Jour - Enhanced Music Discovery Website
+# Album du Jour - Enhanced Music Discovery Website v3
 
-A static site generator that creates a beautiful, responsive website showcasing your personal music library with embedded Apple Music and Spotify players. Features enhanced visual design with LUFS branding, collapsible sections, and timestamp-based album categorization.
+A static site generator that creates a beautiful, responsive website showcasing your personal music library with embedded Apple Music and Spotify players. Features simplified design with LUFS branding, clean album cards, and robust Git deployment using subtree split.
 
-## ✨ Features
+## ✨ Features v3
 
-### 🎨 Enhanced Visual Design
-- **LUFS Brand Integration**: Custom color palette with teal, red, yellow, and blue accents
-- **Animated Background**: Floating gradient elements that create dynamic visual interest
-- **Custom Favicon**: Skeumorphic vinyl record design representing "album du jour"
-- **Gradient Borders**: Inspired by echobridge.lufs.audio design language
+### 🎨 Minimal Visual Design
+- **LUFS Brand Integration**: Subtle background animation with brand colors
+- **Clean Album Cards**: Simplified design that lets Spotify embeds provide color
+- **Minimal Abstract Favicon**: Clean, simple design inspired by LUFS brand sites
 - **Responsive Design**: Optimized for smartphone, tablet, and desktop devices
+- **Natural Color Accents**: Spotify embeds provide vibrant, natural color
 
 ### 📱 Content Organization
 - **Currently Listening**: Prominently displayed "album du jour" section
@@ -25,19 +25,20 @@ A static site generator that creates a beautiful, responsive website showcasing 
 - **Lazy Loading**: Performance-optimized embed loading
 - **Responsive Embeds**: Optimized sizes for different screen sizes
 
-### 🔧 Technical Features
-- **Static Site Generation**: Fast, secure, and easy to deploy
-- **Google Sheets Integration**: Real-time data from your music spreadsheet
-- **Git Workflow**: Separate branches for source code and deployment
-- **Security First**: Credentials never committed to public repositories
-- **Performance Optimized**: Fast loading with minimal JavaScript
+### 🔧 Technical Features v3
+- **Master Build Pipeline**: Single command for complete automation
+- **Safe Git Deployment**: Uses git subtree split (no repo deletion risk)
+- **External Credentials**: Uses only alternative credential paths (never in repo)
+- **Enhanced Security**: Multiple verification layers prevent credential leaks
+- **Modular Scripts**: Separate build.sh, deploy.sh, and master-build.sh
+- **Repeatable Process**: Safe to run multiple times without issues
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.11 or higher
 - Git with push access to your repository
-- Google Sheets API credentials
+- Google Sheets API credentials at alternative path
 - Apple Music and/or Spotify links in your music library
 
 ### Installation
@@ -48,27 +49,55 @@ A static site generator that creates a beautiful, responsive website showcasing 
    cd albumdujour
    ```
 
-2. **Set up credentials**
+2. **Set up credentials at alternative paths**
    ```bash
-   # Place your Google Sheets service account JSON file
-   cp /path/to/your/credentials.json concrete-spider-446700-f9-4646496845d1.json
-   
-   # Optional: Add Apple Music developer tokens
-   mkdir musickit
-   cp /path/to/your/apple-tokens/* musickit/
+   # Ensure your credentials are at these external paths:
+   # /Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json
+   # /Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit (optional)
    ```
 
-3. **Install dependencies**
+3. **Complete build and deployment**
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install gspread
+   ./master-build.sh
    ```
 
-4. **Build and deploy**
-   ```bash
-   ./build.sh
-   ```
+## 🛠️ Build Process v3
+
+### Master Pipeline (Recommended)
+```bash
+./master-build.sh
+```
+- Runs complete build and deployment process
+- Creates website and deploys to Git in one command
+- Safe to run repeatedly
+
+### Individual Steps (For Development)
+
+#### Step 1: Build Website
+```bash
+./build.sh
+```
+- Creates Python virtual environment
+- Fetches data from Google Sheets using external credentials
+- Generates enhanced website with simplified design
+- Creates build/ directory with all website files
+- No Git operations performed
+
+#### Step 2: Deploy to Git
+```bash
+./deploy.sh
+```
+- Commits source changes to main branch
+- Uses git subtree split to create build branch safely
+- Pushes both branches to remote repository
+- No risk of deleting repository
+
+### Benefits of v3 Architecture
+- **Safe Deployment**: Uses git subtree split (no repo deletion risk)
+- **Master Pipeline**: Single command for complete automation
+- **Modular Development**: Individual scripts for testing and development
+- **Enhanced Security**: External credentials with comprehensive verification
+- **Repeatable Process**: Safe to run multiple times
 
 ## 📊 Data Format
 
@@ -84,66 +113,14 @@ Your Google Sheets spreadsheet should have the following columns:
 | Date Finished | ISO 8601 timestamp | `2025-01-20T15:45:00Z` |
 | 🌞 | Rating (optional) | `⭐⭐⭐⭐⭐` |
 
-### Timestamp Format
-- **Valid**: `2025-01-15T10:30:00Z` or `2025-01-15T10:30:00`
-- **Ignored**: `20XX-XX-XXTXX:XX:XXZ` (placeholder format)
-- **Empty**: Blank cells are ignored
+### Credential Security v3
+- **External Paths Only**: Credentials never stored in repository
+- **Alternative Locations**: Supports external credential storage
+- **Build Verification**: Automated security scanning prevents leaks
+- **Gitignore Protection**: Comprehensive patterns for sensitive files
+- **Safe Deployment**: Git subtree split prevents credential exposure
 
-### Album Categorization Logic
-1. **Currently Listening**: Status = "Current" (displayed prominently)
-2. **Recently Added**: Valid Date Added timestamp, sorted newest first (limit 20)
-3. **Recently Finished**: Valid Date Finished timestamp, sorted newest first (limit 20)
-
-## 🛠️ Configuration
-
-### Google Sheets Setup
-1. Create a Google Cloud Project
-2. Enable the Google Sheets API
-3. Create a service account and download the JSON credentials
-4. Share your spreadsheet with the service account email
-5. Name your spreadsheet "2025-media" with music data in the first worksheet
-
-### Credential Paths
-The build script supports multiple credential locations:
-
-**Primary paths** (in project directory):
-- `concrete-spider-446700-f9-4646496845d1.json`
-- `musickit/` directory
-
-**Alternative paths** (external):
-- `/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json`
-- `/Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit`
-
-### Environment Variables
-No environment variables required. All configuration is file-based for security.
-
-## 🏗️ Build Process
-
-The enhanced build process creates two Git branches:
-
-### Main Branch (Source Code)
-- Python build script
-- Bash deployment script
-- Assets and documentation
-- Configuration files
-- **Excludes**: Credentials and sensitive files
-
-### Build Branch (Deployment)
-- `index.html` - Generated website
-- `styles.css` - Enhanced CSS with LUFS branding
-- `scripts.js` - Interactive functionality
-- `assets/` - Optimized images and favicon
-- `README.md` - Deployment documentation
-- **Excludes**: All source code and credentials
-
-### Build Script Features
-- **Security First**: Whitelist approach for build files
-- **Credential Protection**: Multiple verification steps
-- **Error Handling**: Comprehensive logging and rollback
-- **Git Workflow**: Clean orphan branch creation
-- **Performance**: Optimized asset copying
-
-## 🎨 Design System
+## 🎨 Design System v3
 
 ### LUFS Brand Colors
 ```css
@@ -157,21 +134,11 @@ The enhanced build process creates two Git branches:
 }
 ```
 
-### Typography
-- **Primary Font**: System font stack for optimal performance
-- **Headings**: Bold weights with LUFS color gradients
-- **Body Text**: Optimized for readability across devices
-
-### Layout
-- **Container**: Max-width 1400px with responsive padding
-- **Grid System**: CSS Grid with auto-fit columns
-- **Spacing**: Consistent rem-based spacing scale
-- **Border Radius**: 12px for modern, friendly appearance
-
-### Animations
-- **Background**: Floating gradient elements with 20s animation cycle
-- **Interactions**: Smooth hover effects and transitions
-- **Performance**: GPU-accelerated transforms and opacity changes
+### Minimal Design Philosophy
+- **Abstract Favicon**: Simple vinyl record inspired by LUFS brand sites
+- **Clean Album Cards**: Minimal design that doesn't compete with embeds
+- **Spotify Color Integration**: Let music embeds provide natural color accents
+- **Subtle Background**: Gentle floating animation using brand colors
 
 ## 📱 Responsive Design
 
@@ -180,47 +147,68 @@ The enhanced build process creates two Git branches:
 - **Tablet**: 768px - 1024px (two columns, hybrid interactions)
 - **Desktop**: > 1024px (multi-column, hover effects)
 
-### Touch Optimization
-- **Minimum Touch Targets**: 44px for accessibility
-- **Touch Actions**: Optimized for mobile interactions
-- **Hover Fallbacks**: Alternative interactions for touch devices
-
-### Performance
+### Performance v3
 - **Mobile-First**: CSS written for mobile, enhanced for desktop
 - **Lazy Loading**: Embeds load only when visible
 - **Reduced Motion**: Respects user preferences for animations
+- **External Credentials**: No credential processing during build
+- **Safe Git Operations**: Subtree split prevents repository issues
 
 ## 🔧 Development
 
-### File Structure
+### File Structure v3
 ```
 albumdujour/
-├── build_music_site.py      # Enhanced Python build script
-├── build.sh                 # Improved deployment script
+├── master-build.sh             # Master pipeline script
+├── build.sh                    # Website build script (no Git)
+├── deploy.sh                   # Git deployment script (subtree split)
+├── build_music_site.py         # Enhanced Python build script
+├── .gitignore                  # Comprehensive credential protection
 ├── assets/
-│   ├── favicon.svg          # Custom vinyl record favicon
-│   └── [other assets]       # Additional images and graphics
-├── fonts/                   # Custom fonts (if any)
-├── venv/                    # Python virtual environment
-├── build/                   # Generated website files
-├── README.md                # This documentation
-└── [credential files]       # Not committed to Git
+│   ├── favicon.svg             # Minimal abstract favicon
+│   └── [other assets]          # Additional images and graphics
+├── fonts/                      # Custom fonts
+├── venv/                       # Python virtual environment
+├── build/                      # Generated website files
+├── docs/                       # Planning and technical documentation
+└── README.md                   # This documentation
 ```
 
-### Python Dependencies
-- **gspread**: Google Sheets API client
-- **datetime**: Timestamp parsing and formatting
-- **pathlib**: Modern file path handling
-- **urllib**: URL parsing for embed generation
+### Credential Paths (External)
+- **Google Sheets**: `/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json`
+- **Apple Music**: `/Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit`
 
-### JavaScript Features
-- **Collapsible Sections**: Smooth expand/collapse animations
-- **Local Storage**: Remembers user section preferences
-- **Lazy Loading**: Intersection Observer for performance
-- **Accessibility**: Keyboard navigation and ARIA labels
-- **Error Handling**: Graceful fallbacks for failed embeds
+### Git Workflow v3
+1. **Main Branch**: Source code and development files
+2. **Build Branch**: Generated using `git subtree split --prefix build`
+3. **Safe Deployment**: No risk of repository deletion
+4. **Repeatable**: Can be run multiple times safely
 
 ## 🚀 Deployment
+
+### Master Pipeline (Recommended)
+```bash
+# Complete build and deployment
+./master-build.sh
+
+# Build only (for testing)
+./master-build.sh --build-only
+```
+
+### Local Testing
+```bash
+# Build website
+./build.sh
+
+# Open in browser
+open build/index.html
+```
+
+### Git Deployment
+```bash
+# Deploy to repository (after build)
+./deploy.sh
+```
 
 ### Static Hosting Options
 The build branch is ready for deployment to any static hosting service:
@@ -243,35 +231,18 @@ The build branch is ready for deployment to any static hosting service:
 3. Choose "build" branch
 4. Site will be available at `username.github.io/repository`
 
-#### Traditional Hosting
-1. Download build branch files
-2. Upload to web server via FTP/SFTP
-3. Point domain to uploaded files
-4. No server configuration required
+## 🔒 Security v3
 
-### Custom Domain
-Add a `CNAME` file to the build branch with your domain name for custom domain support.
-
-### SSL/HTTPS
-Most modern hosting providers include free SSL certificates. Ensure your site is served over HTTPS for security and performance.
-
-## 🔒 Security
-
-### Credential Protection
-- **Never Committed**: Credentials are never added to Git
-- **Gitignore Protection**: Multiple layers of gitignore rules
-- **Build Verification**: Automated security scanning
-- **Alternative Paths**: Support for external credential storage
+### Enhanced Credential Protection
+- **External Storage**: Credentials never stored in repository
+- **Build Verification**: Automated security scanning before deployment
+- **Gitignore Protection**: Comprehensive patterns prevent accidental commits
+- **Safe Git Operations**: Subtree split prevents repository corruption
 
 ### Content Security
 - **Static Generation**: No server-side vulnerabilities
 - **Embed Security**: Sandboxed iframes for music players
 - **XSS Prevention**: Proper HTML escaping and sanitization
-
-### Privacy
-- **No Tracking**: No analytics or tracking scripts by default
-- **Local Storage**: Only used for user preferences
-- **Third-Party**: Only music service embeds (Apple Music, Spotify)
 
 ## 🧪 Testing
 
@@ -280,92 +251,105 @@ Most modern hosting providers include free SSL certificates. Ensure your site is
 - [ ] Collapsible sections work on all devices
 - [ ] Music embeds load and play properly
 - [ ] Responsive design works across screen sizes
-- [ ] Build process creates proper Git branches
+- [ ] Master build process completes successfully
+- [ ] Deploy process creates proper Git branches
 - [ ] No credentials in build branch
 - [ ] Page loads in under 3 seconds
 - [ ] Accessibility features work with keyboard navigation
 
-### Browser Support
-- **Modern Browsers**: Chrome, Firefox, Safari, Edge (latest versions)
-- **Mobile Browsers**: iOS Safari, Chrome Mobile, Samsung Internet
-- **Progressive Enhancement**: Graceful degradation for older browsers
+### Build Testing v3
+```bash
+# Test master pipeline
+./master-build.sh --build-only
 
-### Performance Targets
-- **Page Load**: < 3 seconds on 3G connection
-- **First Contentful Paint**: < 1.5 seconds
-- **Largest Contentful Paint**: < 2.5 seconds
-- **Cumulative Layout Shift**: < 0.1
+# Verify no credentials in build
+grep -r "concrete-spider" build/ || echo "✅ No credentials found"
 
-## 🐛 Troubleshooting
+# Test individual components
+./build.sh
+./deploy.sh
+
+# Check Git branches
+git branch -a
+```
+
+## 🐛 Troubleshooting v3
 
 ### Common Issues
 
+#### Master Build Fails
+```bash
+# Check script permissions
+ls -la *.sh
+
+# Run individual steps for debugging
+./build.sh
+./deploy.sh
+```
+
 #### Build Fails with Credentials Error
 ```bash
-# Check credential file exists
-ls -la concrete-spider-446700-f9-4646496845d1.json
+# Check external credential paths
+ls -la "/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json"
 
 # Verify Google Sheets access
-python3 -c "import gspread; gc = gspread.service_account('concrete-spider-446700-f9-4646496845d1.json'); print('Credentials valid')"
+python3 -c "
+import gspread
+import shutil
+from pathlib import Path
+
+# Copy credentials temporarily
+alt_path = Path('/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json')
+temp_path = Path('temp_test_creds.json')
+shutil.copy2(alt_path, temp_path)
+
+# Test connection
+gc = gspread.service_account('temp_test_creds.json')
+print('✅ Credentials valid')
+
+# Clean up
+temp_path.unlink()
+"
 ```
 
-#### Git Push Fails
+#### Git Deployment Fails
 ```bash
-# Check remote configuration
+# Check Git configuration
 git remote -v
+git status
 
-# Force push build branch (if needed)
-git push --force origin build
+# Verify build directory exists
+ls -la build/
+
+# Test subtree split manually
+git subtree split --prefix build -b test-build
+git branch -D test-build
 ```
 
-#### Embeds Not Loading
-1. Check Apple Music and Spotify URLs are valid
-2. Verify embed URL generation in Python script
-3. Test embeds in browser developer tools
-4. Check for CORS or content security policy issues
-
-#### Responsive Design Issues
-1. Test on actual devices, not just browser resize
-2. Check CSS media queries in developer tools
-3. Verify touch targets are at least 44px
-4. Test with different screen orientations
-
-### Debug Mode
-Enable verbose logging in the build script:
+### Script Options
 ```bash
-# Add debug flag to build script
-DEBUG=1 ./build.sh
-```
+# Master pipeline options
+./master-build.sh --help
+./master-build.sh --build-only
 
-### Log Files
-Build logs are output to console. For persistent logging:
-```bash
-./build.sh 2>&1 | tee build.log
+# Individual scripts
+./build.sh    # Build only
+./deploy.sh   # Deploy only (requires existing build)
 ```
 
 ## 🤝 Contributing
 
-### Development Setup
+### Development Setup v3
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+3. Test with `./master-build.sh --build-only`
+4. Submit a pull request
 
 ### Code Style
 - **Python**: Follow PEP 8 guidelines
 - **JavaScript**: Use modern ES6+ features
 - **CSS**: Use CSS custom properties for theming
-- **HTML**: Semantic markup with accessibility in mind
-
-### Commit Messages
-Use conventional commit format:
-```
-feat: add new album categorization logic
-fix: resolve mobile responsive issues
-docs: update installation instructions
-style: improve CSS organization
-```
+- **Shell**: Follow shellcheck recommendations
 
 ## 📄 License
 
@@ -377,6 +361,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - **Google Sheets API**: Data source integration
 - **Apple Music**: Embedded player functionality
 - **Spotify**: Rich preview embeds
+- **Git Subtree**: Safe deployment methodology
 - **Modern Web Standards**: CSS Grid, Intersection Observer, and more
 
 ## 📞 Support
@@ -391,4 +376,7 @@ For issues, questions, or contributions:
 
 **Built with ❤️ by LUFS Audio**  
 *Showcasing music discovery through beautiful, functional design*
+
+**Version**: 3.0  
+**Enhanced**: Safe Git deployment, master pipeline, minimal favicon
 

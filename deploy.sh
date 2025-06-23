@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Album du Jour Git Deployment Script
-# Handles Git workflow for deploying the built website
+# Album du Jour Git Deployment Script v3
+# Uses git subtree split for safe deployment (inspired by sync_obsidian-to-hugo.sh)
 
 set -euo pipefail # Exit on any error, undefined variable, or pipe failure
 
@@ -21,7 +21,6 @@ readonly BUILD_DIR="$WEBSITE_DIR/build"
 
 # Global variables
 ORIGINAL_BRANCH=""
-TEMP_BACKUP_DIR=""
 CLEANUP_NEEDED=false
 
 # Logging functions
@@ -57,25 +56,18 @@ cleanup() {
     if [ "$CLEANUP_NEEDED" = true ]; then
         log_info "Performing cleanup..."
         
-        # Clean up any uncommitted changes on build branch
-        local current_branch
-        current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-        if [ "$current_branch" = "build" ]; then
-            log_info "Cleaning up build branch state..."
-            git reset --hard HEAD 2>/dev/null || true
-            git clean -fd 2>/dev/null || true
+        # Clean up temporary deployment branch if it exists
+        if git branch --list | grep -q 'build-deploy'; then
+            git branch -D build-deploy 2>/dev/null || true
+            log_success "Cleaned up temporary deployment branch"
         fi
         
         # Return to original branch if we changed it
+        local current_branch
+        current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
         if [ -n "$ORIGINAL_BRANCH" ] && [ "$ORIGINAL_BRANCH" != "$current_branch" ]; then
             log_info "Returning to original branch: $ORIGINAL_BRANCH"
             git checkout "$ORIGINAL_BRANCH" 2>/dev/null || log_warning "Could not return to original branch"
-        fi
-        
-        # Clean up temporary backup
-        if [ -n "$TEMP_BACKUP_DIR" ] && [ -d "$TEMP_BACKUP_DIR" ]; then
-            rm -rf "$TEMP_BACKUP_DIR"
-            log_success "Temporary backup cleaned up"
         fi
     fi
     
@@ -122,13 +114,57 @@ validate_environment() {
     fi
     log_success "Build appears complete"
     
-    # Check git status
-    if ! git diff-index --quiet HEAD --; then
-        log_warning "Working directory has uncommitted changes"
-        log_info "These will be committed to main branch"
-    else
-        log_success "Working directory is clean"
+    # Check for remote origin
+    if ! git remote | grep -q 'origin'; then
+        log_error "No 'origin' remote found. Please add a remote repository."
+        log_info "Example: git remote add origin https://github.com/username/repository.git"
+        exit 1
     fi
+    log_success "Git remote 'origin' found"
+    
+    # Verify no credentials in build directory
+    verify_build_security
+}
+
+verify_build_security() {
+    log_step "Verifying no credentials in build directory..."
+    
+    # Define patterns for credential files and sensitive content
+    local credential_patterns=(
+        "concrete-spider-446700-f9-*.json"
+        "concrete-spider-*.json"
+        "temp_credentials.json"
+        "musickit"
+        "temp_musickit"
+        "*.key"
+        "*.pem"
+        "*.p8"
+        ".env"
+    )
+    
+    local found_credentials=false
+    
+    for pattern in "${credential_patterns[@]}"; do
+        if find "$BUILD_DIR" -name "$pattern" -type f -o -name "$pattern" -type d 2>/dev/null | grep -q .; then
+            log_error "Found sensitive files/directories in build: $pattern"
+            find "$BUILD_DIR" -name "$pattern" -type f -o -name "$pattern" -type d 2>/dev/null | head -5
+            found_credentials=true
+        fi
+    done
+    
+    # Additional check for sensitive content in files
+    if grep -r "concrete-spider" "$BUILD_DIR" 2>/dev/null | head -1; then
+        log_error "Found credential references in build files"
+        found_credentials=true
+    fi
+    
+    if [ "$found_credentials" = true ]; then
+        log_error "SECURITY VIOLATION: Credentials found in build directory!"
+        log_error "Please run ./build.sh again to regenerate clean build"
+        exit 1
+    fi
+    
+    log_success "✓ Security verification passed - no credentials found in build"
 }
 
 commit_source_changes() {
@@ -144,7 +180,7 @@ commit_source_changes() {
     git add .
     
     # Check if there are changes to commit
-    if git diff-index --quiet HEAD --; then
+    if git diff --cached --quiet; then
         log_info "No source changes to commit"
         return 0
     fi
@@ -152,289 +188,72 @@ commit_source_changes() {
     # Commit changes
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    git commit -m "Enhanced Album du Jour website v2 - $timestamp
+    git commit -m "Enhanced Album du Jour website v3 - $timestamp
 
-- Simplified design with clean album cards
-- LUFS brand colors with subtle background animation
-- Spotify embeds provide natural color accents
-- Abstract vinyl record favicon (no text)
+- Fixed Git deployment using subtree split
+- Minimal abstract favicon design
+- Improved embed functionality
 - Modular build and deployment scripts
-- Improved credential security (external paths only)
-- Enhanced responsive design and accessibility"
+- Enhanced security with external credentials"
     
     log_success "Source changes committed to main"
 }
 
-create_safe_backup() {
-    log_header "💾 Creating Safety Backup"
+push_main_branch() {
+    log_header "🚀 Pushing Main Branch"
     
-    # Create temporary backup directory
-    TEMP_BACKUP_DIR=$(mktemp -d)
-    log_info "Creating backup in: $TEMP_BACKUP_DIR"
-    
-    # Copy build files to backup
-    cp -r "$BUILD_DIR" "$TEMP_BACKUP_DIR/"
-    
-    # Verify backup
-    if [ ! -f "$TEMP_BACKUP_DIR/build/index.html" ]; then
-        log_error "Backup verification failed"
-        exit 1
+    # Make sure we're on main branch
+    if [ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]; then
+        git checkout main
     fi
     
-    log_success "Safety backup created and verified"
-}
-
-create_clean_build_branch() {
-    log_header "🌿 Creating Clean Build Branch"
-    
-    # Check if build branch exists remotely and delete it
-    if git ls-remote --heads origin build | grep -q build; then
-        log_step "Deleting remote build branch..."
-        git push origin --delete build 2>/dev/null || log_warning "Could not delete remote build branch"
-    fi
-    
-    # Check if build branch exists locally and delete it
-    if git show-ref --verify --quiet refs/heads/build; then
-        log_step "Deleting local build branch..."
-        git branch -D build 2>/dev/null || true
-    fi
-    
-    # Create a completely new orphan branch (no history from main)
-    log_step "Creating fresh orphan build branch..."
-    git checkout --orphan build
-    
-    # Remove all files from the new branch (they're still staged from main)
-    log_step "Clearing all files from build branch..."
-    git rm -rf . 2>/dev/null || true
-    
-    # Clean any remaining untracked files
-    git clean -fd 2>/dev/null || true
-    
-    # Verify we have a clean slate
-    if [ "$(ls -A . 2>/dev/null | wc -l)" -ne 0 ]; then
-        log_error "Build branch is not clean after reset"
-        ls -la
-        exit 1
-    fi
-    
-    log_success "Clean orphan build branch created"
-}
-
-setup_build_branch() {
-    log_header "🔧 Setting Up Build Branch"
-    
-    # Create security-focused gitignore FIRST
-    log_step "Setting up build branch .gitignore..."
-    cat > .gitignore << 'EOF'
-# Credentials and sensitive files - NEVER commit these
-concrete-spider-446700-f9-*.json
-concrete-spider-*.json
-musickit/
-temp_musickit/
-temp_credentials.json
-*.key
-*.pem
-*.p8
-.env
-.env.*
-
-# Build tools and development files - shouldn't be in build branch
-build_music_site.py
-build.sh
-deploy.sh
-venv/
-requirements.txt
-__pycache__/
-*.pyc
-*.pyo
-
-# OS and editor files
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-
-# Development files
-node_modules/
-.git/
-EOF
-    log_success "Build branch .gitignore configured"
-    
-    # Copy ONLY web files from backup (whitelist approach for maximum security)
-    log_step "Copying web files to build branch..."
-    
-    # Define whitelist of files to copy
-    local web_files=(
-        "index.html"
-        "styles.css"
-        "scripts.js"
-        "README.md"
-    )
-    
-    # Copy main web files
-    for file in "${web_files[@]}"; do
-        if [ -f "$TEMP_BACKUP_DIR/build/$file" ]; then
-            cp "$TEMP_BACKUP_DIR/build/$file" .
-            log_info "✓ Copied $file"
-        else
-            log_warning "⚠ File not found: $file"
-        fi
-    done
-    
-    # Copy assets directory (web assets only)
-    if [ -d "$TEMP_BACKUP_DIR/build/assets" ]; then
-        cp -r "$TEMP_BACKUP_DIR/build/assets" .
-        log_info "✓ Copied assets directory"
-        
-        # List assets for verification
-        if [ -d "assets" ]; then
-            local asset_count
-            asset_count=$(find assets -type f | wc -l | tr -d ' ')
-            log_info "  → $asset_count asset files copied"
-        fi
-    fi
-    
-    # Verify deployment
-    if [ ! -f "index.html" ]; then
-        log_error "Deployment verification failed: index.html not found in build branch"
-        exit 1
-    fi
-    
-    log_success "Build branch setup completed"
-}
-
-verify_build_security() {
-    log_header "🔒 Security Verification"
-    
-    log_step "Verifying no credentials in build branch..."
-    
-    # Define patterns for credential files and sensitive content
-    local credential_patterns=(
-        "concrete-spider-446700-f9-*.json"
-        "concrete-spider-*.json"
-        "temp_credentials.json"
-        "musickit"
-        "temp_musickit"
-        "*.key"
-        "*.pem"
-        "*.p8"
-        ".env"
-        "build_music_site.py"
-        "build.sh"
-        "deploy.sh"
-        "venv"
-    )
-    
-    local found_credentials=false
-    
-    for pattern in "${credential_patterns[@]}"; do
-        if find . -name "$pattern" -type f -o -name "$pattern" -type d 2>/dev/null | grep -q .; then
-            log_error "Found sensitive files/directories matching pattern: $pattern"
-            find . -name "$pattern" -type f -o -name "$pattern" -type d 2>/dev/null | head -5
-            found_credentials=true
-        fi
-    done
-    
-    # Additional check for sensitive content in files
-    if grep -r "concrete-spider" . 2>/dev/null | grep -v ".gitignore" | head -1; then
-        log_error "Found credential references in files"
-        found_credentials=true
-    fi
-    
-    if [ "$found_credentials" = true ]; then
-        log_error "SECURITY VIOLATION: Credentials or build tools found in build branch!"
-        log_error "Aborting deployment to prevent credential exposure"
-        exit 1
-    fi
-    
-    # Show what's actually in the build branch
-    log_info "Build branch contents:"
-    ls -la
-    
-    # Show file count and sizes
-    local total_files
-    total_files=$(find . -type f | wc -l | tr -d ' ')
-    local total_size
-    total_size=$(du -sh . 2>/dev/null | cut -f1 || echo "unknown")
-    
-    log_info "Total files: $total_files"
-    log_info "Total size: $total_size"
-    
-    log_success "✓ Security verification passed - no credentials found"
-}
-
-commit_build_branch() {
-    log_header "📦 Committing Build Branch"
-    
-    # Add all web files
-    git add .
-    
-    # Check if there are changes to commit
-    if git diff-index --quiet HEAD -- 2>/dev/null; then
-        log_info "No changes to commit in build branch"
-        return 0
-    fi
-    
-    # Commit build files with detailed message
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    git commit -m "Deploy enhanced Album du Jour website v2 - $timestamp
-
-Features:
-- Simplified design with clean album cards
-- LUFS brand colors with subtle background animation
-- Spotify embeds provide natural color accents
-- Abstract vinyl record favicon (no text)
-- Collapsible sections with localStorage persistence
-- Responsive design for all devices
-- Lazy loading for music embeds
-- Improved accessibility and performance
-
-Build info:
-- Generated from enhanced Python build script v2
-- Security verified - no credentials included
-- Modular build and deployment process
-- Optimized for static hosting deployment"
-    
-    log_success "Build files committed to build branch"
-}
-
-push_to_remote() {
-    log_header "🚀 Pushing to Remote Repository"
-    
-    # Push main branch first
-    log_step "Pushing main branch..."
-    git checkout main
-    
+    log_step "Pushing main branch to origin..."
     if git push origin main; then
         log_success "Main branch pushed successfully"
     else
-        log_warning "Failed to push main branch (may be up to date)"
+        log_warning "Failed to push main branch (may be up to date or need to pull first)"
+        log_info "You may need to run: git pull origin main"
+    fi
+}
+
+deploy_build_branch() {
+    log_header "🌿 Deploying Build Branch using Subtree Split"
+    
+    # Make sure we're on main branch
+    if [ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]; then
+        git checkout main
     fi
     
-    # Push build branch
-    log_step "Pushing build branch..."
-    git checkout build
+    CLEANUP_NEEDED=true
     
-    # Since we created a fresh orphan branch, we need to force push
-    if git push --force-with-lease origin build 2>/dev/null; then
-        log_success "Build branch pushed successfully with force-with-lease"
+    # Clean up any existing temporary deployment branch
+    if git branch --list | grep -q 'build-deploy'; then
+        log_step "Cleaning up existing temporary deployment branch..."
+        git branch -D build-deploy 2>/dev/null || true
+    fi
+    
+    # Create subtree split for build directory
+    log_step "Creating subtree split for build directory..."
+    if ! git subtree split --prefix build -b build-deploy; then
+        log_error "Subtree split failed. Make sure the build directory is committed."
+        log_info "Try running: git add . && git commit -m 'Add build files'"
+        exit 1
+    fi
+    log_success "Subtree split created successfully"
+    
+    # Push the build-deploy branch to origin as 'build' branch
+    log_step "Pushing build branch to origin..."
+    if git push origin build-deploy:build --force; then
+        log_success "Build branch pushed successfully"
     else
-        log_warning "Force-with-lease failed, trying regular force push..."
-        if git push --force origin build; then
-            log_success "Build branch force-pushed successfully"
-        else
-            log_error "Failed to push build branch"
-            exit 1
-        fi
+        log_error "Failed to push build branch"
+        exit 1
     fi
     
-    # Show remote URLs for reference
-    log_info "Repository URLs:"
-    git remote -v | while read -r line; do
-        log_info "  $line"
-    done
+    # Clean up temporary branch
+    log_step "Cleaning up temporary deployment branch..."
+    git branch -D build-deploy
+    log_success "Temporary deployment branch cleaned up"
 }
 
 display_summary() {
@@ -443,34 +262,37 @@ display_summary() {
     # Return to original branch for summary
     git checkout "$ORIGINAL_BRANCH" 2>/dev/null || true
     
-    echo -e "${GREEN}🎉 Album du Jour Enhanced Deployment Complete!${NC}"
+    echo -e "${GREEN}🎉 Album du Jour Enhanced Deployment v3 Complete!${NC}"
     echo ""
     echo -e "${CYAN}📁 Local Build Directory:${NC} $BUILD_DIR"
     echo -e "${CYAN}🌐 Local Preview:${NC} file://$BUILD_DIR/index.html"
     echo ""
     echo -e "${CYAN}📋 Git Branches:${NC}"
     echo -e "   ${BLUE}main${NC}  - Source code with enhancements"
-    echo -e "   ${BLUE}build${NC} - Deployable website files"
+    echo -e "   ${BLUE}build${NC} - Deployable website files (subtree split)"
     echo ""
-    echo -e "${CYAN}🚀 Deployment Ready:${NC}"
-    echo -e "   The build branch contains only web files"
-    echo -e "   No credentials or build tools included"
-    echo -e "   Ready for static hosting deployment"
+    echo -e "${CYAN}🚀 Deployment Method:${NC}"
+    echo -e "   Uses git subtree split for safe deployment"
+    echo -e "   Build branch contains only website files"
+    echo -e "   No credentials or source code included"
     echo ""
-    echo -e "${CYAN}✨ New Features v2:${NC}"
-    echo -e "   • Simplified design with clean album cards"
-    echo -e "   • LUFS brand colors with subtle background"
-    echo -e "   • Spotify embeds provide natural color accents"
-    echo -e "   • Abstract vinyl record favicon (no text)"
-    echo -e "   • Modular build and deployment scripts"
-    echo -e "   • Enhanced credential security"
+    echo -e "${CYAN}✨ New Features v3:${NC}"
+    echo -e "   • Fixed Git deployment using subtree split"
+    echo -e "   • Minimal abstract favicon design"
+    echo -e "   • Enhanced embed functionality"
+    echo -e "   • Improved security verification"
+    echo -e "   • Repeatable deployment process"
+    echo ""
+    echo -e "${CYAN}🌐 Hosting:${NC}"
+    echo -e "   Your hosting provider should serve from the 'build' branch"
+    echo -e "   The build branch is now ready for static hosting"
     echo ""
 }
 
 # Main execution
 main() {
-    log_header "🚀 Album du Jour Git Deployment v2"
-    echo -e "${PURPLE}Deploying built website to Git repository${NC}"
+    log_header "🚀 Album du Jour Git Deployment v3"
+    echo -e "${PURPLE}Safe deployment using git subtree split${NC}"
     echo ""
     
     # Change to website directory
@@ -479,12 +301,8 @@ main() {
     # Execute all steps
     validate_environment
     commit_source_changes
-    create_safe_backup
-    create_clean_build_branch
-    setup_build_branch
-    verify_build_security
-    commit_build_branch
-    push_to_remote
+    push_main_branch
+    deploy_build_branch
     
     # Display summary
     display_summary
