@@ -2,7 +2,7 @@
 """
 Enhanced Music Library Website Builder
 Reads from Google Sheets and generates a static website with embedded music players
-Enhanced with timestamp-based categorization and truly responsive embed sizing
+Enhanced with timestamp-based categorization and properly sized responsive embeds
 """
 
 import gspread
@@ -364,11 +364,11 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card with larger, more prominent sizing"""
+        """Generate HTML for a single album card with properly sized embeds"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
-            # For current music (album du jour), show embeds prominently
+            # For current music (album du jour), show embeds prominently with proper container sizing
             if album['spotify_embed']:
                 embed_html = f"""
                 <div class="embed-container current-embed-container">
@@ -400,13 +400,13 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use larger grid embeds
+            # For other sections (Recently Added/Finished), use taller grid embeds for better visibility
             if album['spotify_embed']:
                 embed_html = f"""
                 <div class="embed-container grid-embed-container">
                     <iframe data-src="{album['spotify_embed']}" 
                             width="100%" 
-                            height="280"
+                            height="380"
                             class="dynamic-embed grid-embed spotify-embed lazy-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
@@ -420,7 +420,7 @@ class MusicSiteBuilder:
                 <div class="embed-container grid-embed-container">
                     <iframe data-src="{album['apple_embed']}" 
                             width="100%" 
-                            height="320"
+                            height="420"
                             class="dynamic-embed grid-embed apple-embed lazy-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
@@ -468,50 +468,12 @@ class MusicSiteBuilder:
             </div>
         </div>
         """
-        
-        # Build links
-        links_html = ""
-        if album['apple_link']:
-            links_html += f'<a href="{album["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
-        if album['spotify_link']:
-            links_html += f'<a href="{album["spotify_link"]}" target="_blank" class="music-link spotify">🎵 Spotify</a>'
-        
-        # Format dates
-        date_display = ""
-        if album['date_added']:
-            date_display = f'<span class="date">Added: {self.format_date_display(album["date_added"])}</span>'
-        elif album['date_finished']:
-            date_display = f'<span class="date">Finished: {self.format_date_display(album["date_finished"])}</span>'
-        
-        rating_display = f'<span class="rating">{album["rating"]}</span>' if album['rating'] else ""
-        
-        # Add special styling class for current music
-        card_class = "album-card current-card" if is_current else "album-card"
-        
-        return f"""
-        <div class="{card_class}" data-status="{album['status'].lower()}">
-            <div class="card-header">
-                <h3 class="album-title">{album['album']}</h3>
-                <p class="artist-name">{album['artist']}</p>
-                <div class="card-meta">
-                    {date_display}
-                    {rating_display}
-                </div>
-            </div>
-            
-            {embed_html}
-            
-            <div class="card-links">
-                {links_html}
-            </div>
-        </div>
-        """
     
     def generate_css(self):
-        """Generate CSS with truly dynamic responsive embeds that fill available space"""
-        print("🎨 Generating CSS with dynamic responsive embeds...")
+        """Generate CSS with properly sized embeds and efficient grid layout"""
+        print("🎨 Generating CSS with optimized embed sizing and grid layout...")
         
-        css_content = """/* LUFS Brand Colors and Dynamic Responsive Design */
+        css_content = """/* LUFS Brand Colors and Optimized Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -531,7 +493,7 @@ class MusicSiteBuilder:
     --lufs-gradient: linear-gradient(135deg, var(--lufs-teal), var(--lufs-blue));
     
     /* Layout */
-    --container-max-width: 1400px;
+    --container-max-width: 1600px;
     --container-padding: 2rem;
     --border-radius: 12px;
     --transition: all 0.3s ease;
@@ -609,34 +571,29 @@ body {
 .site-header h1 {
     font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 700;
-    background: var(--lufs-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .title-icon {
-    width: 1em;
-    height: 1em;
-    flex-shrink: 0;
+    width: clamp(2rem, 4vw, 3rem);
+    height: clamp(2rem, 4vw, 3rem);
+    filter: drop-shadow(0 2px 8px rgba(120, 190, 186, 0.3));
 }
 
 .subtitle {
-    color: var(--lufs-teal);
     font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+    margin-bottom: 1rem;
+    opacity: 0.8;
 }
 
 .generation-time {
-    color: rgba(251, 249, 226, 0.7);
     font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    opacity: 0.6;
+    margin-bottom: 2rem;
 }
 
 .stats-badges {
@@ -649,105 +606,106 @@ body {
 .badge {
     padding: 0.5rem 1rem;
     border-radius: 20px;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-size: 0.9rem;
-    transition: var(--transition);
+    border: 1px solid transparent;
 }
 
-.badge:hover {
-    transform: translateY(-2px);
+.badge.current {
+    background: var(--lufs-yellow);
+    color: var(--lufs-black);
 }
 
-.badge.current { 
-    background-color: var(--lufs-yellow); 
-    color: var(--lufs-black); 
+.badge.added {
+    background: var(--lufs-blue);
+    color: var(--lufs-white);
 }
 
-.badge.added { 
-    background-color: var(--lufs-blue); 
-    color: var(--lufs-white); 
+.badge.finished {
+    background: var(--lufs-teal);
+    color: var(--lufs-black);
 }
 
-.badge.finished { 
-    background-color: var(--lufs-teal); 
-    color: var(--lufs-black); 
-}
-
-.badge.total { 
-    background-color: rgba(251, 249, 226, 0.2); 
-    color: var(--lufs-white); 
-    border: 1px solid var(--lufs-white);
+.badge.total {
+    background: transparent;
+    border-color: var(--lufs-white);
+    color: var(--lufs-white);
 }
 
 /* Currently Listening Section */
 .currently-listening {
-    margin-bottom: 3rem;
+    margin-bottom: 4rem;
 }
 
 .currently-listening h2 {
     font-size: 2rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     text-align: center;
-    color: var(--lufs-white);
 }
 
 .album-du-jour {
-    display: flex;
-    justify-content: center;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
-.album-du-jour .album-card {
-    max-width: 600px;
+/* Current embed container - properly sized to contain the embed */
+.current-embed-container {
     width: 100%;
-    background: rgba(251, 249, 226, 0.05);
-    border: 2px solid var(--lufs-teal);
-    box-shadow: 
-        0 0 20px rgba(120, 190, 186, 0.2),
-        0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 660px;
+    margin: 1.5rem auto;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px;
+}
+
+.current-embed-container iframe {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
 }
 
 /* Collapsible Sections */
 .collapsible-section {
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.02);
     overflow: hidden;
-    background: rgba(251, 249, 226, 0.03);
-    border: 1px solid rgba(251, 249, 226, 0.1);
 }
 
 .section-toggle {
     width: 100%;
+    padding: 1.5rem 2rem;
     background: transparent;
     border: none;
-    padding: 1.5rem;
     color: var(--lufs-white);
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1rem;
+    font-size: 1.1rem;
     transition: var(--transition);
-    min-height: 44px; /* Touch-friendly */
 }
 
 .section-toggle:hover {
-    background: rgba(251, 249, 226, 0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .section-toggle h2 {
+    margin: 0;
     font-size: 1.5rem;
-    font-weight: 600;
 }
 
 .count {
-    color: var(--lufs-teal);
-    font-weight: 400;
+    font-weight: normal;
+    opacity: 0.7;
 }
 
 .toggle-icon {
     font-size: 1.2rem;
     transition: transform 0.3s ease;
-    color: var(--lufs-teal);
 }
 
 .section-toggle[aria-expanded="true"] .toggle-icon {
@@ -757,219 +715,121 @@ body {
 .section-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.5s ease;
 }
 
-.section-toggle[aria-expanded="true"] + .section-content {
+.section-content.expanded {
     max-height: none;
+    padding: 2rem;
 }
 
-/* Dynamic Album Grid - Now fills available space */
+/* Optimized Album Grid - Better use of browser window space */
 .album-grid {
     display: grid;
-    gap: 1.5rem;
-    padding: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 1rem;
 }
 
-/* Mobile: Single column, full width */
-@media (max-width: 767px) {
-    .album-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 1rem;
-    }
-}
-
-/* Tablet: Two columns */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .album-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-/* Desktop: Two columns for better visibility */
-@media (min-width: 1024px) and (max-width: 1439px) {
-    .album-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-/* Large Desktop: Three columns */
-@media (min-width: 1440px) {
-    .album-grid {
-        grid-template-columns: 1fr 1fr 1fr;
-    }
-}
-
-/* Ultra-wide: Four columns max */
-@media (min-width: 1920px) {
-    .album-grid {
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-    }
-}
-
-/* Album Cards - Now larger with better proportions */
+/* Album Cards */
 .album-card {
-    background: rgba(251, 249, 226, 0.03);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--border-radius);
     padding: 1.5rem;
-    border: 1px solid rgba(251, 249, 226, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 480px; /* Increased minimum height for better proportions */
 }
 
 .album-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(120, 190, 186, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     border-color: rgba(120, 190, 186, 0.3);
 }
 
+.current-card {
+    background: rgba(231, 178, 37, 0.1);
+    border-color: var(--lufs-yellow);
+}
+
 .card-header {
-    margin-bottom: 1rem;
-    flex-shrink: 0;
+    margin-bottom: 1.5rem;
 }
 
 .album-title {
     font-size: 1.2rem;
     font-weight: 600;
+    margin-bottom: 0.5rem;
     color: var(--lufs-white);
-    margin-bottom: 0.25rem;
-    line-height: 1.3;
 }
 
 .artist-name {
-    color: var(--lufs-teal);
     font-size: 1rem;
+    opacity: 0.8;
     margin-bottom: 0.5rem;
 }
 
 .card-meta {
     display: flex;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.85rem;
-    color: rgba(251, 249, 226, 0.7);
+    opacity: 0.7;
 }
 
-.date {
-    color: var(--lufs-yellow);
-}
-
-.rating {
-    color: var(--lufs-yellow);
-}
-
-/* Dynamic Embed Containers */
-.embed-container {
+/* Grid embed containers - Taller for better visibility */
+.grid-embed-container {
+    width: 100%;
     margin: 1rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
-    flex: 1; /* This makes the embed container grow to fill available space */
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px;
 }
 
-/* Currently Listening Embeds - Large and prominent */
-.current-embed-container {
-    min-height: 450px;
-}
-
-.current-embed-container .dynamic-embed {
-    height: 450px;
-    min-height: 450px;
-}
-
-/* Grid Embeds - Larger for better usability */
-.grid-embed-container {
-    min-height: 280px;
-}
-
-.grid-embed-container .dynamic-embed {
-    height: 280px;
-    min-height: 280px;
-}
-
-/* Dynamic embeds fill their containers */
-.dynamic-embed {
+.grid-embed-container iframe {
     width: 100%;
-    border: none;
-    border-radius: var(--border-radius);
-    flex: 1;
+    display: block;
+    border-radius: 8px;
 }
 
-/* Apple Music gets extra height */
-.apple-embed {
-    height: 320px !important;
-    min-height: 320px !important;
-}
-
-.current-embed-container .apple-embed {
-    height: 500px !important;
-    min-height: 500px !important;
-}
-
-.grid-embed-container .apple-embed {
-    height: 320px !important;
-    min-height: 320px !important;
-}
-
-.no-embed {
-    text-align: center;
-    color: rgba(251, 249, 226, 0.5);
-    padding: 2rem;
-    font-style: italic;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Music Links */
 .card-links {
     display: flex;
     gap: 0.75rem;
     margin-top: 1rem;
-    flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 .music-link {
-    flex: 1;
-    padding: 0.75rem;
-    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
     text-decoration: none;
-    text-align: center;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
     transition: var(--transition);
-    border: 1px solid rgba(251, 249, 226, 0.2);
-    background: rgba(251, 249, 226, 0.05);
+    border: 1px solid transparent;
+}
+
+.music-link.apple {
+    background: var(--lufs-red);
     color: var(--lufs-white);
 }
 
-.music-link:hover {
-    transform: translateY(-1px);
-    border-color: var(--lufs-teal);
-    background: rgba(120, 190, 186, 0.1);
+.music-link.spotify {
+    background: var(--lufs-teal);
+    color: var(--lufs-black);
 }
 
-/* Empty Section */
+.music-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Empty sections */
 .empty-section {
     text-align: center;
-    padding: 3rem 1.5rem;
-    color: rgba(251, 249, 226, 0.6);
-}
-
-.empty-section p {
-    margin-bottom: 0.5rem;
-}
-
-.empty-section .subtitle {
-    font-size: 0.9rem;
-    color: rgba(251, 249, 226, 0.4);
+    padding: 3rem 2rem;
+    opacity: 0.6;
 }
 
 /* Footer */
@@ -977,12 +837,12 @@ body {
     text-align: center;
     margin-top: 4rem;
     padding: 2rem 0;
-    border-top: 1px solid rgba(251, 249, 226, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sheets-link {
     display: inline-block;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     background: var(--lufs-gradient);
     color: var(--lufs-white);
     text-decoration: none;
@@ -994,38 +854,35 @@ body {
 
 .sheets-link:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(120, 190, 186, 0.3);
+    box-shadow: 0 8px 24px rgba(120, 190, 186, 0.3);
 }
 
-.site-footer p {
-    color: rgba(251, 249, 226, 0.7);
-    font-size: 0.9rem;
-}
-
-/* Mobile Specific Adjustments */
-@media (max-width: 767px) {
+/* Responsive Design */
+@media (max-width: 768px) {
     :root {
         --container-padding: 1rem;
     }
     
-    .album-card {
-        min-height: 350px;
+    .album-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
     .current-embed-container {
-        min-height: 300px;
-    }
-    
-    .current-embed-container .dynamic-embed {
-        min-height: 300px;
+        margin: 1rem auto;
+        padding: 6px;
     }
     
     .grid-embed-container {
-        min-height: 180px;
+        padding: 3px;
     }
     
-    .grid-embed-container .dynamic-embed {
-        min-height: 180px;
+    .section-toggle {
+        padding: 1rem 1.5rem;
+    }
+    
+    .section-content.expanded {
+        padding: 1.5rem;
     }
     
     .stats-badges {
@@ -1033,110 +890,63 @@ body {
     }
     
     .badge {
-        font-size: 0.8rem;
         padding: 0.4rem 0.8rem;
-    }
-    
-    .card-links {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .section-toggle {
-        padding: 1rem;
-    }
-    
-    .section-toggle h2 {
-        font-size: 1.2rem;
-    }
-    
-    .site-header h1 {
-        flex-direction: column;
-        gap: 0.25rem;
+        font-size: 0.8rem;
     }
 }
 
-@media (max-width: 480px) {
-    .album-card {
-        padding: 1rem;
-        min-height: 320px;
-    }
-    
-    .site-header {
-        margin-bottom: 2rem;
-        padding: 1rem 0;
-    }
-    
-    .current-embed-container {
-        min-height: 280px;
-    }
-    
-    .grid-embed-container {
-        min-height: 160px;
+@media (min-width: 1200px) {
+    .album-grid {
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 2.5rem;
     }
 }
 
-/* Touch device optimizations */
-@media (hover: none) {
-    .album-card:hover {
-        transform: none;
-    }
-    
-    .album-card:active {
-        transform: scale(0.98);
-    }
-    
-    .music-link:hover {
-        transform: none;
-    }
-    
-    .music-link:active {
-        transform: scale(0.95);
+@media (min-width: 1600px) {
+    .album-grid {
+        grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 3rem;
     }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    :root {
-        --lufs-white: #ffffff;
-        --lufs-black: #000000;
-    }
-    
-    .album-card {
-        border: 2px solid var(--lufs-white);
-    }
+/* Lazy loading placeholder */
+.lazy-embed[data-src] {
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Reduced motion support */
+.lazy-embed[data-src]::before {
+    content: "Loading...";
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* No embed fallback */
+.no-embed {
+    text-align: center;
+    padding: 2rem;
+    opacity: 0.5;
+    font-style: italic;
+}
+
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-    
     .animated-background::before {
         animation: none;
     }
+    
+    * {
+        transition: none !important;
+    }
 }
 
-/* Scrollbar styling for embed containers */
-.embed-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.embed-container::-webkit-scrollbar-track {
-    background: rgba(251, 249, 226, 0.1);
-    border-radius: 4px;
-}
-
-.embed-container::-webkit-scrollbar-thumb {
-    background: var(--lufs-teal);
-    border-radius: 4px;
-}
-
-.embed-container::-webkit-scrollbar-thumb:hover {
-    background: var(--lufs-blue);
+/* Focus styles for accessibility */
+.section-toggle:focus,
+.music-link:focus,
+.sheets-link:focus {
+    outline: 2px solid var(--lufs-teal);
+    outline-offset: 2px;
 }
 """
         
@@ -1144,430 +954,191 @@ body {
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(css_content)
         
-        print(f"✅ CSS generated with dynamic responsive embeds: {output_file}")
+        print(f"✅ CSS generated: {output_file}")
     
     def generate_javascript(self):
-        """Generate JavaScript for interactions with dynamic responsive embeds"""
-        print("⚡ Generating JavaScript with dynamic responsive embed support...")
+        """Generate JavaScript for collapsible sections and lazy loading"""
+        print("⚡ Generating JavaScript...")
         
-        js_content = """// Album du Jour - Interactive Functionality with Dynamic Responsive Embeds
-class AlbumSections {
-    constructor() {
-        this.initializeCollapsibleSections();
-        this.initializeLazyLoading();
-        this.initializeAccessibility();
-        this.initializeDynamicEmbeds();
-    }
+        js_content = """// Album du Jour - Enhanced Interactions
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCollapsibleSections();
+    initializeLazyLoading();
+    initializeAccessibility();
+});
+
+function initializeCollapsibleSections() {
+    const toggles = document.querySelectorAll('.section-toggle');
     
-    initializeCollapsibleSections() {
-        const toggleButtons = document.querySelectorAll('.section-toggle');
-        
-        toggleButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                this.toggleSection(e.currentTarget);
-            });
-        });
-        
-        // Restore saved states
-        this.restoreSectionStates();
-    }
-    
-    toggleSection(button) {
-        const section = button.closest('.collapsible-section');
-        const content = section.querySelector('.section-content');
-        const icon = section.querySelector('.toggle-icon');
-        const isExpanded = button.getAttribute('aria-expanded') === 'true';
-        
-        // Toggle expanded state
-        button.setAttribute('aria-expanded', !isExpanded);
-        
-        if (!isExpanded) {
-            // Expanding
-            content.style.maxHeight = content.scrollHeight + 'px';
-            icon.style.transform = 'rotate(180deg)';
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const section = this.closest('.collapsible-section');
+            const content = section.querySelector('.section-content');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
             
-            // Load any lazy embeds in this section
-            this.loadLazyEmbedsInSection(section);
+            // Toggle state
+            this.setAttribute('aria-expanded', !isExpanded);
             
-            // Trigger dynamic embed resize after content is visible
-            setTimeout(() => {
-                this.resizeDynamicEmbeds(section);
-            }, 300);
-        } else {
-            // Collapsing
-            content.style.maxHeight = '0';
-            icon.style.transform = 'rotate(0deg)';
-        }
-        
-        // Save state to localStorage
-        localStorage.setItem(`section-${section.dataset.section}`, !isExpanded);
-    }
-    
-    restoreSectionStates() {
-        const sections = document.querySelectorAll('.collapsible-section');
-        sections.forEach(section => {
-            const savedState = localStorage.getItem(`section-${section.dataset.section}`);
-            if (savedState === 'true') {
-                const button = section.querySelector('.section-toggle');
-                // Delay to ensure DOM is ready
-                setTimeout(() => {
-                    this.toggleSection(button);
-                }, 100);
+            if (!isExpanded) {
+                content.classList.add('expanded');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                
+                // Save state
+                localStorage.setItem(`section-${section.dataset.section}`, 'expanded');
+                
+                // Load lazy embeds when section is expanded
+                loadLazyEmbedsInSection(section);
+            } else {
+                content.classList.remove('expanded');
+                content.style.maxHeight = '0';
+                
+                // Save state
+                localStorage.setItem(`section-${section.dataset.section}`, 'collapsed');
             }
         });
-    }
+        
+        // Restore saved state
+        const section = toggle.closest('.collapsible-section');
+        const savedState = localStorage.getItem(`section-${section.dataset.section}`);
+        
+        if (savedState === 'expanded') {
+            // Simulate click to expand
+            setTimeout(() => toggle.click(), 100);
+        }
+    });
+}
+
+function initializeLazyLoading() {
+    // Load embeds that are currently visible
+    loadVisibleEmbeds();
     
-    initializeLazyLoading() {
-        // Intersection Observer for lazy loading embeds
+    // Set up intersection observer for lazy loading
+    if ('IntersectionObserver' in window) {
         const embedObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    this.loadEmbed(entry.target);
+                    loadEmbed(entry.target);
                     embedObserver.unobserve(entry.target);
                 }
             });
-        }, { 
-            rootMargin: '100px',
-            threshold: 0.1
+        }, {
+            rootMargin: '50px'
         });
         
         // Observe all lazy embeds
-        document.querySelectorAll('.lazy-embed').forEach(iframe => {
-            embedObserver.observe(iframe);
+        document.querySelectorAll('.lazy-embed[data-src]').forEach(embed => {
+            embedObserver.observe(embed);
         });
+    } else {
+        // Fallback for browsers without IntersectionObserver
+        document.querySelectorAll('.lazy-embed[data-src]').forEach(loadEmbed);
     }
-    
-    loadEmbed(iframe) {
-        if (iframe.dataset.src) {
-            iframe.src = iframe.dataset.src;
-            iframe.removeAttribute('data-src');
-            iframe.classList.remove('lazy-embed');
-            
-            // Add loading indicator
-            iframe.style.opacity = '0';
-            iframe.addEventListener('load', () => {
-                iframe.style.transition = 'opacity 0.3s ease';
-                iframe.style.opacity = '1';
-                
-                // Resize embed after load
-                this.resizeSingleEmbed(iframe);
-            });
-        }
+}
+
+function loadVisibleEmbeds() {
+    // Load embeds in currently visible sections (like Currently Listening)
+    document.querySelectorAll('.currently-listening .lazy-embed[data-src]').forEach(loadEmbed);
+}
+
+function loadLazyEmbedsInSection(section) {
+    // Load all lazy embeds in a specific section
+    section.querySelectorAll('.lazy-embed[data-src]').forEach(loadEmbed);
+}
+
+function loadEmbed(embed) {
+    const src = embed.getAttribute('data-src');
+    if (src) {
+        embed.src = src;
+        embed.removeAttribute('data-src');
+        embed.classList.remove('lazy-embed');
     }
-    
-    loadLazyEmbedsInSection(section) {
-        const lazyEmbeds = section.querySelectorAll('.lazy-embed');
-        lazyEmbeds.forEach(iframe => {
-            this.loadEmbed(iframe);
-        });
-    }
-    
-    initializeDynamicEmbeds() {
-        // Handle responsive embed sizing on window resize
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                this.resizeDynamicEmbeds();
-            }, 150);
-        });
-        
-        // Initial resize after page load
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                this.resizeDynamicEmbeds();
-            }, 500);
-        });
-        
-        // Initial adjustment
-        this.resizeDynamicEmbeds();
-    }
-    
-    resizeDynamicEmbeds(container = document) {
-        const embedContainers = container.querySelectorAll('.embed-container');
-        
-        embedContainers.forEach(embedContainer => {
-            const iframe = embedContainer.querySelector('.dynamic-embed');
-            if (iframe) {
-                this.resizeSingleEmbed(iframe);
-            }
-        });
-    }
-    
-    resizeSingleEmbed(iframe) {
-        const embedContainer = iframe.closest('.embed-container');
-        if (!embedContainer) return;
-        
-        const albumCard = iframe.closest('.album-card');
-        if (!albumCard) return;
-        
-        // Calculate available space
-        const cardHeight = albumCard.offsetHeight;
-        const header = albumCard.querySelector('.card-header');
-        const links = albumCard.querySelector('.card-links');
-        
-        const headerHeight = header ? header.offsetHeight : 0;
-        const linksHeight = links ? links.offsetHeight : 0;
-        const padding = 32; // Account for card padding and margins
-        
-        // Calculate ideal embed height
-        const availableHeight = cardHeight - headerHeight - linksHeight - padding;
-        const minHeight = iframe.classList.contains('current-embed') ? 300 : 160;
-        const maxHeight = iframe.classList.contains('current-embed') ? 500 : 300;
-        
-        const idealHeight = Math.max(minHeight, Math.min(maxHeight, availableHeight));
-        
-        // Apply the calculated height
-        embedContainer.style.height = idealHeight + 'px';
-        iframe.style.height = idealHeight + 'px';
-        
-        // Log for debugging (remove in production)
-        console.log(`Resized embed: ${idealHeight}px (card: ${cardHeight}px, available: ${availableHeight}px)`);
-    }
-    
-    initializeAccessibility() {
-        // Keyboard navigation for collapsible sections
-        document.addEventListener('keydown', (e) => {
+}
+
+function initializeAccessibility() {
+    // Add keyboard navigation for collapsible sections
+    document.querySelectorAll('.section-toggle').forEach(toggle => {
+        toggle.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
-                if (e.target.classList.contains('section-toggle')) {
-                    e.preventDefault();
-                    this.toggleSection(e.target);
-                }
-            }
-        });
-        
-        // Focus management
-        const toggleButtons = document.querySelectorAll('.section-toggle');
-        toggleButtons.forEach(button => {
-            button.addEventListener('focus', () => {
-                button.style.outline = '2px solid var(--lufs-teal)';
-                button.style.outlineOffset = '2px';
-            });
-            
-            button.addEventListener('blur', () => {
-                button.style.outline = 'none';
-            });
-        });
-    }
-}
-
-// Smooth scrolling for anchor links
-function initializeSmoothScrolling() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                e.preventDefault();
+                this.click();
             }
         });
     });
-}
-
-// Performance monitoring
-function initializePerformanceMonitoring() {
-    // Log page load time
-    window.addEventListener('load', () => {
-        const loadTime = performance.now();
-        console.log(`Album du Jour loaded in ${Math.round(loadTime)}ms`);
-        
-        // Track largest contentful paint
-        if ('PerformanceObserver' in window) {
-            const observer = new PerformanceObserver((list) => {
-                const entries = list.getEntries();
-                const lastEntry = entries[entries.length - 1];
-                console.log(`LCP: ${Math.round(lastEntry.startTime)}ms`);
-            });
-            observer.observe({ entryTypes: ['largest-contentful-paint'] });
-        }
-    });
-}
-
-// Error handling for embeds
-function initializeEmbedErrorHandling() {
-    document.addEventListener('error', (e) => {
-        if (e.target.tagName === 'IFRAME') {
-            const iframe = e.target;
-            const container = iframe.closest('.embed-container');
-            if (container) {
-                container.innerHTML = '<p class="no-embed">Embed failed to load</p>';
-            }
-        }
-    }, true);
-}
-
-// Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎵 Album du Jour - Initializing with dynamic responsive embeds...');
     
-    try {
-        new AlbumSections();
-        initializeSmoothScrolling();
-        initializePerformanceMonitoring();
-        initializeEmbedErrorHandling();
-        
-        console.log('✅ Album du Jour - Initialized successfully');
-    } catch (error) {
-        console.error('❌ Album du Jour - Initialization error:', error);
-    }
-});
+    // Add focus management
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            document.body.classList.add('keyboard-navigation');
+        }
+    });
+    
+    document.addEventListener('mousedown', function() {
+        document.body.classList.remove('keyboard-navigation');
+    });
+}
+
+// Utility function to handle window resize
+window.addEventListener('resize', debounce(function() {
+    // Recalculate expanded section heights
+    document.querySelectorAll('.section-content.expanded').forEach(content => {
+        content.style.maxHeight = content.scrollHeight + 'px';
+    });
+}, 250));
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 """
         
         output_file = self.output_dir / "scripts.js"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(js_content)
         
-        print(f"✅ JavaScript generated with dynamic responsive embed support: {output_file}")
+        print(f"✅ JavaScript generated: {output_file}")
     
-    def generate_build_readme(self):
-        """Generate README for build folder"""
-        print("📝 Generating build README...")
-        
-        readme_content = """# Album du Jour - Build Files
-
-This directory contains the generated static website files for Album du Jour.
-
-## Generated Files
-
-- `index.html` - Main website page with dynamic responsive design
-- `styles.css` - Stylesheet with LUFS branding and flexible layout system
-- `scripts.js` - Interactive functionality with intelligent embed resizing
-- `assets/` - Images and static assets including favicon
-- `favicon.svg` - Clean, abstract vinyl record favicon
-
-## Features
-
-### Dynamic Responsive Layout
-- **Mobile**: Single column layout with touch-optimized embeds
-- **Tablet**: Two-column grid with balanced sizing
-- **Desktop**: Three-column layout with larger embeds
-- **Large Desktop**: Four-column grid maximizing screen real estate
-- **Ultra-wide**: Five columns for maximum content density
-
-### Intelligent Embed Sizing
-- **CSS Flexbox**: Cards automatically fill available grid space
-- **JavaScript Calculation**: Embeds resize based on actual card dimensions
-- **Dynamic Heights**: No hardcoded sizes - embeds adapt to content
-- **Minimum/Maximum Constraints**: Ensures usability across all screen sizes
-
-### Content Organization
-- **Currently Listening**: Prominently displayed with large embed
-- **Recently Added**: Last 20 albums (collapsible, sorted by date added)
-- **Recently Finished**: Last 20 albums (collapsible, sorted by date finished)
-
-### Interactive Features
-- LUFS brand colors with animated background
-- Collapsible sections with localStorage persistence
-- Lazy loading for performance optimization
-- Accessibility features and keyboard navigation
-- Touch-friendly interactions on mobile devices
-
-### Music Integration
-- Apple Music and Spotify embeds with optimal sizing
-- Direct links to music services
-- Error handling for failed embeds
-- Service-specific height adjustments (Apple Music gets extra space)
-
-## Technical Implementation
-
-### CSS Grid System
-```css
-/* Mobile: 1 column */
-@media (max-width: 767px) {
-    .album-grid { grid-template-columns: 1fr; }
-}
-
-/* Tablet: 2 columns */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .album-grid { grid-template-columns: 1fr 1fr; }
-}
-
-/* Desktop: 3 columns */
-@media (min-width: 1024px) and (max-width: 1439px) {
-    .album-grid { grid-template-columns: 1fr 1fr 1fr; }
-}
-
-/* Large Desktop: 4 columns */
-@media (min-width: 1440px) {
-    .album-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
-}
-```
-
-### Dynamic Embed Sizing
-```javascript
-// JavaScript calculates optimal embed height based on:
-// - Album card height
-// - Header and footer space
-// - Minimum/maximum constraints
-// - Screen size considerations
-```
-
-## Deployment
-
-Ready for deployment to any static hosting service:
-
-- **Netlify**: Direct folder upload or Git integration
-- **Vercel**: Connect to repository, automatic deployments
-- **GitHub Pages**: Serve from build branch
-- **Traditional Hosting**: Upload files via FTP/SFTP
-
-## Performance Features
-
-- **Lazy Loading**: Embeds load only when visible
-- **Efficient Resizing**: Debounced resize calculations
-- **Minimal JavaScript**: Lightweight interactive enhancements
-- **CSS-First Approach**: Layout handled by CSS for best performance
-
----
-
-**Generated on:** """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """
-**Source:** Album du Jour Dynamic Responsive Build System  
-**Version:** 2.2 - Dynamic Responsive Layout  
-"""
-        
-        output_file = self.output_dir / "README.md"
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(readme_content)
-        
-        print(f"✅ Build README generated: {output_file}")
-    
-    def run(self):
-        """Main execution method"""
+    def build(self):
+        """Main build process"""
         try:
-            print("🚀 Starting Album du Jour Enhanced Build Process v2.2 with Dynamic Responsive Layout...")
+            print("🚀 Starting Album du Jour website build...")
             
-            # Setup temporary credentials from alternative paths
+            # Setup temporary credentials
             self.setup_temporary_credentials()
             
-            # Setup and data fetching
+            # Connect to Google Sheets
             sheet = self.setup_google_sheets()
+            
+            # Fetch and process data
             music_data = self.fetch_music_data(sheet)
             categorized_data = self.categorize_albums(music_data)
             
-            # Create output and generate files
+            # Create output directory and copy assets
             self.create_output_directory()
+            
+            # Generate website files
             self.generate_html(categorized_data)
             self.generate_css()
             self.generate_javascript()
-            self.generate_build_readme()
             
-            # Clean up temporary credentials
-            self.cleanup_temporary_credentials()
-            
-            print("🎉 Album du Jour Enhanced Build Complete with Dynamic Responsive Layout!")
+            print("🎉 Album du Jour website build completed successfully!")
             print(f"📁 Output directory: {self.output_dir}")
-            print(f"🌐 Open {self.output_dir}/index.html to view the site")
-            print("📱 Dynamic responsive sizing now optimized for all screen sizes!")
+            print(f"🌐 Open: file://{self.output_dir.absolute()}/index.html")
             
         except Exception as e:
             print(f"❌ Build failed: {str(e)}")
-            # Clean up on failure
-            self.cleanup_temporary_credentials()
             raise
+        finally:
+            # Always cleanup temporary credentials
+            self.cleanup_temporary_credentials()
 
 if __name__ == "__main__":
     builder = MusicSiteBuilder()
-    builder.run()
+    builder.build()
+
