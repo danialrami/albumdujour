@@ -1,9 +1,10 @@
-// Album du Jour - Interactive Functionality
+// Album du Jour - Interactive Functionality with Responsive Embeds
 class AlbumSections {
     constructor() {
         this.initializeCollapsibleSections();
         this.initializeLazyLoading();
         this.initializeAccessibility();
+        this.initializeResponsiveEmbeds();
     }
     
     initializeCollapsibleSections() {
@@ -101,6 +102,32 @@ class AlbumSections {
         });
     }
     
+    initializeResponsiveEmbeds() {
+        // Handle responsive embed sizing on window resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.adjustEmbedHeights();
+            }, 250);
+        });
+        
+        // Initial adjustment
+        this.adjustEmbedHeights();
+    }
+    
+    adjustEmbedHeights() {
+        // This function ensures embeds are properly sized
+        // CSS handles most of the responsive behavior, but we can add
+        // any JavaScript-based adjustments here if needed
+        const embeds = document.querySelectorAll('.responsive-embed');
+        
+        embeds.forEach(embed => {
+            // Force a reflow to ensure CSS changes are applied
+            embed.style.height = embed.style.height;
+        });
+    }
+    
     initializeAccessibility() {
         // Keyboard navigation for collapsible sections
         document.addEventListener('keydown', (e) => {
@@ -177,7 +204,7 @@ function initializeEmbedErrorHandling() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎵 Album du Jour - Initializing...');
+    console.log('🎵 Album du Jour - Initializing with responsive embeds...');
     
     try {
         new AlbumSections();
