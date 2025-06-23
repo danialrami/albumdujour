@@ -3,976 +3,1073 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Album du Jour - Music Library</title>
+    <title>Album du Jour - Music Discovery</title>
+    <meta name="description" content="Personal music library showcase featuring currently listening, recently added, and recently finished albums.">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="assets/lufs-LOGO-04.png" />
 </head>
 <body>
-    <div class="lufs-container">
-        <header class="lufs-header">
+    <div class="animated-background"></div>
+    <div class="container">
+        <header class="site-header">
             <h1>🎵 Album du Jour</h1>
-            <p class="lufs-subtitle">Generated on June 23, 2025 at 02:14 AM</p>
-            <div class="lufs-stats">
-                <span class="stat-badge current">0 Current</span>
-                <span class="stat-badge open">752 Open</span>
-                <span class="stat-badge done">49 Done</span>
-                <span class="stat-badge total">801 Total</span>
+            <p class="subtitle">Personal Music Discovery</p>
+            <p class="generation-time">Generated on June 23, 2025 at 12:01 PM</p>
+            <div class="stats-badges">
+                <span class="badge current">0 Current</span>
+                <span class="badge added">20 Recently Added</span>
+                <span class="badge finished">20 Recently Finished</span>
+                <span class="badge total">40 Total</span>
             </div>
         </header>
-
-        <main class="lufs-main">
+        
+        <main class="content">
             
-            <section class="lufs-section current">
+            <section class="currently-listening">
                 <h2>🎧 Currently Listening</h2>
-                <p class="empty-section">No music in this section yet.</p>
+                <div class="empty-section">
+                    <p>No album currently being listened to.</p>
+                    <p class="subtitle">The album du jour will appear here when selected.</p>
+                </div>
             </section>
             
             
-        <section class="lufs-section open">
-            <h2>📖 Up Next</h2>
-            <div class="music-grid">
+        <section class="collapsible-section" data-section="recently-added">
+            <button class="section-toggle" aria-expanded="false">
+                <h2>📀 Recently Added <span class="count">(20)</span></h2>
+                <span class="toggle-icon">▼</span>
+            </button>
+            <div class="section-content">
+                <div class="album-grid">
+                    
+        <div class="album-card" data-status="open">
+            <div class="card-header">
+                <h3 class="album-title">It's Okay - EP</h3>
+                <p class="artist-name">The False Alarms</p>
+                <div class="card-meta">
+                    <span class="date">Added: Jun 21, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/5aR8r0uXBKtOYjN5XdVQnG?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - It's Okay - EP"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
                 
-        <div class="music-card" data-status="open">
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/its-okay-ep/1737679561" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5aR8r0uXBKtOYjN5XdVQnG" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">The Don</h3>
-                <p class="artist-name">Donny Benét</p>
+                <h3 class="album-title">Amateur Observer - EP</h3>
+                <p class="artist-name">Yot Club</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 20, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0drE0Xqo5yrSPirL3edUuX?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - The Don"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/6i0emSfmJxFPlCOTOqYBLc?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Amateur Observer - EP"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/the-don/1345339743" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0drE0Xqo5yrSPirL3edUuX" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/amateur-observer-ep/1677542747" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6i0emSfmJxFPlCOTOqYBLc" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">New Blue Sun</h3>
-                <p class="artist-name">Andre 3000</p>
+                <h3 class="album-title">Trvll W Friends</h3>
+                <p class="artist-name">Nate Traveller</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 20, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/33Ek6daAL3oXyQIV1uoItD?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - New Blue Sun"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/2kSKToEK67FX62qByc6Nt6?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Trvll W Friends"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/new-blue-sun/1716101993" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/33Ek6daAL3oXyQIV1uoItD" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/trvll-w-friends/1727013382" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2kSKToEK67FX62qByc6Nt6" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Poison Lotus Corpse Pearl</h3>
-                <p class="artist-name">xenoch</p>
+                <h3 class="album-title">The Forbidden Story</h3>
+                <p class="artist-name">dj saratonin</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 20, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/73Yo42FvyNbpoZPxAucerZ?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Poison Lotus Corpse Pearl"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/6cZvsPopG672UEo1l0GIUa?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - The Forbidden Story"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/poison-lotus-corpse-pearl/1723781170" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/73Yo42FvyNbpoZPxAucerZ" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/the-forbidden-story/1606830449" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6cZvsPopG672UEo1l0GIUa" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Es muy fácil (Remastered)</h3>
-                <p class="artist-name">Los Mitos</p>
+                <h3 class="album-title">Strega</h3>
+                <p class="artist-name">Mia Pucci</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 20, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/5t71bO53Z1Sd5xfzG1fwxb?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Es muy fácil (Remastered)"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/5M9UrcsrzIsDPzwwP9wN9a?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Strega"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/es-muy-f%C3%A1cil-remastered/956858152" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5t71bO53Z1Sd5xfzG1fwxb" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/strega/1495914743" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5M9UrcsrzIsDPzwwP9wN9a" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">BB/ANG3L</h3>
+                <h3 class="album-title">Harmonious</h3>
+                <p class="artist-name">Vida</p>
+                <div class="card-meta">
+                    <span class="date">Added: Jun 20, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1bOBAs1A7gB3Ga091vdj4q?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Harmonious"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/harmonious/1773963634" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1bOBAs1A7gB3Ga091vdj4q" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="open">
+            <div class="card-header">
+                <h3 class="album-title">The Little Mermaid</h3>
+                <p class="artist-name">Vida</p>
+                <div class="card-meta">
+                    <span class="date">Added: Jun 20, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/4fNMAfEgFGZamEz0KIWt3D?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - The Little Mermaid"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/the-little-mermaid/1732256711" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/4fNMAfEgFGZamEz0KIWt3D" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="open">
+            <div class="card-header">
+                <h3 class="album-title">CRASH</h3>
+                <p class="artist-name">Kehlani</p>
+                <div class="card-meta">
+                    <span class="date">Added: Jun 20, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/2MRNLEYm9SB0HBrJEU8L32?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - CRASH"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/crash/1752190549" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2MRNLEYm9SB0HBrJEU8L32" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="open">
+            <div class="card-header">
+                <h3 class="album-title">Aquarius</h3>
                 <p class="artist-name">Tinashe</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 18, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0Ytzeqoskd5VfSVfGGA1SM?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - BB/ANG3L"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/6zXUDBGLbrB9Kgkw2Y3F7L?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Aquarius"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/bb-ang3l/1704733390" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0Ytzeqoskd5VfSVfGGA1SM" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/aquarius/911472229" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6zXUDBGLbrB9Kgkw2Y3F7L" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">If This Is The End</h3>
-                <p class="artist-name">Noah Gundersen</p>
+                <h3 class="album-title">Father of Asahd</h3>
+                <p class="artist-name">DJ Khaled</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 16, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0PnDs1aZvcco3PihWmrQ9n?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - If This Is The End"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1YgX8BWKleDlDeCOFklRfz?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Father of Asahd"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/if-this-is-the-end/1689309522" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0PnDs1aZvcco3PihWmrQ9n" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/father-of-asahd/1464024147" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1YgX8BWKleDlDeCOFklRfz" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Me, Myself & I</h3>
-                <p class="artist-name">BashfortheWorld</p>
+                <h3 class="album-title">Discovery</h3>
+                <p class="artist-name">Electric Light Orchestra</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 16, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/3SoT68kHV9Q8Y3NR3Bo7Ok?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Me, Myself & I"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1CvVSn2MtKDBR6aWMkNkem?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Discovery"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/me-myself-i/1522976700" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/3SoT68kHV9Q8Y3NR3Bo7Ok" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/discovery/1054530378" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1CvVSn2MtKDBR6aWMkNkem" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Life On the Rocks</h3>
-                <p class="artist-name">BashfortheWorld</p>
+                <h3 class="album-title">Kytecrash</h3>
+                <p class="artist-name">Kytecrash</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 15, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/3iX2LUc2MS8TWSQ90WxKhA?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Life On the Rocks"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/4lX68DGyUbe92yj3cF888N?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Kytecrash"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/life-on-the-rocks/1664284170" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/3iX2LUc2MS8TWSQ90WxKhA" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/kytecrash/1769457478" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/4lX68DGyUbe92yj3cF888N" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Hotel Surrender (Expanded Edition)</h3>
-                <p class="artist-name">Chet Faker</p>
+                <h3 class="album-title">For Lovers</h3>
+                <p class="artist-name">Lamp</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 15, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/62VoEhJtVh6jeqL7vHsEnX?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Hotel Surrender (Expanded Edition)"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/0gwS2D9sukMLXNvleEnYr2?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - For Lovers"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/hotel-surrender-expanded-edition/1709632954" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/62VoEhJtVh6jeqL7vHsEnX" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/%E6%81%8B%E4%BA%BA%E3%81%B8/1486281113" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0gwS2D9sukMLXNvleEnYr2" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">I Ain’t Marching Anymore</h3>
-                <p class="artist-name">Phil Ochs</p>
+                <h3 class="album-title">+(KR) ystal Eyes <AESTHETIC> - EP</h3>
+                <p class="artist-name">tripleS</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 12, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/28XoBuuNDXciDAdfEgDMg6?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - I Ain’t Marching Anymore"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/6ZOfnNRe1tp5tQpdkdDfCy?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - +(KR) ystal Eyes <AESTHETIC> - EP"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/i-aint-marching-anymore/111190810" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/28XoBuuNDXciDAdfEgDMg6" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/kr-ystal-eyes-aesthetic-ep/1737941299" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6ZOfnNRe1tp5tQpdkdDfCy" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Bolero</h3>
-                <p class="artist-name">Ángela Aguilar</p>
+                <h3 class="album-title">Queen of the Clouds</h3>
+                <p class="artist-name">Tove Lo</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 12, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/2XltOEB0eKfJ8hxoa9tJoy?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Bolero"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/47C7w4o1resDhr7jvYEpxE?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Queen of the Clouds"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/bolero/1724792315" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2XltOEB0eKfJ8hxoa9tJoy" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/queen-of-the-clouds/1440820593" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/47C7w4o1resDhr7jvYEpxE" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Girl With No Face</h3>
-                <p class="artist-name">Allie X</p>
+                <h3 class="album-title">Dirt Femme (Extended Cut)</h3>
+                <p class="artist-name">Tove Lo</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 12, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/10o3OFqQt0gqemtIcCh72x?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Girl With No Face"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/4HqIEAaytAyzVPnnT0j9j3?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Dirt Femme (Extended Cut)"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/girl-with-no-face/1711778190" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/10o3OFqQt0gqemtIcCh72x" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/dirt-femme-extended-cut/1698778389" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/4HqIEAaytAyzVPnnT0j9j3" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">CAPICÚ</h3>
-                <p class="artist-name">RaiNao</p>
+                <h3 class="album-title">Fauré: Dolly Suite; Nocturnes; Barcarolles; Impromptus</h3>
+                <p class="artist-name">Katia & Marielle Labèque & Pascal Rogé</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 11, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/15GbOhBVxAs4T84gCpwlY8?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - CAPICÚ"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1VMXYuxv7jwh3XzPZtoELi?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Fauré: Dolly Suite; Nocturnes; Barcarolles; Impromptus"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/capic%C3%BA/1731237546" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/15GbOhBVxAs4T84gCpwlY8" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/faur%C3%A9-dolly-suite-nocturnes-barcarolles-impromptus/1452327920" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1VMXYuxv7jwh3XzPZtoELi" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">GLOOM DIVISION</h3>
-                <p class="artist-name">I DONT KNOW HOW BUT THEY FOUND ME</p>
+                <h3 class="album-title">SEVENTEEN BEST ALBUM '17 IS RIGHT HERE'</h3>
+                <p class="artist-name">SEVENTEEN</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 08, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0uJRPvtoXw3k9377EVqShK?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - GLOOM DIVISION"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/2Jrp37x38qZqtyrIrfxN4H?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - SEVENTEEN BEST ALBUM '17 IS RIGHT HERE'"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/gloom-division/1706419494" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0uJRPvtoXw3k9377EVqShK" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/seventeen-best-album-17-is-right-here/1741446411" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2Jrp37x38qZqtyrIrfxN4H" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Laslafaria</h3>
-                <p class="artist-name">Katrine Amsler</p>
+                <h3 class="album-title">Ratatouille (Score from the Motion Picture)</h3>
+                <p class="artist-name">Michael Giacchino</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 07, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/4L6fupQmpUFQjTERrKqtTR?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Laslafaria"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/7Dr08Oi3zxdCzmFulSXSs2?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Ratatouille (Score from the Motion Picture)"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/laslafaria/1492364096" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/4L6fupQmpUFQjTERrKqtTR" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/ratatouille-score-from-the-motion-picture/1443314538" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/7Dr08Oi3zxdCzmFulSXSs2" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
+        <div class="album-card" data-status="open">
             <div class="card-header">
-                <h3 class="album-title">Preacher’s Daughter</h3>
-                <p class="artist-name">Ethel Cain</p>
+                <h3 class="album-title">MUTT Deluxe: HEEL</h3>
+                <p class="artist-name">Leon Thomas</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jun 06, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/3WmujGwOS0ANHkJRnMH6n8?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Preacher’s Daughter"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/5m3rVDTPrTRwSgkKsvSYEL?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - MUTT Deluxe: HEEL"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/preachers-daughter/1619405400" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/3WmujGwOS0ANHkJRnMH6n8" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/mutt-deluxe-heel/1812987941" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5m3rVDTPrTRwSgkKsvSYEL" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="open">
-            <div class="card-header">
-                <h3 class="album-title">Djesse Vol. 4</h3>
-                <p class="artist-name">Jacob Collier</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
                 </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/13r6eqjYlKELFQlNvVCBz1?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Djesse Vol. 4"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/djesse-vol-4/1725446442" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/13r6eqjYlKELFQlNvVCBz1" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="open">
-            <div class="card-header">
-                <h3 class="album-title">Monolocale</h3>
-                <p class="artist-name">Angelina Mango</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/2VOlLQKOgJ30KTs4GhM0mG?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Monolocale"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/monolocale/1539078244" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2VOlLQKOgJ30KTs4GhM0mG" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="open">
-            <div class="card-header">
-                <h3 class="album-title">Geidi Primes (Nightcore Edition)</h3>
-                <p class="artist-name">Grimes</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/7HO6IZ3Ff5J9YoRBI8hm1O?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Geidi Primes (Nightcore Edition)"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/geidi-primes-nightcore-edition/1733105796" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/7HO6IZ3Ff5J9YoRBI8hm1O" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="open">
-            <div class="card-header">
-                <h3 class="album-title">Mundo</h3>
-                <p class="artist-name">BashfortheWorld</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/5qmP8wU9sZgza2XTqdrRoL?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Mundo"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/mundo/1733626587" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5qmP8wU9sZgza2XTqdrRoL" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
             </div>
         </section>
-          
+        
             
-        <section class="lufs-section done">
-            <h2>✅ Recently Finished</h2>
-            <div class="music-grid">
+        <section class="collapsible-section" data-section="recently-finished">
+            <button class="section-toggle" aria-expanded="false">
+                <h2>✅ Recently Finished <span class="count">(20)</span></h2>
+                <span class="toggle-icon">▼</span>
+            </button>
+            <div class="section-content">
+                <div class="album-grid">
+                    
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Mechanomorphic</h3>
+                <p class="artist-name">Mr. Bill</p>
+                <div class="card-meta">
+                    <span class="date">Added: Sep 29, 2024</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/3YSCEubpM4QyBWIMc2fU0w?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Mechanomorphic"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
                 
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">PIZZA KEBAB Vol. 1</h3>
-                <p class="artist-name">Ghali</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/36pfG4aLiawluO8PgGZkeh?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - PIZZA KEBAB Vol. 1"
-                        style="border-radius: 10px;"></iframe>
-                </div>
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/pizza-kebab-vol-1/1718644215" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/36pfG4aLiawluO8PgGZkeh" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/mechanomorphic/1734711918" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/3YSCEubpM4QyBWIMc2fU0w" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Winterreise</h3>
-                <p class="artist-name">Jerskin Fendrix</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/23tjIW6fzlYMWfc55QHSAs?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Winterreise"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/winterreise/1504529384" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/23tjIW6fzlYMWfc55QHSAs" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Lonerism</h3>
-                <p class="artist-name">Tame Impala</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/3C2MFZ2iHotUQOSBzdSvM7?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Lonerism"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/lonerism/1440825369" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/3C2MFZ2iHotUQOSBzdSvM7" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">FELIZ CUMPLEAÑOS FERXXO TE PIRATEAMOS EL ÁLBUM</h3>
-                <p class="artist-name">Feid</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/7pijRxgRaBirPz6wDaJIp9?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - FELIZ CUMPLEAÑOS FERXXO TE PIRATEAMOS EL ÁLBUM"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/feliz-cumplea%C3%B1os-ferxxo-te-pirateamos-el-%C3%A1lbum/1645032132" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/7pijRxgRaBirPz6wDaJIp9" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
+        <div class="album-card" data-status="done">
             <div class="card-header">
                 <h3 class="album-title">Ita – EP</h3>
                 <p class="artist-name">Bobby Sanchez</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Finished: Jun 18, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/1i3YgHy0nHfQyAYlAd2EcY?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Ita – EP"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1i3YgHy0nHfQyAYlAd2EcY?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Ita – EP"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
                 <a href="https://music.apple.com/us/album/ita-ep/1559338257" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1i3YgHy0nHfQyAYlAd2EcY" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="done">
+        <div class="album-card" data-status="done">
             <div class="card-header">
-                <h3 class="album-title">Palm in Mirror</h3>
-                <p class="artist-name">Disparition</p>
+                <h3 class="album-title">The Jam Sessions</h3>
+                <p class="artist-name">The Kyteman Orchestra</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Oct 25, 2024</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0IPJvR360DA2b1T7BPZHRD?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Palm in Mirror"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/7zmF4zp5i6PYmNKfKbyVPd?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - The Jam Sessions"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/palm-in-mirror/1155868568" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0IPJvR360DA2b1T7BPZHRD" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/the-jam-sessions/1769421998" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/7zmF4zp5i6PYmNKfKbyVPd" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="done">
+        <div class="album-card" data-status="done">
             <div class="card-header">
-                <h3 class="album-title">Texas Technician</h3>
-                <p class="artist-name">That Mexican OT</p>
+                <h3 class="album-title">Adderall - EP</h3>
+                <p class="artist-name">Slipknot</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    <span class="rating">🌞</span>
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/2L5fQG5lbyMkG6iyNNj3uR?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Texas Technician"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/texas-technician/1732805982" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2L5fQG5lbyMkG6iyNNj3uR" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">You Won’t Go Before You’re Supposed To</h3>
-                <p class="artist-name">Knocked Loose</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    <span class="rating">🌞</span>
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/2sLBMdUF5HYNB0voqWs4K3?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - You Won’t Go Before You’re Supposed To"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/you-wont-go-before-youre-supposed-to/1732119298" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2sLBMdUF5HYNB0voqWs4K3" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Ask That God</h3>
-                <p class="artist-name">Empire of the Sun</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Oct 19, 2024</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/5iEtQfZATfimid3Ogvce5m?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Ask That God"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/0E3OlFC9aoCO37szpGrqfH?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Adderall - EP"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/ask-that-god/1741469042" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5iEtQfZATfimid3Ogvce5m" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/adderall-ep/1689107272" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0E3OlFC9aoCO37szpGrqfH" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="done">
+        <div class="album-card" data-status="done">
             <div class="card-header">
-                <h3 class="album-title">VULTURES 2</h3>
-                <p class="artist-name">¥$, Kanye West, Ty Dolla $ign</p>
+                <h3 class="album-title">Lost Pages - EP</h3>
+                <p class="artist-name">Tink</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Added: Jan 07, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/5RV2TNyjylqWJNxQyHBTeJ?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - VULTURES 2"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/2dtaX61cm2HUJlOn5MSsMs?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Lost Pages - EP"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/vultures-2/1760905142" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5RV2TNyjylqWJNxQyHBTeJ" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/lost-pages-ep/1786213847" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2dtaX61cm2HUJlOn5MSsMs" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Ehhthang Ehhthang</h3>
-                <p class="artist-name">GloRilla</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0SW0LplxFID1otCk4bhhHI?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Ehhthang Ehhthang"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/ehhthang-ehhthang/1737094867" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0SW0LplxFID1otCk4bhhHI" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Flight b741</h3>
-                <p class="artist-name">King Gizzard & The Lizard Wizard</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/1hyEbrjx4XtesBvKDR3ez2?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Flight b741"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/flight-b741/1751825129" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1hyEbrjx4XtesBvKDR3ez2" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Cleave</h3>
-                <p class="artist-name">Vallis Alps</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/195Un6jYy1ckMxggNTUsgV?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Cleave"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/cleave/1673227428" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/195Un6jYy1ckMxggNTUsgV" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Revenge</h3>
-                <p class="artist-name">Muni Long</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    <span class="rating">🌞</span>
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/1q37MEHkdOivTuJJbwRkGS?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Revenge"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/revenge/1763160555" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1q37MEHkdOivTuJJbwRkGS" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Alligator Bites Never Heal</h3>
-                <p class="artist-name">Doechii</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/60UzB8mOCMpc7xkuJE6Bwc?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Alligator Bites Never Heal"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/alligator-bites-never-heal/1763934442" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/60UzB8mOCMpc7xkuJE6Bwc" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Tomorrowland 2024: REZZMAU5 at Freedom, Weekend 1 (DJ Mix)</h3>
-                <p class="artist-name">Rezz & deadmau5</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/3S9GUf0drt2FBoNkwJZQjZ?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Tomorrowland 2024: REZZMAU5 at Freedom, Weekend 1 (DJ Mix)"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/tomorrowland-2024-rezzmau5-at-freedom-weekend-1-dj-mix/1762699870" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/3S9GUf0drt2FBoNkwJZQjZ" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Death or Glory</h3>
-                <p class="artist-name">Palaye Royale</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0d057DHZkVhYZCDRrr1p5f?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Death or Glory"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/death-or-glory/1750984454" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0d057DHZkVhYZCDRrr1p5f" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
-            <div class="card-header">
-                <h3 class="album-title">Wish On the Bone</h3>
-                <p class="artist-name">Why Bonnie</p>
-                <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
-                    
-                </div>
-            </div>
-            
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/5wWOSnHalf5iMaVWu6CGnn?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Wish On the Bone"
-                        style="border-radius: 10px;"></iframe>
-                </div>
-            
-            <div class="card-links">
-                <a href="https://music.apple.com/us/album/wish-on-the-bone/1745333620" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/5wWOSnHalf5iMaVWu6CGnn" target="_blank" class="music-link spotify">🎵 Spotify</a>
-            </div>
-        </div>
-        
-        <div class="music-card" data-status="done">
+        <div class="album-card" data-status="done">
             <div class="card-header">
                 <h3 class="album-title">Survivor</h3>
                 <p class="artist-name">Vanessa Williams</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Finished: Jun 04, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/0fkp4oHJJTbcewmxjAGXNO?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Survivor"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/0fkp4oHJJTbcewmxjAGXNO?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Survivor"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
                 <a href="https://music.apple.com/us/album/survivor/1759648907" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0fkp4oHJJTbcewmxjAGXNO" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
-        <div class="music-card" data-status="done">
+        <div class="album-card" data-status="done">
             <div class="card-header">
-                <h3 class="album-title">Liquor Talkin’</h3>
-                <p class="artist-name">Don Louis</p>
+                <h3 class="album-title">Flight b741</h3>
+                <p class="artist-name">King Gizzard & The Lizard Wizard</p>
                 <div class="card-meta">
-                    <span class="date">20XX-XX-XX</span>
+                    <span class="date">Finished: May 22, 2025</span>
                     
                 </div>
             </div>
             
-            <div class="embed-container">
-                <iframe src="https://open.spotify.com/embed/album/6HRMhjD3a6SH7KCFv6S4GD?utm_source=generator" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - Liquor Talkin’"
-                        style="border-radius: 10px;"></iframe>
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1hyEbrjx4XtesBvKDR3ez2?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Flight b741"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
                 </div>
+                
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/liquor-talkin/1760864099" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6HRMhjD3a6SH7KCFv6S4GD" target="_blank" class="music-link spotify">🎵 Spotify</a>
+                <a href="https://music.apple.com/us/album/flight-b741/1751825129" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1hyEbrjx4XtesBvKDR3ez2" target="_blank" class="music-link spotify">🎵 Spotify</a>
             </div>
         </div>
         
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">PIZZA KEBAB Vol. 1</h3>
+                <p class="artist-name">Ghali</p>
+                <div class="card-meta">
+                    <span class="date">Finished: May 20, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/36pfG4aLiawluO8PgGZkeh?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - PIZZA KEBAB Vol. 1"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/pizza-kebab-vol-1/1718644215" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/36pfG4aLiawluO8PgGZkeh" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">22:22</h3>
+                <p class="artist-name">Polo & Pan</p>
+                <div class="card-meta">
+                    <span class="date">Added: Apr 06, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/6753teQnmjiQTbYlJMajYo?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - 22:22"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/22-22/1794315091" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6753teQnmjiQTbYlJMajYo" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Public Displays Of Affection: The Album</h3>
+                <p class="artist-name">Muni Long</p>
+                <div class="card-meta">
+                    <span class="date">Added: Apr 02, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/7fe4Mem3wWgY6zkTFuKUI9?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Public Displays Of Affection: The Album"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/public-displays-of-affection-the-album/1645149934" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/7fe4Mem3wWgY6zkTFuKUI9" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Dying for Sex (Original Soundtrack)</h3>
+                <p class="artist-name">Ariel Marx</p>
+                <div class="card-meta">
+                    <span class="date">Added: Apr 12, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/6oFwvTkO7mmVAjCxO0JWlr?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Dying for Sex (Original Soundtrack)"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/dying-for-sex-original-soundtrack/1804167725" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/6oFwvTkO7mmVAjCxO0JWlr" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Like All Before You</h3>
+                <p class="artist-name">The Voidz</p>
+                <div class="card-meta">
+                    <span class="date">Added: Mar 24, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/7h0Y4HcaDsuLnXeYmvY7ai?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Like All Before You"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/like-all-before-you/1755798910" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/7h0Y4HcaDsuLnXeYmvY7ai" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">KING OF THE MISCHIEVOUS SOUTH</h3>
+                <p class="artist-name">Denzel Curry</p>
+                <div class="card-meta">
+                    <span class="date">Added: Dec 03, 2024</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1OUX2HxH2tyqyHMALnYbnG?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - KING OF THE MISCHIEVOUS SOUTH"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/king-of-the-mischievous-south/1772769118" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1OUX2HxH2tyqyHMALnYbnG" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Horny.4U</h3>
+                <p class="artist-name">Ayesha Erotica</p>
+                <div class="card-meta">
+                    <span class="date">Added: Feb 14, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/2w8FTdTisJeEyU3lFVaO9v?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Horny.4U"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/horny-4u/1747953034" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/2w8FTdTisJeEyU3lFVaO9v" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Winterreise</h3>
+                <p class="artist-name">Jerskin Fendrix</p>
+                <div class="card-meta">
+                    <span class="date">Finished: Apr 15, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/23tjIW6fzlYMWfc55QHSAs?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Winterreise"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/winterreise/1504529384" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/23tjIW6fzlYMWfc55QHSAs" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Cleave</h3>
+                <p class="artist-name">Vallis Alps</p>
+                <div class="card-meta">
+                    <span class="date">Finished: Apr 14, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/195Un6jYy1ckMxggNTUsgV?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Cleave"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/cleave/1673227428" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/195Un6jYy1ckMxggNTUsgV" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Ehhthang Ehhthang</h3>
+                <p class="artist-name">GloRilla</p>
+                <div class="card-meta">
+                    <span class="date">Finished: Apr 13, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/0SW0LplxFID1otCk4bhhHI?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Ehhthang Ehhthang"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/ehhthang-ehhthang/1737094867" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0SW0LplxFID1otCk4bhhHI" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Diego</h3>
+                <p class="artist-name">Lil Xan</p>
+                <div class="card-meta">
+                    <span class="date">Added: Oct 01, 2024</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1qSb4pcXiDtv6X42ELUIJb?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Diego"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/diego/1762481355" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1qSb4pcXiDtv6X42ELUIJb" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Probably Nothing, Possibly Everything</h3>
+                <p class="artist-name">Pat The Bunny</p>
+                <div class="card-meta">
+                    <span class="date">Added: Dec 17, 2024</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/1mdup5fgvCJcq2eZzuSUzA?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Probably Nothing, Possibly Everything"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/probably-nothing-possibly-everything/953407638" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/1mdup5fgvCJcq2eZzuSUzA" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+        <div class="album-card" data-status="done">
+            <div class="card-header">
+                <h3 class="album-title">Death or Glory</h3>
+                <p class="artist-name">Palaye Royale</p>
+                <div class="card-meta">
+                    <span class="date">Finished: Apr 06, 2025</span>
+                    
+                </div>
+            </div>
+            
+            
+                <div class="embed-container">
+                    <iframe data-src="https://open.spotify.com/embed/album/0d057DHZkVhYZCDRrr1p5f?utm_source=generator" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - Death or Glory"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
+                
+            
+            <div class="card-links">
+                <a href="https://music.apple.com/us/album/death-or-glory/1750984454" target="_blank" class="music-link apple">🍎 Apple Music</a><a href="https://open.spotify.com/album/0d057DHZkVhYZCDRrr1p5f" target="_blank" class="music-link spotify">🎵 Spotify</a>
+            </div>
+        </div>
+        
+                </div>
             </div>
         </section>
         
         </main>
-
-        <footer class="lufs-footer">
-            <div class="lufs-logo-container">
-                <img src="assets/lufs-LOGO-04.png" alt="LUFS Logo" class="lufs-logo" />
-            </div>
-            <p>Album du Jour • Built with ❤️</p>
+        
+        <footer class="site-footer">
+            <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
+               target="_blank" class="sheets-link">
+                📊 View Full Library
+            </a>
+            <p>Built with ❤️ by <strong>LUFS Audio</strong></p>
         </footer>
     </div>
-
+    
     <script src="scripts.js"></script>
 </body>
 </html>
