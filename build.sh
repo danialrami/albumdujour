@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Music Library Website Builder with Safe Git Deployment
-# Enhanced version with proper error handling and file safety
+# Music Library Website Builder with Enhanced Security and Git Deployment
+# Ensures credentials never leak to build branch
 
-set -euo pipefail  # Exit on any error, undefined variable, or pipe failure
+set -euo pipefail # Exit on any error, undefined variable, or pipe failure
 
 # Color codes for output
 readonly RED='\033[0;31m'
@@ -28,7 +28,7 @@ CLEANUP_NEEDED=false
 
 # Logging functions
 log_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+    echo -e "${BLUE}ℹ️ $1${NC}"
 }
 
 log_success() {
@@ -36,7 +36,7 @@ log_success() {
 }
 
 log_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}⚠️ $1${NC}"
 }
 
 log_error() {
@@ -194,7 +194,7 @@ commit_source_changes() {
         git checkout main
     fi
     
-    # Add all changes
+    # Add all changes (credentials should already be gitignored)
     git add .
     
     # Check if there are changes to commit
@@ -229,6 +229,72 @@ create_safe_backup() {
     log_success "Safety backup created and verified"
 }
 
+setup_build_gitignore() {
+    log_info "Setting up build branch .gitignore..."
+    cat > .gitignore << 'EOF'
+# Credentials and sensitive files - NEVER commit these
+concrete-spider-446700-f9-*.json
+musickit/
+*.key
+*.pem
+*.p8
+.env
+.env.*
+
+# Build tools and development files - shouldn't be in build branch
+build_music_site.py
+build.sh
+venv/
+requirements.txt
+__pycache__/
+*.pyc
+*.pyo
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+EOF
+    log_success "Build branch .gitignore configured"
+}
+
+verify_no_credentials() {
+    log_info "Verifying no credentials in build branch..."
+    
+    # Define patterns for credential files
+    local credential_patterns=(
+        "concrete-spider-446700-f9-*.json"
+        "musickit"
+        "*.key"
+        "*.pem"
+        "*.p8"
+        ".env"
+        "build_music_site.py"
+        "build.sh"
+        "venv"
+    )
+    
+    local found_credentials=false
+    
+    for pattern in "${credential_patterns[@]}"; do
+        if find . -name "$pattern" -type f -o -name "$pattern" -type d | grep -q .; then
+            log_error "Found sensitive files/directories matching pattern: $pattern"
+            find . -name "$pattern" -type f -o -name "$pattern" -type d | head -5
+            found_credentials=true
+        fi
+    done
+    
+    if [ "$found_credentials" = true ]; then
+        log_error "SECURITY VIOLATION: Credentials or build tools found in build branch!"
+        log_error "Aborting deployment to prevent credential exposure"
+        exit 1
+    fi
+    
+    log_success "✓ No credentials or build tools found in build branch"
+}
+
 deploy_to_build_branch() {
     log_header "🌿 Deploying to Build Branch"
     
@@ -249,13 +315,16 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # SAFE cleanup: Only remove specific files/directories, keep source files safe
+    # Set up security-focused gitignore FIRST
+    setup_build_gitignore
+    
+    # SAFE cleanup: Only remove web files, preserve .git and .gitignore
     log_info "Safely cleaning build branch..."
     
-    # Remove only the old build artifacts, not source files
+    # Remove only web artifacts, using explicit whitelist approach
     local items_to_remove=(
         "index.html"
-        "styles.css" 
+        "styles.css"
         "scripts.js"
         "assets"
     )
@@ -267,9 +336,35 @@ deploy_to_build_branch() {
         fi
     done
     
-    # Copy new build files from backup (safer than from original location)
-    log_info "Copying new build files..."
-    cp -r "$TEMP_BACKUP_DIR/build/"* .
+    # Copy ONLY web files from backup (whitelist approach for maximum security)
+    log_info "Copying web files to build branch..."
+    
+    # Copy main HTML file
+    if [ -f "$TEMP_BACKUP_DIR/build/index.html" ]; then
+        cp "$TEMP_BACKUP_DIR/build/index.html" .
+        log_info "✓ Copied index.html"
+    fi
+    
+    # Copy CSS files
+    if [ -f "$TEMP_BACKUP_DIR/build/styles.css" ]; then
+        cp "$TEMP_BACKUP_DIR/build/styles.css" .
+        log_info "✓ Copied styles.css"
+    fi
+    
+    # Copy JavaScript files if they exist
+    if [ -f "$TEMP_BACKUP_DIR/build/scripts.js" ]; then
+        cp "$TEMP_BACKUP_DIR/build/scripts.js" .
+        log_info "✓ Copied scripts.js"
+    fi
+    
+    # Copy assets directory (web assets only)
+    if [ -d "$TEMP_BACKUP_DIR/build/assets" ]; then
+        cp -r "$TEMP_BACKUP_DIR/build/assets" .
+        log_info "✓ Copied assets directory"
+    fi
+    
+    # CRITICAL: Verify no credentials were copied
+    verify_no_credentials
     
     # Verify deployment
     if [ ! -f "index.html" ]; then
@@ -281,11 +376,20 @@ deploy_to_build_branch() {
     log_info "Build branch contents:"
     ls -la
     
+    # Add only the web files (selective git add for security)
+    log_info "Adding web files to git..."
+    git add .gitignore
+    git add index.html 2>/dev/null || true
+    git add styles.css 2>/dev/null || true
+    git add scripts.js 2>/dev/null || true
+    git add assets/ 2>/dev/null || true
+    
+    # Final security check before commit
+    verify_no_credentials
+    
     # Commit build files
-    git add .
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    
     if ! git diff-index --quiet HEAD --; then
         git commit -m "Deploy website build - $timestamp"
         log_success "Build files committed to build branch"
@@ -300,6 +404,7 @@ push_to_remote() {
     # Push main branch first
     log_info "Pushing main branch..."
     git checkout main
+    
     if git push origin main; then
         log_success "Main branch pushed successfully"
     else
@@ -327,7 +432,7 @@ push_to_remote() {
 
 # Main execution
 main() {
-    log_header "🎵 Music Library Website Builder with Safe Git Deployment"
+    log_header "🎵 Music Library Website Builder with Enhanced Security"
     
     # Change to website directory
     cd "$WEBSITE_DIR"
@@ -347,6 +452,7 @@ main() {
     log_success "🎉 Deployment completed successfully!"
     log_info "Website is now live on the build branch"
     log_info "Source code remains safe on the main branch"
+    log_info "All credentials and build tools are protected"
 }
 
 # Run main function
