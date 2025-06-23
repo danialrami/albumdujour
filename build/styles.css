@@ -1,4 +1,4 @@
-/* LUFS Brand Colors and Full-Width Responsive Design */
+/* LUFS Brand Colors and Compact Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -164,16 +164,8 @@ body {
 
 .currently-listening h2 {
     font-size: 2rem;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.section-subtitle {
-    text-align: center;
-    font-size: 0.9rem;
-    opacity: 0.7;
     margin-bottom: 2rem;
-    font-style: italic;
+    text-align: center;
 }
 
 .album-du-jour {
@@ -190,7 +182,6 @@ body {
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     background: rgba(255, 255, 255, 0.05);
-    /* Exact padding to match embed height */
     padding: 4px;
 }
 
@@ -198,15 +189,6 @@ body {
     width: 100%;
     display: block;
     border-radius: 8px;
-}
-
-/* Full-width sections for Recently Added/Finished */
-.full-width-section {
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
-    width: 100vw;
-    padding-left: 2rem;
-    padding-right: 2rem;
 }
 
 /* Collapsible Sections */
@@ -266,13 +248,12 @@ body {
     padding: 2rem;
 }
 
-/* Full-width Album Grid - 4 columns on desktop */
-.album-grid-fullwidth {
+/* Compact Album Grid - Multiple columns with small embeds */
+.album-grid-compact {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-top: 1rem;
-    max-width: none;
 }
 
 /* Album Cards */
@@ -293,6 +274,10 @@ body {
 .current-card {
     background: rgba(231, 178, 37, 0.1);
     border-color: var(--lufs-yellow);
+}
+
+.compact-card {
+    padding: 1rem;
 }
 
 .card-header {
@@ -321,8 +306,8 @@ body {
     opacity: 0.7;
 }
 
-/* Grid embed containers - condensed vertical, wider horizontal */
-.grid-embed-container {
+/* Compact embed containers - Small and efficient */
+.compact-embed-container {
     width: 100%;
     margin: 0.8rem 0;
     border-radius: var(--border-radius);
@@ -332,7 +317,7 @@ body {
     padding: 3px;
 }
 
-.grid-embed-container iframe {
+.compact-embed-container iframe {
     width: 100%;
     display: block;
     border-radius: 6px;
@@ -404,20 +389,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .album-grid-fullwidth {
-        grid-template-columns: repeat(3, 1fr);
+    .album-grid-compact {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.2rem;
     }
 }
 
 @media (max-width: 900px) {
-    .album-grid-fullwidth {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.2rem;
-    }
-    
-    .full-width-section {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+    .album-grid-compact {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
     }
 }
 
@@ -426,14 +407,9 @@ body {
         --container-padding: 1rem;
     }
     
-    .album-grid-fullwidth {
+    .album-grid-compact {
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
-    
-    .full-width-section {
-        padding-left: 1rem;
-        padding-right: 1rem;
     }
     
     .current-embed-container {
@@ -441,7 +417,7 @@ body {
         padding: 3px;
     }
     
-    .grid-embed-container {
+    .compact-embed-container {
         padding: 2px;
     }
     

@@ -2,7 +2,7 @@
 """
 Enhanced Music Library Website Builder
 Reads from Google Sheets and generates a static website with embedded music players
-Enhanced with timestamp-based categorization, edge case handling, and optimized responsive embeds
+Enhanced with timestamp-based categorization, edge case handling, and compact responsive embeds
 """
 
 import gspread
@@ -317,7 +317,7 @@ class MusicSiteBuilder:
         </header>
         
         <main class="content">
-            {self.generate_currently_listening_section(current_listening, is_fallback, categorized_data.get('fallback_type'))}
+            {self.generate_currently_listening_section(current_listening, is_fallback)}
             {self.generate_collapsible_section("recently-added", "📀 Recently Added", recently_added)}
             {self.generate_collapsible_section("recently-finished", "✅ Recently Finished", recently_finished)}
         </main>
@@ -341,8 +341,8 @@ class MusicSiteBuilder:
         
         print(f"✅ HTML generated: {output_file}")
     
-    def generate_currently_listening_section(self, current_albums, is_fallback=False, fallback_type=None):
-        """Generate the Currently Listening section with edge case handling"""
+    def generate_currently_listening_section(self, current_albums, is_fallback=False):
+        """Generate the Currently Listening section with clean titles"""
         if not current_albums:
             return f"""
             <section class="currently-listening">
@@ -358,23 +358,11 @@ class MusicSiteBuilder:
         album = current_albums[0]
         
         # Determine section title based on whether it's a fallback
-        if is_fallback:
-            if fallback_type == 'finished':
-                section_title = "🎵 Latest Album"
-                section_subtitle = "(Most recently finished)"
-            else:
-                section_title = "🎵 Latest Album"
-                section_subtitle = "(Most recently added)"
-        else:
-            section_title = "🎧 Currently Listening"
-            section_subtitle = ""
-        
-        subtitle_html = f'<p class="section-subtitle">{section_subtitle}</p>' if section_subtitle else ""
+        section_title = "🎵 Latest Album" if is_fallback else "🎧 Currently Listening"
         
         return f"""
         <section class="currently-listening">
             <h2>{section_title}</h2>
-            {subtitle_html}
             <div class="album-du-jour">
                 {self.generate_album_card_html(album, is_current=True)}
             </div>
@@ -382,7 +370,7 @@ class MusicSiteBuilder:
         """
     
     def generate_collapsible_section(self, section_id, title, albums):
-        """Generate a collapsible section with full-width layout"""
+        """Generate a collapsible section with compact grid layout"""
         if not albums:
             return f"""
             <section class="collapsible-section" data-section="{section_id}">
@@ -403,13 +391,13 @@ class MusicSiteBuilder:
             album_cards += self.generate_album_card_html(album, is_current=False)
         
         return f"""
-        <section class="collapsible-section full-width-section" data-section="{section_id}">
+        <section class="collapsible-section" data-section="{section_id}">
             <button class="section-toggle" aria-expanded="false">
                 <h2>{title} <span class="count">({len(albums)})</span></h2>
                 <span class="toggle-icon">▼</span>
             </button>
             <div class="section-content">
-                <div class="album-grid-fullwidth">
+                <div class="album-grid-compact">
                     {album_cards}
                 </div>
             </div>
@@ -421,7 +409,7 @@ class MusicSiteBuilder:
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
-            # For current music (album du jour), show embeds prominently with exact container sizing
+            # For current music (album du jour), show embeds prominently
             if album['spotify_embed']:
                 embed_html = f"""
                 <div class="embed-container current-embed-container">
@@ -453,14 +441,14 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use condensed vertical embeds
+            # For other sections (Recently Added/Finished), use compact embeds
             if album['spotify_embed']:
                 embed_html = f"""
-                <div class="embed-container grid-embed-container">
+                <div class="embed-container compact-embed-container">
                     <iframe data-src="{album['spotify_embed']}" 
                             width="100%" 
-                            height="200"
-                            class="dynamic-embed grid-embed spotify-embed lazy-embed" 
+                            height="152"
+                            class="dynamic-embed compact-embed spotify-embed lazy-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
                             allow="encrypted-media"
@@ -470,11 +458,11 @@ class MusicSiteBuilder:
                 """
             elif album['apple_embed']:
                 embed_html = f"""
-                <div class="embed-container grid-embed-container">
+                <div class="embed-container compact-embed-container">
                     <iframe data-src="{album['apple_embed']}" 
                             width="100%" 
-                            height="240"
-                            class="dynamic-embed grid-embed apple-embed lazy-embed" 
+                            height="175"
+                            class="dynamic-embed compact-embed apple-embed lazy-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
                             style="overflow: hidden; border-radius: 8px;"
@@ -482,7 +470,7 @@ class MusicSiteBuilder:
                 </div>
                 """
             else:
-                embed_html = '<div class="embed-container grid-embed-container"><p class="no-embed">No embed available</p></div>'
+                embed_html = '<div class="embed-container compact-embed-container"><p class="no-embed">No embed available</p></div>'
         
         # Build links
         links_html = ""
@@ -501,7 +489,7 @@ class MusicSiteBuilder:
         rating_display = f'<span class="rating">{album["rating"]}</span>' if album['rating'] else ""
         
         # Add special styling class for current music
-        card_class = "album-card current-card" if is_current else "album-card"
+        card_class = "album-card current-card" if is_current else "album-card compact-card"
         
         return f"""
         <div class="{card_class}" data-status="{album['status'].lower()}">
@@ -523,10 +511,10 @@ class MusicSiteBuilder:
         """
     
     def generate_css(self):
-        """Generate CSS with full-width layout and condensed embeds for Recently sections"""
-        print("🎨 Generating CSS with full-width layout and optimized embed sizing...")
+        """Generate CSS with compact grid layout and efficient embed sizing"""
+        print("🎨 Generating CSS with compact grid layout and optimized embed sizing...")
         
-        css_content = """/* LUFS Brand Colors and Full-Width Responsive Design */
+        css_content = """/* LUFS Brand Colors and Compact Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -692,16 +680,8 @@ body {
 
 .currently-listening h2 {
     font-size: 2rem;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.section-subtitle {
-    text-align: center;
-    font-size: 0.9rem;
-    opacity: 0.7;
     margin-bottom: 2rem;
-    font-style: italic;
+    text-align: center;
 }
 
 .album-du-jour {
@@ -718,7 +698,6 @@ body {
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     background: rgba(255, 255, 255, 0.05);
-    /* Exact padding to match embed height */
     padding: 4px;
 }
 
@@ -726,15 +705,6 @@ body {
     width: 100%;
     display: block;
     border-radius: 8px;
-}
-
-/* Full-width sections for Recently Added/Finished */
-.full-width-section {
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
-    width: 100vw;
-    padding-left: 2rem;
-    padding-right: 2rem;
 }
 
 /* Collapsible Sections */
@@ -794,13 +764,12 @@ body {
     padding: 2rem;
 }
 
-/* Full-width Album Grid - 4 columns on desktop */
-.album-grid-fullwidth {
+/* Compact Album Grid - Multiple columns with small embeds */
+.album-grid-compact {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-top: 1rem;
-    max-width: none;
 }
 
 /* Album Cards */
@@ -821,6 +790,10 @@ body {
 .current-card {
     background: rgba(231, 178, 37, 0.1);
     border-color: var(--lufs-yellow);
+}
+
+.compact-card {
+    padding: 1rem;
 }
 
 .card-header {
@@ -849,8 +822,8 @@ body {
     opacity: 0.7;
 }
 
-/* Grid embed containers - condensed vertical, wider horizontal */
-.grid-embed-container {
+/* Compact embed containers - Small and efficient */
+.compact-embed-container {
     width: 100%;
     margin: 0.8rem 0;
     border-radius: var(--border-radius);
@@ -860,7 +833,7 @@ body {
     padding: 3px;
 }
 
-.grid-embed-container iframe {
+.compact-embed-container iframe {
     width: 100%;
     display: block;
     border-radius: 6px;
@@ -932,20 +905,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .album-grid-fullwidth {
-        grid-template-columns: repeat(3, 1fr);
+    .album-grid-compact {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.2rem;
     }
 }
 
 @media (max-width: 900px) {
-    .album-grid-fullwidth {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.2rem;
-    }
-    
-    .full-width-section {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+    .album-grid-compact {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
     }
 }
 
@@ -954,14 +923,9 @@ body {
         --container-padding: 1rem;
     }
     
-    .album-grid-fullwidth {
+    .album-grid-compact {
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
-    
-    .full-width-section {
-        padding-left: 1rem;
-        padding-right: 1rem;
     }
     
     .current-embed-container {
@@ -969,7 +933,7 @@ body {
         padding: 3px;
     }
     
-    .grid-embed-container {
+    .compact-embed-container {
         padding: 2px;
     }
     
