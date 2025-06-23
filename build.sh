@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Music Library Website Builder with Safe Git Deployment
-# Enhanced version with proper error handling, file safety, and history preservation
+# Enhanced version with secure clean deployment (website files only)
 
 set -euo pipefail  # Exit on any error, undefined variable, or pipe failure
 
@@ -217,20 +217,27 @@ create_safe_backup() {
     TEMP_BACKUP_DIR=$(mktemp -d)
     log_info "Creating backup in: $TEMP_BACKUP_DIR"
     
-    # Copy build files to backup
+    # Copy ONLY the build directory contents to backup
     cp -r "$BUILD_DIR" "$TEMP_BACKUP_DIR/"
     
-    # Verify backup
+    # Verify backup contains only website files
     if [ ! -f "$TEMP_BACKUP_DIR/build/index.html" ]; then
-        log_error "Backup verification failed"
+        log_error "Backup verification failed: index.html not found"
         exit 1
     fi
     
-    log_success "Safety backup created and verified"
+    # Security check: ensure no source files in backup
+    if [ -f "$TEMP_BACKUP_DIR/build/build_music_site.py" ] || [ -f "$TEMP_BACKUP_DIR/build/concrete-spider-446700-f9-4646496845d1.json" ]; then
+        log_error "SECURITY ERROR: Source files detected in backup!"
+        log_error "Build directory contains source files - this should not happen"
+        exit 1
+    fi
+    
+    log_success "Safety backup created and verified (website files only)"
 }
 
 deploy_to_build_branch() {
-    log_header "🌿 Deploying to Build Branch (History Preserving)"
+    log_header "🌿 Deploying to Build Branch (Secure Clean Deployment)"
     
     # Ensure we're up to date with remote build branch
     log_info "Fetching latest remote changes..."
@@ -243,12 +250,33 @@ deploy_to_build_branch() {
             log_info "Creating local build branch from remote..."
             git checkout -b build origin/build
         else
-            log_info "Creating new build branch..."
-            git checkout -b build
-            # Create initial commit for build branch
-            echo "# Build Branch" > README-build.md
-            git add README-build.md
-            git commit -m "Initialize build branch"
+            log_info "Creating new clean build branch..."
+            git checkout --orphan build
+            git rm -rf . 2>/dev/null || true
+            
+            # Create a clean README for the build branch
+            cat > README.md << 'EOF'
+# Website Build Branch
+
+This branch contains only the built website files for deployment to Hostinger.
+
+## Contents
+- `index.html` - Main website page
+- `styles.css` - Website styling
+- `scripts.js` - Client-side JavaScript
+- `assets/` - Images, fonts, and other static files
+
+## Security
+- **No source code** is included in this branch
+- **No credentials** or sensitive files are deployed
+- Source code and build logic are maintained in the main branch
+
+## Deployment
+This branch is automatically updated by the build script and deployed to the hosting service.
+EOF
+            
+            git add README.md
+            git commit -m "Initialize clean build branch for secure deployment"
         fi
     else
         log_info "Switching to existing build branch..."
@@ -269,39 +297,83 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # HISTORY-PRESERVING UPDATE: Remove only build artifacts, keep git history
-    log_info "Updating build files while preserving history..."
+    # SECURE CLEAN DEPLOYMENT: Remove everything except .git and README.md
+    log_info "Performing secure clean deployment..."
+    log_info "🔒 Removing all files except .git and README.md..."
     
-    # Remove only the old build artifacts (not source files or git history)
-    local items_to_remove=(
-        "index.html"
-        "styles.css" 
-        "scripts.js"
-        "assets"
-    )
+    # Create a list of what to keep (NEVER delete these)
+    local keep_items=(".git" "README.md")
     
-    for item in "${items_to_remove[@]}"; do
-        if [ -e "$item" ]; then
+    # Remove all visible files except those we want to keep
+    for item in *; do
+        if [[ ! " ${keep_items[@]} " =~ " ${item} " ]]; then
             rm -rf "$item"
-            log_info "Removed old: $item"
+            log_info "Removed: $item"
         fi
     done
     
-    # Copy new build files from backup
-    log_info "Copying new build files..."
+    # Remove hidden files except .git and .gitignore
+    for item in .*; do
+        if [[ "$item" != "." && "$item" != ".." && "$item" != ".git" && "$item" != ".gitignore" ]]; then
+            rm -rf "$item"
+            log_info "Removed hidden: $item"
+        fi
+    done
+    
+    # Copy ONLY the website files from backup
+    log_info "🌐 Copying website files for secure deployment..."
     cp -r "$TEMP_BACKUP_DIR/build/"* .
     
-    # Verify deployment
+    # Verify deployment contains only website files
     if [ ! -f "index.html" ]; then
-        log_error "Deployment verification failed: index.html not found in build branch"
+        log_error "Deployment verification failed: index.html not found"
         exit 1
     fi
     
-    # Show what's in the build branch
-    log_info "Build branch contents:"
+    # CRITICAL SECURITY CHECK: Verify no source files leaked through
+    local security_violations=()
+    
+    # Check for common source files that should never be in build branch
+    local forbidden_files=(
+        "build_music_site.py"
+        "concrete-spider-446700-f9-4646496845d1.json"
+        "build.sh"
+        "venv"
+        "musickit"
+        "__pycache__"
+        "*.pyc"
+        ".env"
+    )
+    
+    for pattern in "${forbidden_files[@]}"; do
+        if ls $pattern 2>/dev/null | grep -q .; then
+            security_violations+=("$pattern")
+        fi
+    done
+    
+    if [ ${#security_violations[@]} -gt 0 ]; then
+        log_error "🚨 SECURITY VIOLATION: Forbidden files detected in build branch!"
+        for violation in "${security_violations[@]}"; do
+            log_error "   - $violation"
+        done
+        log_error "Aborting deployment to prevent credential/source code exposure"
+        exit 1
+    fi
+    
+    # Show clean build branch contents
+    log_info "✅ Clean build branch contents (website files only):"
     ls -la
     
-    # Stage all changes (additions, modifications, deletions)
+    # Count different types of files for reporting
+    local html_count=$(find . -name "*.html" | wc -l | tr -d ' ')
+    local css_count=$(find . -name "*.css" | wc -l | tr -d ' ')
+    local js_count=$(find . -name "*.js" | wc -l | tr -d ' ')
+    local asset_count=$(find assets -type f 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+    
+    log_success "🔒 Security verification passed - no source files detected"
+    log_info "📊 Deployment contains: $html_count HTML, $css_count CSS, $js_count JS files, $asset_count assets"
+    
+    # Stage all changes
     git add -A
     
     # Check if there are actually changes to commit
@@ -310,19 +382,24 @@ deploy_to_build_branch() {
         return 0
     fi
     
-    # Commit with detailed message
+    # Commit with detailed security-focused message
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local file_count
-    file_count=$(find . -name "*.html" -o -name "*.css" -o -name "*.js" | wc -l | tr -d ' ')
     
-    git commit -m "Deploy website build - $timestamp
+    git commit -m "🔒 Deploy secure website build - $timestamp
 
-- Updated website with latest content
-- Generated $file_count web files
-- Build size: $(du -sh . 2>/dev/null | cut -f1 || echo 'unknown')"
+SECURE DEPLOYMENT - Website files only
+✅ Security verified: No source code or credentials included
+📊 Files deployed:
+   - $html_count HTML files
+   - $css_count CSS files  
+   - $js_count JavaScript files
+   - $asset_count asset files
+📦 Build size: $(du -sh . 2>/dev/null | cut -f1 || echo 'unknown')
+🛡️  Source code maintained separately in main branch"
     
-    log_success "Build files committed to build branch with preserved history"
+    log_success "🔒 Secure clean deployment completed successfully"
+    log_success "✅ Build branch contains only website files - no credentials exposed"
 }
 
 push_to_remote() {
@@ -337,15 +414,15 @@ push_to_remote() {
         log_info "Main branch is up to date"
     fi
     
-    # Push build branch with history preservation
-    log_info "Pushing build branch..."
+    # Push clean build branch
+    log_info "Pushing secure build branch..."
     git checkout build
     
-    # Normal push should work now since we're preserving history
+    # Normal push should work since we're preserving history
     if git push origin build 2>/dev/null; then
         log_success "Build branch pushed successfully"
     else
-        # If it still fails, it might be because remote is ahead
+        # If it still fails, try to merge remote changes
         log_info "Normal push failed, trying to merge remote changes..."
         
         if git pull origin build 2>/dev/null; then
@@ -354,6 +431,7 @@ push_to_remote() {
                 log_success "Build branch pushed successfully after merge"
             else
                 log_error "Failed to push build branch even after merge"
+                log_info "Manual intervention may be required"
                 exit 1
             fi
         else
@@ -371,7 +449,7 @@ push_to_remote() {
 
 # Main execution
 main() {
-    log_header "🎵 Music Library Website Builder with Safe Git Deployment"
+    log_header "🎵 Music Library Website Builder with Secure Git Deployment"
     
     # Change to website directory
     cd "$WEBSITE_DIR"
@@ -388,10 +466,11 @@ main() {
     # Return to original branch
     git checkout "$ORIGINAL_BRANCH"
     
-    log_success "🎉 Deployment completed successfully!"
-    log_info "Website is now live on the build branch"
-    log_info "Source code remains safe on the main branch"
-    log_info "Both branches maintain their complete Git history"
+    log_success "🎉 Secure deployment completed successfully!"
+    log_info "🌐 Website is now live on the build branch"
+    log_info "🔒 Source code and credentials remain secure on the main branch"  
+    log_info "🛡️  Only essential website files are exposed to Hostinger"
+    log_info "📚 Both branches maintain their complete Git history"
 }
 
 # Run main function
