@@ -185,15 +185,29 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     # Create timestamp for commit message
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     
+    # First, verify the build directory exists and has content
+    if [ ! -d "build" ] || [ ! "$(ls -A build 2>/dev/null)" ]; then
+        echo "❌ Error: Build directory is empty or doesn't exist on main branch"
+        echo "📋 Cannot proceed with deployment"
+        exit 1
+    fi
+    
+    echo "✅ Build directory verified with content"
+    
+    # Create a temporary copy of build files outside the repo
+    TEMP_BUILD_DIR="/tmp/albumdujour_build_$(date +%s)"
+    echo "🗂️  Creating temporary backup of build files at: $TEMP_BUILD_DIR"
+    cp -r build "$TEMP_BUILD_DIR"
+    
     # 1. First, commit any changes to the current branch (main/master)
     echo ""
     echo "📝 Committing source changes to $CURRENT_BRANCH branch..."
     
-    # Check if there are any changes to commit
-    if git diff --staged --quiet && git diff --quiet; then
+    # Check if there are any changes to commit (exclude build directory from main branch)
+    git add . || true
+    if git diff --staged --quiet; then
         echo "ℹ️  No source changes to commit"
     else
-        git add .
         git commit -m "Update website source - $TIMESTAMP" || {
             echo "⚠️  Nothing to commit or commit failed, continuing..."
         }
@@ -213,37 +227,31 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
         git checkout -b build
     fi
     
-    # Clear the build branch (keep only build files)
+    # Clear the build branch completely (keep only .git)
     echo "🧹 Cleaning build branch..."
     
-    # FIXED: More careful cleanup - only remove files that should be in build branch
-    # Remove everything except .git and .gitignore, but do it more carefully
-    for item in *; do
-        if [ "$item" != ".git" ] && [ "$item" != ".gitignore" ] && [ "$item" != "build" ]; then
-            rm -rf "$item" 2>/dev/null || true
-        fi
-    done
+    # Remove all files and directories except .git
+    find . -maxdepth 1 -not -name '.git' -not -path '.' -exec rm -rf {} + 2>/dev/null || true
     
-    # Also clean up any hidden files except .git and .gitignore
-    for item in .*; do
-        if [ "$item" != "." ] && [ "$item" != ".." ] && [ "$item" != ".git" ] && [ "$item" != ".gitignore" ]; then
-            rm -rf "$item" 2>/dev/null || true
-        fi
-    done
-    
-    # Move build contents to root
-    echo "📦 Moving build files to repository root..."
-    if [ -d "build" ] && [ "$(ls -A build 2>/dev/null)" ]; then
-        # Only move if build directory exists and is not empty
-        mv build/* . 2>/dev/null || true
-        mv build/.* . 2>/dev/null || true  # Move hidden files if any
-        rmdir build 2>/dev/null || true
-        echo "✅ Build files moved successfully"
+    # Copy build files from temporary location
+    echo "📦 Copying build files to build branch..."
+    if [ -d "$TEMP_BUILD_DIR" ] && [ "$(ls -A "$TEMP_BUILD_DIR" 2>/dev/null)" ]; then
+        cp -r "$TEMP_BUILD_DIR"/* . 2>/dev/null || true
+        cp -r "$TEMP_BUILD_DIR"/. . 2>/dev/null || true  # Copy hidden files if any
+        echo "✅ Build files copied successfully"
+        
+        # Verify files were copied
+        echo "📋 Build branch contents:"
+        ls -la | head -10
     else
-        echo "⚠️  Build directory is empty or doesn't exist"
-        echo "📋 Contents of current directory:"
-        ls -la
+        echo "❌ Error: Could not copy build files from temporary location"
+        git checkout "$CURRENT_BRANCH"
+        rm -rf "$TEMP_BUILD_DIR" 2>/dev/null || true
+        exit 1
     fi
+    
+    # Clean up temporary directory
+    rm -rf "$TEMP_BUILD_DIR" 2>/dev/null || true
     
     # Create a simple .gitignore for the build branch
     echo "# Build branch - only contains generated website files" > .gitignore
@@ -254,10 +262,10 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     
     # Check if there are actually files to commit
     if git diff --staged --quiet; then
-        echo "⚠️  No build files to commit"
+        echo "⚠️  No new build files to commit"
     else
         git commit -m "Deploy website build - $TIMESTAMP" || {
-            echo "⚠️  No build changes to commit"
+            echo "⚠️  Commit failed, but files are staged"
         }
         echo "✅ Build files committed"
     fi
@@ -304,17 +312,6 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     echo "   Website: https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\([^.]*\).*/\1/')/tree/build"
     echo ""
     echo "🔄 To rebuild and redeploy: just run ./build.sh again"
-    echo "💡 Your local build/ directory is ready for testing"
-    
-    # Optional: Open in browser (macOS)
-    if [[ "$OSTYPE" == "darwin"* ]] && [ -f "build/index.html" ]; then
-        echo ""
-        read -p "Open local build in browser? (y/n): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            open "build/index.html"
-        fi
-    fi
     
 else
     echo ""
