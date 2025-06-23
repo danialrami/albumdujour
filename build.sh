@@ -216,15 +216,33 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     # Clear the build branch (keep only build files)
     echo "🧹 Cleaning build branch..."
     
-    # Remove all files except .git, build/, and .gitignore
-    find . -maxdepth 1 -not -name '.git' -not -name 'build' -not -name '.gitignore' -not -path '.' -exec rm -rf {} + 2>/dev/null || true
+    # FIXED: More careful cleanup - only remove files that should be in build branch
+    # Remove everything except .git and .gitignore, but do it more carefully
+    for item in *; do
+        if [ "$item" != ".git" ] && [ "$item" != ".gitignore" ] && [ "$item" != "build" ]; then
+            rm -rf "$item" 2>/dev/null || true
+        fi
+    done
+    
+    # Also clean up any hidden files except .git and .gitignore
+    for item in .*; do
+        if [ "$item" != "." ] && [ "$item" != ".." ] && [ "$item" != ".git" ] && [ "$item" != ".gitignore" ]; then
+            rm -rf "$item" 2>/dev/null || true
+        fi
+    done
     
     # Move build contents to root
     echo "📦 Moving build files to repository root..."
-    if [ -d "build" ]; then
+    if [ -d "build" ] && [ "$(ls -A build 2>/dev/null)" ]; then
+        # Only move if build directory exists and is not empty
         mv build/* . 2>/dev/null || true
         mv build/.* . 2>/dev/null || true  # Move hidden files if any
         rmdir build 2>/dev/null || true
+        echo "✅ Build files moved successfully"
+    else
+        echo "⚠️  Build directory is empty or doesn't exist"
+        echo "📋 Contents of current directory:"
+        ls -la
     fi
     
     # Create a simple .gitignore for the build branch
@@ -233,9 +251,16 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     # Add and commit build files
     echo "📤 Committing build files..."
     git add .
-    git commit -m "Deploy website build - $TIMESTAMP" || {
-        echo "⚠️  No build changes to commit"
-    }
+    
+    # Check if there are actually files to commit
+    if git diff --staged --quiet; then
+        echo "⚠️  No build files to commit"
+    else
+        git commit -m "Deploy website build - $TIMESTAMP" || {
+            echo "⚠️  No build changes to commit"
+        }
+        echo "✅ Build files committed"
+    fi
     
     # 3. Push both branches
     echo ""
@@ -258,23 +283,8 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     }
     echo "✅ Source branch pushed successfully"
     
-    # 4. Clean up - rebuild the build directory locally for testing
-    echo ""
-    echo "🔧 Rebuilding local build directory for testing..."
-    
-    # Re-run just the Python build script to regenerate build folder locally
-    source "$VENV_DIR/bin/activate" 2>/dev/null || {
-        echo "⚠️  Could not reactivate virtual environment"
-        echo "💡 You may need to run the build script again if you want to test locally"
-    }
-    
-    if [ -n "$VIRTUAL_ENV" ]; then
-        # Use venv Python directly
-        "$VENV_DIR/bin/python" "$BUILD_SCRIPT" || {
-            echo "⚠️  Could not rebuild local build directory"
-        }
-        deactivate
-    fi
+    # REMOVED: The problematic rebuild section that was trying to re-run the script
+    # without credentials. Instead, just inform the user.
     
     # Final status
     echo ""
@@ -294,6 +304,7 @@ if [ -d "build" ] && [ -f "build/index.html" ]; then
     echo "   Website: https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\([^.]*\).*/\1/')/tree/build"
     echo ""
     echo "🔄 To rebuild and redeploy: just run ./build.sh again"
+    echo "💡 Your local build/ directory is ready for testing"
     
     # Optional: Open in browser (macOS)
     if [[ "$OSTYPE" == "darwin"* ]] && [ -f "build/index.html" ]; then
