@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Music Library Website Builder with Safe Git Deployment
-# Enhanced version with proper error handling, file safety, and history preservation
+# Enhanced version with clean build branch deployment (website files only)
 
 set -euo pipefail  # Exit on any error, undefined variable, or pipe failure
 
@@ -230,7 +230,7 @@ create_safe_backup() {
 }
 
 deploy_to_build_branch() {
-    log_header "🌿 Deploying to Build Branch (History Preserving)"
+    log_header "🌿 Deploying to Build Branch (Clean Deployment)"
     
     # Ensure we're up to date with remote build branch
     log_info "Fetching latest remote changes..."
@@ -243,12 +243,21 @@ deploy_to_build_branch() {
             log_info "Creating local build branch from remote..."
             git checkout -b build origin/build
         else
-            log_info "Creating new build branch..."
-            git checkout -b build
-            # Create initial commit for build branch
-            echo "# Build Branch" > README-build.md
-            git add README-build.md
-            git commit -m "Initialize build branch"
+            log_info "Creating new clean build branch..."
+            git checkout --orphan build
+            git rm -rf . 2>/dev/null || true
+            echo "# Website Build Branch" > README.md
+            echo "" >> README.md
+            echo "This branch contains only the built website files for deployment." >> README.md
+            echo "Source code and build logic are maintained in the main branch." >> README.md
+            echo "" >> README.md
+            echo "## Contents" >> README.md
+            echo "- \`index.html\` - Main website page" >> README.md
+            echo "- \`styles.css\` - Website styling" >> README.md
+            echo "- \`scripts.js\` - Client-side JavaScript" >> README.md
+            echo "- \`assets/\` - Images, fonts, and other static files" >> README.md
+            git add README.md
+            git commit -m "Initialize clean build branch for deployment"
         fi
     else
         log_info "Switching to existing build branch..."
@@ -269,26 +278,12 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # HISTORY-PRESERVING UPDATE: Remove only build artifacts, keep git history
-    log_info "Updating build files while preserving history..."
+    # CLEAN DEPLOYMENT: Remove everything except .git and README.md
+    log_info "Cleaning build branch for secure deployment..."
+    find . -maxdepth 1 -not -name '.git' -not -name 'README.md' -not -path '.' -exec rm -rf {} + 2>/dev/null || true
     
-    # Remove only the old build artifacts (not source files or git history)
-    local items_to_remove=(
-        "index.html"
-        "styles.css" 
-        "scripts.js"
-        "assets"
-    )
-    
-    for item in "${items_to_remove[@]}"; do
-        if [ -e "$item" ]; then
-            rm -rf "$item"
-            log_info "Removed old: $item"
-        fi
-    done
-    
-    # Copy new build files from backup
-    log_info "Copying new build files..."
+    # Copy ONLY the website files from backup
+    log_info "Copying website files for clean deployment..."
     cp -r "$TEMP_BACKUP_DIR/build/"* .
     
     # Verify deployment
@@ -297,11 +292,11 @@ deploy_to_build_branch() {
         exit 1
     fi
     
-    # Show what's in the build branch
-    log_info "Build branch contents:"
+    # Show clean build branch contents
+    log_info "Clean build branch contents (website files only):"
     ls -la
     
-    # Stage all changes (additions, modifications, deletions)
+    # Stage all changes
     git add -A
     
     # Check if there are actually changes to commit
@@ -315,14 +310,19 @@ deploy_to_build_branch() {
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local file_count
     file_count=$(find . -name "*.html" -o -name "*.css" -o -name "*.js" | wc -l | tr -d ' ')
+    local asset_count
+    asset_count=$(find assets -type f 2>/dev/null | wc -l | tr -d ' ' || echo "0")
     
-    git commit -m "Deploy website build - $timestamp
+    git commit -m "Deploy clean website build - $timestamp
 
-- Updated website with latest content
+- Clean deployment with only website files
 - Generated $file_count web files
-- Build size: $(du -sh . 2>/dev/null | cut -f1 || echo 'unknown')"
+- Included $asset_count asset files
+- Build size: $(du -sh . 2>/dev/null | cut -f1 || echo 'unknown')
+- Source code maintained separately in main branch"
     
-    log_success "Build files committed to build branch with preserved history"
+    log_success "Clean build files committed to build branch with preserved history"
+    log_info "🔒 Security: Only website files deployed, no source code exposed"
 }
 
 push_to_remote() {
@@ -337,8 +337,8 @@ push_to_remote() {
         log_info "Main branch is up to date"
     fi
     
-    # Push build branch with history preservation
-    log_info "Pushing build branch..."
+    # Push build branch with clean deployment
+    log_info "Pushing clean build branch..."
     git checkout build
     
     # Normal push should work now since we're preserving history
@@ -389,9 +389,10 @@ main() {
     git checkout "$ORIGINAL_BRANCH"
     
     log_success "🎉 Deployment completed successfully!"
-    log_info "Website is now live on the build branch"
-    log_info "Source code remains safe on the main branch"
-    log_info "Both branches maintain their complete Git history"
+    log_info "🌐 Website is now live on the build branch"
+    log_info "🔒 Source code remains secure on the main branch"
+    log_info "📚 Both branches maintain their complete Git history"
+    log_info "🛡️  Only website files are exposed to Hostinger"
 }
 
 # Run main function
