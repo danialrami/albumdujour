@@ -2,7 +2,7 @@
 """
 Enhanced Music Library Website Builder
 Reads from Google Sheets and generates a static website with embedded music players
-Enhanced with timestamp-based categorization, edge case handling, and ultra-compact responsive embeds
+Enhanced with timestamp-based categorization, edge case handling, and compact responsive embeds
 """
 
 import gspread
@@ -370,7 +370,7 @@ class MusicSiteBuilder:
         """
     
     def generate_collapsible_section(self, section_id, title, albums):
-        """Generate a collapsible section with ultra-compact grid layout"""
+        """Generate a collapsible section with compact grid layout"""
         if not albums:
             return f"""
             <section class="collapsible-section" data-section="{section_id}">
@@ -397,7 +397,7 @@ class MusicSiteBuilder:
                 <span class="toggle-icon">▼</span>
             </button>
             <div class="section-content">
-                <div class="album-grid-ultra-compact">
+                <div class="album-grid-compact">
                     {album_cards}
                 </div>
             </div>
@@ -405,7 +405,7 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card with ultra-compact embed sizing"""
+        """Generate HTML for a single album card with optimized embed sizing"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
@@ -441,36 +441,36 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use ultra-compact embeds
+            # For other sections (Recently Added/Finished), use compact embeds
             if album['spotify_embed']:
                 embed_html = f"""
-                <div class="embed-container ultra-compact-embed-container">
+                <div class="embed-container compact-embed-container">
                     <iframe data-src="{album['spotify_embed']}" 
                             width="100%" 
-                            height="120"
-                            class="dynamic-embed ultra-compact-embed spotify-embed lazy-embed" 
+                            height="152"
+                            class="dynamic-embed compact-embed spotify-embed lazy-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
                             allow="encrypted-media"
                             title="Spotify - {album['album']}"
-                            style="border-radius: 6px;"></iframe>
+                            style="border-radius: 8px;"></iframe>
                 </div>
                 """
             elif album['apple_embed']:
                 embed_html = f"""
-                <div class="embed-container ultra-compact-embed-container">
+                <div class="embed-container compact-embed-container">
                     <iframe data-src="{album['apple_embed']}" 
                             width="100%" 
-                            height="140"
-                            class="dynamic-embed ultra-compact-embed apple-embed lazy-embed" 
+                            height="175"
+                            class="dynamic-embed compact-embed apple-embed lazy-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
-                            style="overflow: hidden; border-radius: 6px;"
+                            style="overflow: hidden; border-radius: 8px;"
                             title="Apple Music - {album['album']}"></iframe>
                 </div>
                 """
             else:
-                embed_html = '<div class="embed-container ultra-compact-embed-container"><p class="no-embed">No embed available</p></div>'
+                embed_html = '<div class="embed-container compact-embed-container"><p class="no-embed">No embed available</p></div>'
         
         # Build links
         links_html = ""
@@ -489,7 +489,7 @@ class MusicSiteBuilder:
         rating_display = f'<span class="rating">{album["rating"]}</span>' if album['rating'] else ""
         
         # Add special styling class for current music
-        card_class = "album-card current-card" if is_current else "album-card ultra-compact-card"
+        card_class = "album-card current-card" if is_current else "album-card compact-card"
         
         return f"""
         <div class="{card_class}" data-status="{album['status'].lower()}">
@@ -511,10 +511,10 @@ class MusicSiteBuilder:
         """
     
     def generate_css(self):
-        """Generate CSS with ultra-compact grid layout and minimal embed sizing"""
-        print("🎨 Generating CSS with ultra-compact grid layout and minimal embed sizing...")
+        """Generate CSS with compact grid layout and efficient embed sizing"""
+        print("🎨 Generating CSS with compact grid layout and optimized embed sizing...")
         
-        css_content = """/* LUFS Brand Colors and Ultra-Compact Responsive Design */
+        css_content = """/* LUFS Brand Colors and Compact Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -764,11 +764,11 @@ body {
     padding: 2rem;
 }
 
-/* Ultra-Compact Album Grid - Optimized for maximum space efficiency */
-.album-grid-ultra-compact {
+/* Compact Album Grid - Multiple columns with small embeds */
+.album-grid-compact {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
     margin-top: 1rem;
 }
 
@@ -792,65 +792,65 @@ body {
     border-color: var(--lufs-yellow);
 }
 
-.ultra-compact-card {
-    padding: 0.8rem;
+.compact-card {
+    padding: 1rem;
 }
 
 .card-header {
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
 }
 
 .album-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
     color: var(--lufs-white);
     line-height: 1.3;
 }
 
 .artist-name {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     opacity: 0.8;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
 }
 
 .card-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     opacity: 0.7;
 }
 
-/* Ultra-compact embed containers - Minimal height for maximum efficiency */
-.ultra-compact-embed-container {
+/* Compact embed containers - Small and efficient */
+.compact-embed-container {
     width: 100%;
-    margin: 0.5rem 0;
-    border-radius: 8px;
+    margin: 0.8rem 0;
+    border-radius: var(--border-radius);
     overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     background: rgba(255, 255, 255, 0.03);
-    padding: 2px;
+    padding: 3px;
 }
 
-.ultra-compact-embed-container iframe {
+.compact-embed-container iframe {
     width: 100%;
     display: block;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .card-links {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.6rem;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
     flex-wrap: wrap;
 }
 
 .music-link {
-    padding: 0.3rem 0.6rem;
-    border-radius: 12px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 500;
     transition: var(--transition);
     border: 1px solid transparent;
@@ -903,18 +903,18 @@ body {
     box-shadow: 0 8px 24px rgba(120, 190, 186, 0.3);
 }
 
-/* Responsive Design - Optimized for space efficiency */
+/* Responsive Design */
 @media (max-width: 1200px) {
-    .album-grid-ultra-compact {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 0.8rem;
+    .album-grid-compact {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.2rem;
     }
 }
 
 @media (max-width: 900px) {
-    .album-grid-ultra-compact {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 0.8rem;
+    .album-grid-compact {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
     }
 }
 
@@ -923,9 +923,9 @@ body {
         --container-padding: 1rem;
     }
     
-    .album-grid-ultra-compact {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 0.6rem;
+    .album-grid-compact {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
     
     .current-embed-container {
@@ -933,9 +933,8 @@ body {
         padding: 3px;
     }
     
-    .ultra-compact-embed-container {
-        padding: 1px;
-        margin: 0.3rem 0;
+    .compact-embed-container {
+        padding: 2px;
     }
     
     .section-toggle {
@@ -954,17 +953,6 @@ body {
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
-    
-    .ultra-compact-card {
-        padding: 0.6rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .album-grid-ultra-compact {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
 }
 
 /* Lazy loading placeholder */
@@ -978,16 +966,14 @@ body {
 .lazy-embed[data-src]::before {
     content: "Loading...";
     color: rgba(255, 255, 255, 0.5);
-    font-size: 0.8rem;
 }
 
 /* No embed fallback */
 .no-embed {
     text-align: center;
-    padding: 1rem;
+    padding: 1.5rem;
     opacity: 0.5;
     font-style: italic;
-    font-size: 0.8rem;
 }
 
 /* Accessibility */
