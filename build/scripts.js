@@ -1,11 +1,134 @@
-// Music Library Website JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎵 Music Library loaded');
+// Album du Jour - Interactive Functionality
+class AlbumSections {
+    constructor() {
+        this.initializeCollapsibleSections();
+        this.initializeLazyLoading();
+        this.initializeAccessibility();
+    }
     
-    // Add any interactive functionality here
-    // For now, this is mainly for future enhancements
+    initializeCollapsibleSections() {
+        const toggleButtons = document.querySelectorAll('.section-toggle');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                this.toggleSection(e.currentTarget);
+            });
+        });
+        
+        // Restore saved states
+        this.restoreSectionStates();
+    }
     
-    // Smooth scrolling for any internal links
+    toggleSection(button) {
+        const section = button.closest('.collapsible-section');
+        const content = section.querySelector('.section-content');
+        const icon = section.querySelector('.toggle-icon');
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+        
+        // Toggle expanded state
+        button.setAttribute('aria-expanded', !isExpanded);
+        
+        if (!isExpanded) {
+            // Expanding
+            content.style.maxHeight = content.scrollHeight + 'px';
+            icon.style.transform = 'rotate(180deg)';
+            
+            // Load any lazy embeds in this section
+            this.loadLazyEmbedsInSection(section);
+        } else {
+            // Collapsing
+            content.style.maxHeight = '0';
+            icon.style.transform = 'rotate(0deg)';
+        }
+        
+        // Save state to localStorage
+        localStorage.setItem(`section-${section.dataset.section}`, !isExpanded);
+    }
+    
+    restoreSectionStates() {
+        const sections = document.querySelectorAll('.collapsible-section');
+        sections.forEach(section => {
+            const savedState = localStorage.getItem(`section-${section.dataset.section}`);
+            if (savedState === 'true') {
+                const button = section.querySelector('.section-toggle');
+                // Delay to ensure DOM is ready
+                setTimeout(() => {
+                    this.toggleSection(button);
+                }, 100);
+            }
+        });
+    }
+    
+    initializeLazyLoading() {
+        // Intersection Observer for lazy loading embeds
+        const embedObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.loadEmbed(entry.target);
+                    embedObserver.unobserve(entry.target);
+                }
+            });
+        }, { 
+            rootMargin: '100px',
+            threshold: 0.1
+        });
+        
+        // Observe all lazy embeds
+        document.querySelectorAll('.lazy-embed').forEach(iframe => {
+            embedObserver.observe(iframe);
+        });
+    }
+    
+    loadEmbed(iframe) {
+        if (iframe.dataset.src) {
+            iframe.src = iframe.dataset.src;
+            iframe.removeAttribute('data-src');
+            iframe.classList.remove('lazy-embed');
+            
+            // Add loading indicator
+            iframe.style.opacity = '0';
+            iframe.addEventListener('load', () => {
+                iframe.style.transition = 'opacity 0.3s ease';
+                iframe.style.opacity = '1';
+            });
+        }
+    }
+    
+    loadLazyEmbedsInSection(section) {
+        const lazyEmbeds = section.querySelectorAll('.lazy-embed');
+        lazyEmbeds.forEach(iframe => {
+            this.loadEmbed(iframe);
+        });
+    }
+    
+    initializeAccessibility() {
+        // Keyboard navigation for collapsible sections
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.target.classList.contains('section-toggle')) {
+                    e.preventDefault();
+                    this.toggleSection(e.target);
+                }
+            }
+        });
+        
+        // Focus management
+        const toggleButtons = document.querySelectorAll('.section-toggle');
+        toggleButtons.forEach(button => {
+            button.addEventListener('focus', () => {
+                button.style.outline = '2px solid var(--lufs-teal)';
+                button.style.outlineOffset = '2px';
+            });
+            
+            button.addEventListener('blur', () => {
+                button.style.outline = 'none';
+            });
+        });
+    }
+}
+
+// Smooth scrolling for anchor links
+function initializeSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -18,14 +141,72 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // Add loading states for iframes
-    const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
-        iframe.addEventListener('load', function() {
-            this.style.opacity = '1';
-        });
-        iframe.style.opacity = '0.8';
-        iframe.style.transition = 'opacity 0.3s ease';
+}
+
+// Performance monitoring
+function initializePerformanceMonitoring() {
+    // Log page load time
+    window.addEventListener('load', () => {
+        const loadTime = performance.now();
+        console.log(`Album du Jour loaded in ${Math.round(loadTime)}ms`);
+        
+        // Track largest contentful paint
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                const entries = list.getEntries();
+                const lastEntry = entries[entries.length - 1];
+                console.log(`LCP: ${Math.round(lastEntry.startTime)}ms`);
+            });
+            observer.observe({ entryTypes: ['largest-contentful-paint'] });
+        }
     });
+}
+
+// Error handling for embeds
+function initializeEmbedErrorHandling() {
+    document.addEventListener('error', (e) => {
+        if (e.target.tagName === 'IFRAME') {
+            const iframe = e.target;
+            const container = iframe.closest('.embed-container');
+            if (container) {
+                container.innerHTML = '<p class="no-embed">Embed failed to load</p>';
+            }
+        }
+    }, true);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎵 Album du Jour - Initializing...');
+    
+    try {
+        new AlbumSections();
+        initializeSmoothScrolling();
+        initializePerformanceMonitoring();
+        initializeEmbedErrorHandling();
+        
+        console.log('✅ Album du Jour - Initialized successfully');
+    } catch (error) {
+        console.error('❌ Album du Jour - Initialization error:', error);
+    }
 });
+
+// Service worker registration for offline support (optional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Only register if service worker file exists
+        fetch('/sw.js', { method: 'HEAD' })
+            .then(() => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            })
+            .catch(() => {
+                // Service worker file doesn't exist, skip registration
+            });
+    });
+}

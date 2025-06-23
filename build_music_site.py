@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Music Library Website Builder
+Enhanced Music Library Website Builder
 Reads from Google Sheets and generates a static website with embedded music players
+Enhanced with timestamp-based categorization and improved design
 """
 
 import gspread
@@ -43,6 +44,19 @@ class MusicSiteBuilder:
         sheet = spreadsheet.get_worksheet(self.worksheet_index)
         return sheet
     
+    def parse_timestamp(self, timestamp_str):
+        """Parse timestamp, ignore placeholders like '20XX-XX-XXTXX:XX:XXZ'"""
+        if not timestamp_str or 'XX' in timestamp_str or timestamp_str.strip() == '':
+            return None
+        try:
+            # Handle both with and without 'Z' suffix
+            if timestamp_str.endswith('Z'):
+                return datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            else:
+                return datetime.fromisoformat(timestamp_str)
+        except:
+            return None
+    
     def fetch_music_data(self, sheet):
         """Fetch and process music data from the sheet"""
         print("📊 Fetching music data...")
@@ -65,6 +79,10 @@ class MusicSiteBuilder:
             # Parse album and artist
             album, artist = self.parse_album_artist(music_entry)
             
+            # Parse timestamps
+            date_added = self.parse_timestamp(record.get('Date Added', '').strip())
+            date_finished = self.parse_timestamp(record.get('Date Finished', '').strip())
+            
             entry = {
                 'id': i + 1,
                 'album': album,
@@ -72,8 +90,10 @@ class MusicSiteBuilder:
                 'apple_link': apple_link,
                 'spotify_link': spotify_link,
                 'status': record.get('Status', 'Open').strip(),
-                'date_added': record.get('Date Added', '').strip(),
-                'date_finished': record.get('Date Finished', '').strip(),
+                'date_added': date_added,
+                'date_finished': date_finished,
+                'date_added_raw': record.get('Date Added', '').strip(),
+                'date_finished_raw': record.get('Date Finished', '').strip(),
                 'rating': record.get('🌞', '').strip()
             }
             
@@ -85,6 +105,46 @@ class MusicSiteBuilder:
         
         print(f"✅ Processed {len(music_data)} music entries")
         return music_data
+    
+    def categorize_albums(self, music_data):
+        """Categorize albums based on status and timestamps"""
+        print("📂 Categorizing albums...")
+        
+        current_listening = []
+        recently_added = []
+        recently_finished = []
+        
+        for entry in music_data:
+            # Currently Listening: Status = "Current"
+            if entry['status'].lower() == 'current':
+                current_listening.append(entry)
+            # Recently Finished: Has a valid date_finished timestamp
+            elif entry['date_finished'] is not None:
+                recently_finished.append(entry)
+            # Recently Added: Has a valid date_added timestamp
+            elif entry['date_added'] is not None:
+                recently_added.append(entry)
+        
+        # Sort by timestamps (newest first)
+        recently_added.sort(key=lambda x: x['date_added'], reverse=True)
+        recently_finished.sort(key=lambda x: x['date_finished'], reverse=True)
+        
+        # Limit to 20 albums each for Recently Added and Recently Finished
+        recently_added = recently_added[:20]
+        recently_finished = recently_finished[:20]
+        
+        categorized = {
+            'current_listening': current_listening,
+            'recently_added': recently_added,
+            'recently_finished': recently_finished
+        }
+        
+        print(f"📊 Categorization complete:")
+        print(f"   🎧 Currently Listening: {len(current_listening)}")
+        print(f"   📀 Recently Added: {len(recently_added)}")
+        print(f"   ✅ Recently Finished: {len(recently_finished)}")
+        
+        return categorized
     
     def parse_album_artist(self, music_entry):
         """Parse 'Album - Artist' format to separate components"""
@@ -138,56 +198,65 @@ class MusicSiteBuilder:
         else:
             print("⚠️  No assets directory found, skipping asset copy")
     
-    def generate_html(self, music_data):
-        """Generate the main HTML file"""
+    def format_date_display(self, date_obj):
+        """Format date for display"""
+        if date_obj is None:
+            return ""
+        try:
+            return date_obj.strftime('%b %d, %Y')
+        except:
+            return ""
+    
+    def generate_html(self, categorized_data):
+        """Generate the main HTML file with enhanced design"""
         print("🎨 Generating HTML...")
         
-        # Group data by status for better organization
-        current_music = [m for m in music_data if m['status'] == 'Current']
-        open_music = [m for m in music_data if m['status'] == 'Open']
-        done_music = [m for m in music_data if m['status'] == 'Done']
+        current_listening = categorized_data['current_listening']
+        recently_added = categorized_data['recently_added']
+        recently_finished = categorized_data['recently_finished']
         
-        # Sort by date added (newest first)
-        current_music.sort(key=lambda x: x['date_added'], reverse=True)
-        open_music.sort(key=lambda x: x['date_added'], reverse=True)
-        done_music.sort(key=lambda x: x['date_added'], reverse=True)
+        total_albums = len(current_listening) + len(recently_added) + len(recently_finished)
         
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Album du Jour - Music Library</title>
+    <title>Album du Jour - Music Discovery</title>
+    <meta name="description" content="Personal music library showcase featuring currently listening, recently added, and recently finished albums.">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="assets/lufs-LOGO-04.png" />
 </head>
 <body>
-    <div class="lufs-container">
-        <header class="lufs-header">
+    <div class="animated-background"></div>
+    <div class="container">
+        <header class="site-header">
             <h1>🎵 Album du Jour</h1>
-            <p class="lufs-subtitle">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
-            <div class="lufs-stats">
-                <span class="stat-badge current">{len(current_music)} Current</span>
-                <span class="stat-badge open">{len(open_music)} Open</span>
-                <span class="stat-badge done">{len(done_music)} Done</span>
-                <span class="stat-badge total">{len(music_data)} Total</span>
+            <p class="subtitle">Personal Music Discovery</p>
+            <p class="generation-time">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+            <div class="stats-badges">
+                <span class="badge current">{len(current_listening)} Current</span>
+                <span class="badge added">{len(recently_added)} Recently Added</span>
+                <span class="badge finished">{len(recently_finished)} Recently Finished</span>
+                <span class="badge total">{total_albums} Total</span>
             </div>
         </header>
-
-        <main class="lufs-main">
-            {self.generate_section_html("🎧 Currently Listening", current_music, "current")}
-            {self.generate_section_html("📖 Up Next", open_music[:20], "open")}  
-            {self.generate_section_html("✅ Recently Finished", done_music[:20], "done")}
+        
+        <main class="content">
+            {self.generate_currently_listening_section(current_listening)}
+            {self.generate_collapsible_section("recently-added", "📀 Recently Added", recently_added)}
+            {self.generate_collapsible_section("recently-finished", "✅ Recently Finished", recently_finished)}
         </main>
-
-        <footer class="lufs-footer">
-            <div class="lufs-logo-container">
-                <img src="assets/lufs-LOGO-04.png" alt="LUFS Logo" class="lufs-logo" />
-            </div>
-            <p>Album du Jour • Built with ❤️</p>
+        
+        <footer class="site-footer">
+            <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
+               target="_blank" class="sheets-link">
+                📊 View Full Library
+            </a>
+            <p>Built with ❤️ by <strong>LUFS Audio</strong></p>
         </footer>
     </div>
-
+    
     <script src="scripts.js"></script>
 </body>
 </html>"""
@@ -198,121 +267,151 @@ class MusicSiteBuilder:
         
         print(f"✅ HTML generated: {output_file}")
     
-    def generate_section_html(self, title, music_list, section_class):
-        """Generate HTML for a section of music"""
-        if not music_list:
+    def generate_currently_listening_section(self, current_albums):
+        """Generate the Currently Listening section (always visible)"""
+        if not current_albums:
             return f"""
-            <section class="lufs-section {section_class}">
-                <h2>{title}</h2>
-                <p class="empty-section">No music in this section yet.</p>
+            <section class="currently-listening">
+                <h2>🎧 Currently Listening</h2>
+                <div class="empty-section">
+                    <p>No album currently being listened to.</p>
+                    <p class="subtitle">The album du jour will appear here when selected.</p>
+                </div>
             </section>
             """
         
-        music_cards = ""
-        for music in music_list:
-            music_cards += self.generate_music_card_html(music)
+        # Take the first current album as the "album du jour"
+        album = current_albums[0]
         
         return f"""
-        <section class="lufs-section {section_class}">
-            <h2>{title}</h2>
-            <div class="music-grid">
-                {music_cards}
+        <section class="currently-listening">
+            <h2>🎧 Currently Listening</h2>
+            <div class="album-du-jour">
+                {self.generate_album_card_html(album, is_current=True)}
             </div>
         </section>
         """
     
-    def generate_music_card_html(self, music):
-        """Generate HTML for a single music card"""
-        # For "Currently Listening" section, always show embeds prominently
-        is_current = music['status'] == 'Current'
+    def generate_collapsible_section(self, section_id, title, albums):
+        """Generate a collapsible section"""
+        if not albums:
+            return f"""
+            <section class="collapsible-section" data-section="{section_id}">
+                <button class="section-toggle" aria-expanded="false">
+                    <h2>{title}</h2>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div class="section-content">
+                    <div class="empty-section">
+                        <p>No albums in this section yet.</p>
+                    </div>
+                </div>
+            </section>
+            """
         
-        # Debug: Print what we have for current music
-        if is_current:
-            print(f"🎧 Current music debug:")
-            print(f"  Album: {music['album']}")
-            print(f"  Apple link: {music['apple_link']}")
-            print(f"  Spotify link: {music['spotify_link']}")
-            print(f"  Apple embed: {music['apple_embed']}")
-            print(f"  Spotify embed: {music['spotify_embed']}")
+        album_cards = ""
+        for album in albums:
+            album_cards += self.generate_album_card_html(album, is_current=False)
         
+        return f"""
+        <section class="collapsible-section" data-section="{section_id}">
+            <button class="section-toggle" aria-expanded="false">
+                <h2>{title} <span class="count">({len(albums)})</span></h2>
+                <span class="toggle-icon">▼</span>
+            </button>
+            <div class="section-content">
+                <div class="album-grid">
+                    {album_cards}
+                </div>
+            </div>
+        </section>
+        """
+    
+    def generate_album_card_html(self, album, is_current=False):
+        """Generate HTML for a single album card"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
             # For current music, show embeds prominently
-            if music['spotify_embed']:
+            if album['spotify_embed']:
                 embed_html = f"""
-                <iframe src="{music['spotify_embed']}" 
-                        width="100%" height="380" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - {music['album']}"
-                        style="border-radius: 10px;"></iframe>
+                <div class="embed-container">
+                    <iframe src="{album['spotify_embed']}" 
+                            width="100%" height="380" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - {album['album']}"
+                            style="border-radius: 10px;"></iframe>
+                </div>
                 """
-                print(f"  ✅ Using Spotify embed: {music['spotify_embed']}")
-            elif music['apple_embed']:
+            elif album['apple_embed']:
                 embed_html = f"""
-                <iframe src="{music['apple_embed']}" 
-                        width="100%" height="450" frameborder="0" 
-                        allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
-                        style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;"
-                        sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-                        title="Apple Music - {music['album']}"></iframe>
+                <div class="embed-container">
+                    <iframe src="{album['apple_embed']}" 
+                            width="100%" height="450" frameborder="0" 
+                            allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
+                            style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;"
+                            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                            title="Apple Music - {album['album']}"></iframe>
+                </div>
                 """
-                print(f"  ✅ Using Apple embed: {music['apple_embed']}")
             else:
-                print(f"  ⚠️  No embeds available for current music")
+                embed_html = '<div class="embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections, use smaller embeds or no embeds
-            if music['spotify_embed']:
+            # For other sections, use smaller embeds
+            if album['spotify_embed']:
                 embed_html = f"""
-                <iframe src="{music['spotify_embed']}" 
-                        width="100%" height="152" frameborder="0" 
-                        allowtransparency="true" allow="encrypted-media"
-                        title="Spotify - {music['album']}"
-                        style="border-radius: 10px;"></iframe>
+                <div class="embed-container">
+                    <iframe data-src="{album['spotify_embed']}" 
+                            width="100%" height="152" frameborder="0" 
+                            allowtransparency="true" allow="encrypted-media"
+                            title="Spotify - {album['album']}"
+                            style="border-radius: 10px;" class="lazy-embed"></iframe>
+                </div>
                 """
-            elif music['apple_embed']:
+            elif album['apple_embed']:
                 embed_html = f"""
-                <iframe src="{music['apple_embed']}" 
-                        width="100%" height="175" frameborder="0" 
-                        allow="autoplay *; encrypted-media *" 
-                        style="overflow: hidden; border-radius: 10px;"
-                        title="Apple Music - {music['album']}"></iframe>
+                <div class="embed-container">
+                    <iframe data-src="{album['apple_embed']}" 
+                            width="100%" height="175" frameborder="0" 
+                            allow="autoplay *; encrypted-media *" 
+                            style="overflow: hidden; border-radius: 10px;"
+                            title="Apple Music - {album['album']}" class="lazy-embed"></iframe>
+                </div>
                 """
+            else:
+                embed_html = '<div class="embed-container"><p class="no-embed">No embed available</p></div>'
         
         # Build links
         links_html = ""
-        if music['apple_link']:
-            links_html += f'<a href="{music["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
-        if music['spotify_link']:
-            links_html += f'<a href="{music["spotify_link"]}" target="_blank" class="music-link spotify">🎵 Spotify</a>'
+        if album['apple_link']:
+            links_html += f'<a href="{album["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
+        if album['spotify_link']:
+            links_html += f'<a href="{album["spotify_link"]}" target="_blank" class="music-link spotify">🎵 Spotify</a>'
         
-        # Format date
+        # Format dates
         date_display = ""
-        if music['date_added']:
-            try:
-                # Parse ISO date and format nicely
-                date_obj = datetime.fromisoformat(music['date_added'].replace('Z', '+00:00'))
-                date_display = date_obj.strftime('%b %d, %Y')
-            except:
-                date_display = music['date_added'][:10]  # Just take the date part
+        if album['date_added']:
+            date_display = f'<span class="date">Added: {self.format_date_display(album["date_added"])}</span>'
+        elif album['date_finished']:
+            date_display = f'<span class="date">Finished: {self.format_date_display(album["date_finished"])}</span>'
         
-        rating_display = music['rating'] if music['rating'] else ""
+        rating_display = f'<span class="rating">{album["rating"]}</span>' if album['rating'] else ""
         
         # Add special styling class for current music
-        card_class = f"music-card {music['status'].lower()}-card" if is_current else "music-card"
+        card_class = "album-card current-card" if is_current else "album-card"
         
         return f"""
-        <div class="{card_class}" data-status="{music['status'].lower()}">
+        <div class="{card_class}" data-status="{album['status'].lower()}">
             <div class="card-header">
-                <h3 class="album-title">{music['album']}</h3>
-                <p class="artist-name">{music['artist']}</p>
+                <h3 class="album-title">{album['album']}</h3>
+                <p class="artist-name">{album['artist']}</p>
                 <div class="card-meta">
-                    {f'<span class="date">{date_display}</span>' if date_display else ''}
-                    {f'<span class="rating">{rating_display}</span>' if rating_display else ''}
+                    {date_display}
+                    {rating_display}
                 </div>
             </div>
             
-            {f'<div class="embed-container">{embed_html}</div>' if embed_html else '<div class="embed-container"><p style="text-align:center;color:var(--lufs-light-gray);padding:20px;">No embed available</p></div>'}
+            {embed_html}
             
             <div class="card-links">
                 {links_html}
@@ -321,24 +420,37 @@ class MusicSiteBuilder:
         """
     
     def generate_css(self):
-        """Generate the CSS file"""
-        print("🎨 Generating CSS...")
+        """Generate the enhanced CSS file with LUFS branding"""
+        print("🎨 Generating enhanced CSS...")
         
-        css_content = """/* LUFS Color Palette */
+        css_content = """/* LUFS Brand Colors and Enhanced Design */
 :root {
+    /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
     --lufs-red: #D35233;
     --lufs-yellow: #E7B225;
-    --lufs-blue: #2C5AA0;
-    --lufs-white: #FFFFFF;
-    --lufs-off-white: #E0E0E0;
-    --lufs-light-gray: #B0B0B0;
-    --lufs-dark-gray: #333333;
-    --lufs-darker-gray: #222222;
-    --lufs-almost-black: #121212;
-    --lufs-black: #000000;
+    --lufs-blue: #2069af;
+    --lufs-black: #111111;
+    --lufs-white: #fbf9e2;
+    
+    /* Derived colors */
+    --lufs-teal-alpha: rgba(120, 190, 186, 0.1);
+    --lufs-red-alpha: rgba(211, 82, 51, 0.1);
+    --lufs-yellow-alpha: rgba(231, 178, 37, 0.1);
+    --lufs-blue-alpha: rgba(32, 105, 175, 0.1);
+    
+    /* Gradients */
+    --lufs-gradient: linear-gradient(135deg, var(--lufs-teal), var(--lufs-blue));
+    --lufs-border-gradient: linear-gradient(90deg, var(--lufs-teal), var(--lufs-yellow), var(--lufs-red), var(--lufs-blue));
+    
+    /* Layout */
+    --container-max-width: 1400px;
+    --container-padding: 2rem;
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
 }
 
+/* Reset and base styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -346,261 +458,487 @@ class MusicSiteBuilder:
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Host Grotesk', Public Sans, Inter, Manrope, sans-serif;
-    background-color: var(--lufs-almost-black);
-    color: var(--lufs-off-white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--lufs-black);
+    color: var(--lufs-white);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
-.lufs-container {
-    max-width: 1400px;
+/* Animated Background */
+.animated-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: var(--lufs-black);
+    overflow: hidden;
+}
+
+.animated-background::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 80%, var(--lufs-teal-alpha) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, var(--lufs-red-alpha) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, var(--lufs-yellow-alpha) 0%, transparent 50%),
+        radial-gradient(circle at 60% 60%, var(--lufs-blue-alpha) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { 
+        transform: translate(0, 0) rotate(0deg); 
+    }
+    25% { 
+        transform: translate(30px, -30px) rotate(90deg); 
+    }
+    50% { 
+        transform: translate(-20px, 20px) rotate(180deg); 
+    }
+    75% { 
+        transform: translate(20px, -10px) rotate(270deg); 
+    }
+}
+
+/* Container */
+.container {
+    max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: var(--container-padding);
+    position: relative;
+    z-index: 1;
 }
 
 /* Header */
-.lufs-header {
+.site-header {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
 }
 
-.lufs-header h1 {
-    color: var(--lufs-blue);
-    font-size: 3rem;
-    margin-bottom: 10px;
+.site-header h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 700;
+    background: var(--lufs-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
 }
 
-.lufs-subtitle {
+.subtitle {
     color: var(--lufs-teal);
-    font-size: 1.1rem;
-    margin-bottom: 20px;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
 }
 
-.lufs-stats {
+.generation-time {
+    color: rgba(251, 249, 226, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-badges {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
-.stat-badge {
-    padding: 8px 16px;
+.badge {
+    padding: 0.5rem 1rem;
     border-radius: 20px;
     font-weight: 600;
     font-size: 0.9rem;
+    transition: var(--transition);
 }
 
-.stat-badge.current { background-color: var(--lufs-yellow); color: var(--lufs-almost-black); }
-.stat-badge.open { background-color: var(--lufs-blue); color: var(--lufs-white); }
-.stat-badge.done { background-color: var(--lufs-teal); color: var(--lufs-almost-black); }
-.stat-badge.total { background-color: var(--lufs-dark-gray); color: var(--lufs-off-white); }
-
-/* Sections */
-.lufs-section {
-    margin-bottom: 60px;
+.badge:hover {
+    transform: translateY(-2px);
 }
 
-.lufs-section h2 {
-    color: var(--lufs-white);
+.badge.current { 
+    background-color: var(--lufs-yellow); 
+    color: var(--lufs-black); 
+}
+
+.badge.added { 
+    background-color: var(--lufs-blue); 
+    color: var(--lufs-white); 
+}
+
+.badge.finished { 
+    background-color: var(--lufs-teal); 
+    color: var(--lufs-black); 
+}
+
+.badge.total { 
+    background-color: rgba(251, 249, 226, 0.2); 
+    color: var(--lufs-white); 
+    border: 1px solid var(--lufs-white);
+}
+
+/* Currently Listening Section */
+.currently-listening {
+    margin-bottom: 3rem;
+}
+
+.currently-listening h2 {
     font-size: 2rem;
-    margin-bottom: 30px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--lufs-white);
+}
+
+.album-du-jour {
+    display: flex;
+    justify-content: center;
+}
+
+.album-du-jour .album-card {
+    max-width: 600px;
+    width: 100%;
+    background: var(--lufs-gradient);
+    border: 3px solid var(--lufs-yellow);
+    box-shadow: 
+        0 0 30px rgba(231, 178, 37, 0.3),
+        0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(1.02);
+}
+
+/* Collapsible Sections */
+.collapsible-section {
+    margin-bottom: 2rem;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: rgba(251, 249, 226, 0.05);
+    border: 1px solid rgba(251, 249, 226, 0.1);
+}
+
+.section-toggle {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 1.5rem;
+    color: var(--lufs-white);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    transition: var(--transition);
+    min-height: 44px; /* Touch-friendly */
+}
+
+.section-toggle:hover {
+    background: rgba(251, 249, 226, 0.1);
+}
+
+.section-toggle h2 {
+    font-size: 1.5rem;
     font-weight: 600;
 }
 
-.empty-section {
-    text-align: center;
-    color: var(--lufs-light-gray);
-    font-style: italic;
-    padding: 40px;
+.count {
+    color: var(--lufs-teal);
+    font-weight: 400;
 }
 
-/* Music Grid */
-.music-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 30px;
+.toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+    color: var(--lufs-teal);
 }
 
-/* Special grid for currently listening section */
-.lufs-section.current .music-grid {
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 40px;
+.section-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
 }
 
-/* Music Cards */
-.music-card {
-    background-color: var(--lufs-darker-gray);
-    border-radius: 16px;
+.section-content {
+    max-height: 0;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid var(--lufs-dark-gray);
+    transition: max-height 0.3s ease;
 }
 
-.music-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+.section-toggle[aria-expanded="true"] + .section-content {
+    max-height: none;
 }
 
-/* Special styling for current music cards */
-.current-card {
-    background-color: var(--lufs-darker-gray);
-    border: 2px solid var(--lufs-yellow);
-    box-shadow: 0 5px 20px rgba(231, 178, 37, 0.2);
+/* Album Grid */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
 }
 
-.current-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(231, 178, 37, 0.3);
+/* Album Cards */
+.album-card {
+    background: rgba(251, 249, 226, 0.05);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid transparent;
+    background-image: var(--lufs-border-gradient);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.album-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 17, 17, 0.8);
+    z-index: -1;
+}
+
+.album-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(120, 190, 186, 0.2);
 }
 
 .card-header {
-    padding: 20px 20px 15px;
+    margin-bottom: 1rem;
 }
 
 .album-title {
-    color: var(--lufs-white);
     font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--lufs-white);
+    margin-bottom: 0.25rem;
     line-height: 1.3;
-}
-
-.current-card .album-title {
-    font-size: 1.4rem;
-    color: var(--lufs-yellow);
 }
 
 .artist-name {
     color: var(--lufs-teal);
     font-size: 1rem;
-    font-weight: 500;
-    margin-bottom: 10px;
-}
-
-.current-card .artist-name {
-    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
 }
 
 .card-meta {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 1rem;
     font-size: 0.85rem;
-    color: var(--lufs-light-gray);
+    color: rgba(251, 249, 226, 0.7);
+}
+
+.date {
+    color: var(--lufs-yellow);
 }
 
 .rating {
-    font-size: 1rem;
+    color: var(--lufs-yellow);
 }
 
+/* Embed Container */
 .embed-container {
-    margin: 0;
+    margin: 1rem 0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .embed-container iframe {
     width: 100%;
     border: none;
-    background-color: var(--lufs-dark-gray);
+    border-radius: var(--border-radius);
 }
 
+.no-embed {
+    text-align: center;
+    color: rgba(251, 249, 226, 0.5);
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* Music Links */
 .card-links {
-    padding: 15px 20px 20px;
     display: flex;
-    gap: 10px;
+    gap: 0.75rem;
+    margin-top: 1rem;
 }
 
 .music-link {
     flex: 1;
-    text-align: center;
-    padding: 10px 15px;
+    padding: 0.75rem;
     border-radius: 8px;
     text-decoration: none;
+    text-align: center;
     font-weight: 600;
     font-size: 0.9rem;
-    transition: all 0.2s ease;
+    transition: var(--transition);
+    border: 2px solid transparent;
 }
 
 .music-link.apple {
-    background-color: var(--lufs-red);
-    color: var(--lufs-white);
-    border: 1px solid var(--lufs-red);
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    color: white;
 }
 
 .music-link.spotify {
-    background-color: #1DB954;
-    color: var(--lufs-white);
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    color: white;
 }
 
 .music-link:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.music-link.apple:hover {
-    background-color: #e85a42;
+/* Empty Section */
+.empty-section {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: rgba(251, 249, 226, 0.6);
 }
 
-.music-link.spotify:hover {
-    background-color: #1ed760;
+.empty-section p {
+    margin-bottom: 0.5rem;
+}
+
+.empty-section .subtitle {
+    font-size: 0.9rem;
+    color: rgba(251, 249, 226, 0.4);
 }
 
 /* Footer */
-.lufs-footer {
+.site-footer {
     text-align: center;
-    margin-top: 80px;
-    padding-top: 40px;
-    border-top: 1px solid var(--lufs-dark-gray);
-    color: var(--lufs-light-gray);
+    margin-top: 4rem;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(251, 249, 226, 0.1);
 }
 
-.lufs-logo-container {
-    margin-bottom: 15px;
-    opacity: 0.6;
+.sheets-link {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: var(--lufs-gradient);
+    color: var(--lufs-white);
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    transition: var(--transition);
 }
 
-.lufs-logo {
-    width: 40px;
-    height: auto;
+.sheets-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(120, 190, 186, 0.3);
 }
 
-/* Mobile Responsive */
+.site-footer p {
+    color: rgba(251, 249, 226, 0.7);
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .lufs-container {
-        padding: 30px 15px;
+    :root {
+        --container-padding: 1rem;
     }
     
-    .lufs-header h1 {
-        font-size: 2.5rem;
-    }
-    
-    .music-grid {
+    .album-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 1rem;
+        padding: 1rem;
     }
     
-    .lufs-section.current .music-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
+    .stats-badges {
+        gap: 0.5rem;
     }
     
-    .lufs-stats {
-        gap: 10px;
-    }
-    
-    .stat-badge {
+    .badge {
         font-size: 0.8rem;
-        padding: 6px 12px;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .card-links {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .section-toggle {
+        padding: 1rem;
+    }
+    
+    .section-toggle h2 {
+        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 480px) {
-    .card-links {
-        flex-direction: column;
+    .site-header {
+        margin-bottom: 2rem;
+        padding: 1rem 0;
     }
     
-    .music-link {
-        margin-bottom: 5px;
+    .album-card {
+        padding: 1rem;
+    }
+    
+    .embed-container iframe {
+        height: 120px !important;
+    }
+    
+    .album-du-jour .embed-container iframe {
+        height: 300px !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .album-card:hover {
+        transform: none;
+    }
+    
+    .album-card:active {
+        transform: scale(0.98);
+    }
+    
+    .music-link:hover {
+        transform: none;
+    }
+    
+    .music-link:active {
+        transform: scale(0.95);
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --lufs-white: #ffffff;
+        --lufs-black: #000000;
+    }
+    
+    .album-card {
+        border: 2px solid var(--lufs-white);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .animated-background::before {
+        animation: none;
     }
 }
 """
@@ -611,18 +949,141 @@ body {
         
         print(f"✅ CSS generated: {output_file}")
     
-    def generate_js(self):
-        """Generate the JavaScript file"""
-        print("🎨 Generating JavaScript...")
+    def generate_javascript(self):
+        """Generate JavaScript for interactions"""
+        print("⚡ Generating JavaScript...")
         
-        js_content = """// Music Library Website JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎵 Music Library loaded');
+        js_content = """// Album du Jour - Interactive Functionality
+class AlbumSections {
+    constructor() {
+        this.initializeCollapsibleSections();
+        this.initializeLazyLoading();
+        this.initializeAccessibility();
+    }
     
-    // Add any interactive functionality here
-    // For now, this is mainly for future enhancements
+    initializeCollapsibleSections() {
+        const toggleButtons = document.querySelectorAll('.section-toggle');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                this.toggleSection(e.currentTarget);
+            });
+        });
+        
+        // Restore saved states
+        this.restoreSectionStates();
+    }
     
-    // Smooth scrolling for any internal links
+    toggleSection(button) {
+        const section = button.closest('.collapsible-section');
+        const content = section.querySelector('.section-content');
+        const icon = section.querySelector('.toggle-icon');
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+        
+        // Toggle expanded state
+        button.setAttribute('aria-expanded', !isExpanded);
+        
+        if (!isExpanded) {
+            // Expanding
+            content.style.maxHeight = content.scrollHeight + 'px';
+            icon.style.transform = 'rotate(180deg)';
+            
+            // Load any lazy embeds in this section
+            this.loadLazyEmbedsInSection(section);
+        } else {
+            // Collapsing
+            content.style.maxHeight = '0';
+            icon.style.transform = 'rotate(0deg)';
+        }
+        
+        // Save state to localStorage
+        localStorage.setItem(`section-${section.dataset.section}`, !isExpanded);
+    }
+    
+    restoreSectionStates() {
+        const sections = document.querySelectorAll('.collapsible-section');
+        sections.forEach(section => {
+            const savedState = localStorage.getItem(`section-${section.dataset.section}`);
+            if (savedState === 'true') {
+                const button = section.querySelector('.section-toggle');
+                // Delay to ensure DOM is ready
+                setTimeout(() => {
+                    this.toggleSection(button);
+                }, 100);
+            }
+        });
+    }
+    
+    initializeLazyLoading() {
+        // Intersection Observer for lazy loading embeds
+        const embedObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.loadEmbed(entry.target);
+                    embedObserver.unobserve(entry.target);
+                }
+            });
+        }, { 
+            rootMargin: '100px',
+            threshold: 0.1
+        });
+        
+        // Observe all lazy embeds
+        document.querySelectorAll('.lazy-embed').forEach(iframe => {
+            embedObserver.observe(iframe);
+        });
+    }
+    
+    loadEmbed(iframe) {
+        if (iframe.dataset.src) {
+            iframe.src = iframe.dataset.src;
+            iframe.removeAttribute('data-src');
+            iframe.classList.remove('lazy-embed');
+            
+            // Add loading indicator
+            iframe.style.opacity = '0';
+            iframe.addEventListener('load', () => {
+                iframe.style.transition = 'opacity 0.3s ease';
+                iframe.style.opacity = '1';
+            });
+        }
+    }
+    
+    loadLazyEmbedsInSection(section) {
+        const lazyEmbeds = section.querySelectorAll('.lazy-embed');
+        lazyEmbeds.forEach(iframe => {
+            this.loadEmbed(iframe);
+        });
+    }
+    
+    initializeAccessibility() {
+        // Keyboard navigation for collapsible sections
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.target.classList.contains('section-toggle')) {
+                    e.preventDefault();
+                    this.toggleSection(e.target);
+                }
+            }
+        });
+        
+        // Focus management
+        const toggleButtons = document.querySelectorAll('.section-toggle');
+        toggleButtons.forEach(button => {
+            button.addEventListener('focus', () => {
+                button.style.outline = '2px solid var(--lufs-teal)';
+                button.style.outlineOffset = '2px';
+            });
+            
+            button.addEventListener('blur', () => {
+                button.style.outline = 'none';
+            });
+        });
+    }
+}
+
+// Smooth scrolling for anchor links
+function initializeSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -635,17 +1096,75 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // Add loading states for iframes
-    const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
-        iframe.addEventListener('load', function() {
-            this.style.opacity = '1';
-        });
-        iframe.style.opacity = '0.8';
-        iframe.style.transition = 'opacity 0.3s ease';
+}
+
+// Performance monitoring
+function initializePerformanceMonitoring() {
+    // Log page load time
+    window.addEventListener('load', () => {
+        const loadTime = performance.now();
+        console.log(`Album du Jour loaded in ${Math.round(loadTime)}ms`);
+        
+        // Track largest contentful paint
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                const entries = list.getEntries();
+                const lastEntry = entries[entries.length - 1];
+                console.log(`LCP: ${Math.round(lastEntry.startTime)}ms`);
+            });
+            observer.observe({ entryTypes: ['largest-contentful-paint'] });
+        }
     });
+}
+
+// Error handling for embeds
+function initializeEmbedErrorHandling() {
+    document.addEventListener('error', (e) => {
+        if (e.target.tagName === 'IFRAME') {
+            const iframe = e.target;
+            const container = iframe.closest('.embed-container');
+            if (container) {
+                container.innerHTML = '<p class="no-embed">Embed failed to load</p>';
+            }
+        }
+    }, true);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎵 Album du Jour - Initializing...');
+    
+    try {
+        new AlbumSections();
+        initializeSmoothScrolling();
+        initializePerformanceMonitoring();
+        initializeEmbedErrorHandling();
+        
+        console.log('✅ Album du Jour - Initialized successfully');
+    } catch (error) {
+        console.error('❌ Album du Jour - Initialization error:', error);
+    }
 });
+
+// Service worker registration for offline support (optional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Only register if service worker file exists
+        fetch('/sw.js', { method: 'HEAD' })
+            .then(() => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            })
+            .catch(() => {
+                // Service worker file doesn't exist, skip registration
+            });
+    });
+}
 """
         
         output_file = self.output_dir / "scripts.js"
@@ -654,33 +1173,102 @@ document.addEventListener('DOMContentLoaded', function() {
         
         print(f"✅ JavaScript generated: {output_file}")
     
-    def build(self):
-        """Main build process"""
-        print("🚀 Starting Music Library website build...\n")
+    def generate_build_readme(self):
+        """Generate README for build folder"""
+        print("📝 Generating build README...")
         
+        readme_content = f"""# Album du Jour - Build Files
+
+This directory contains the generated static website files for Album du Jour.
+
+## Generated Files
+
+- `index.html` - Main website page with enhanced design
+- `styles.css` - Stylesheet with LUFS branding and responsive design
+- `scripts.js` - Interactive functionality for collapsible sections
+- `assets/` - Images and static assets including custom favicon
+- `favicon.svg` - Custom Album du Jour vinyl record favicon
+
+## Features
+
+### Content Organization
+- **Currently Listening**: Prominently displayed "album du jour"
+- **Recently Added**: Last 20 albums added (collapsible)
+- **Recently Finished**: Last 20 albums completed (collapsible)
+
+### Design Features
+- LUFS brand colors and animated background
+- Responsive design for all devices
+- Collapsible sections with localStorage persistence
+- Lazy loading for music embeds
+- Accessibility features and keyboard navigation
+
+### Music Integration
+- Apple Music and Spotify embeds
+- Direct links to music services
+- Optimized embed sizes for different sections
+
+## Deployment
+
+These files are ready for deployment to any static hosting service:
+
+- **Netlify**: Drag and drop this folder
+- **Vercel**: Connect to Git repository
+- **GitHub Pages**: Push to gh-pages branch
+- **Traditional hosting**: Upload via FTP/SFTP
+
+## Browser Support
+
+- Modern browsers (Chrome, Firefox, Safari, Edge)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+- Progressive enhancement for older browsers
+
+## Performance
+
+- Optimized for fast loading
+- Lazy loading for embeds
+- Minimal JavaScript footprint
+- Responsive images and assets
+
+---
+
+**Generated on:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
+**Source:** Album du Jour Enhanced Build System  
+**Version:** 2.0  
+"""
+        
+        output_file = self.output_dir / "README.md"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(readme_content)
+        
+        print(f"✅ Build README generated: {output_file}")
+    
+    def run(self):
+        """Main execution method"""
         try:
-            # Setup
+            print("🚀 Starting Album du Jour Enhanced Build Process...")
+            
+            # Setup and data fetching
             sheet = self.setup_google_sheets()
             music_data = self.fetch_music_data(sheet)
+            categorized_data = self.categorize_albums(music_data)
             
-            # Create output structure
+            # Create output and generate files
             self.create_output_directory()
-            
-            # Generate files
-            self.generate_html(music_data)
+            self.generate_html(categorized_data)
             self.generate_css()
-            self.generate_js()
+            self.generate_javascript()
+            self.generate_build_readme()
             
-            print(f"\n🎉 Build complete! Generated website in: {self.output_dir}")
-            print(f"📂 Open {self.output_dir / 'index.html'} in your browser")
+            print("🎉 Album du Jour Enhanced Build Complete!")
+            print(f"📁 Output directory: {self.output_dir}")
+            print(f"🌐 Open {self.output_dir}/index.html to view the site")
             
         except Exception as e:
-            print(f"\n❌ Build failed: {str(e)}")
+            print(f"❌ Build failed: {str(e)}")
             raise
 
-def main():
-    builder = MusicSiteBuilder()
-    builder.build()
-
 if __name__ == "__main__":
-    main()
+    builder = MusicSiteBuilder()
+    builder.run()
+
