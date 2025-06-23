@@ -63,3 +63,5 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+DELIVERY_README.md

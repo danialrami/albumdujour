@@ -289,7 +289,7 @@ class MusicSiteBuilder:
                target="_blank" class="sheets-link">
                 📊 View Full Library
             </a>
-            <p>Built with ❤️ by <strong>LUFS Audio</strong></p>
+            <p>Built with ❤️</p>
         </footer>
     </div>
     
