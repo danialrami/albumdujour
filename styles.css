@@ -1,4 +1,4 @@
-/* LUFS Brand Colors and Compact Responsive Design */
+/* LUFS Brand Colors and Ultra-Compact Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -248,11 +248,11 @@ body {
     padding: 2rem;
 }
 
-/* Compact Album Grid - Multiple columns with small embeds */
-.album-grid-compact {
+/* Ultra-Compact Album Grid - Optimized for maximum space efficiency */
+.album-grid-ultra-compact {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
     margin-top: 1rem;
 }
 
@@ -276,65 +276,65 @@ body {
     border-color: var(--lufs-yellow);
 }
 
-.compact-card {
-    padding: 1rem;
+.ultra-compact-card {
+    padding: 0.8rem;
 }
 
 .card-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
 }
 
 .album-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
     color: var(--lufs-white);
     line-height: 1.3;
 }
 
 .artist-name {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     opacity: 0.8;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
 }
 
 .card-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     opacity: 0.7;
 }
 
-/* Compact embed containers - Small and efficient */
-.compact-embed-container {
+/* Ultra-compact embed containers - Minimal height for maximum efficiency */
+.ultra-compact-embed-container {
     width: 100%;
-    margin: 0.8rem 0;
-    border-radius: var(--border-radius);
+    margin: 0.5rem 0;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     background: rgba(255, 255, 255, 0.03);
-    padding: 3px;
+    padding: 2px;
 }
 
-.compact-embed-container iframe {
+.ultra-compact-embed-container iframe {
     width: 100%;
     display: block;
-    border-radius: 6px;
+    border-radius: 4px;
 }
 
 .card-links {
     display: flex;
-    gap: 0.6rem;
-    margin-top: 0.8rem;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
     flex-wrap: wrap;
 }
 
 .music-link {
-    padding: 0.4rem 0.8rem;
-    border-radius: 16px;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     transition: var(--transition);
     border: 1px solid transparent;
@@ -387,18 +387,18 @@ body {
     box-shadow: 0 8px 24px rgba(120, 190, 186, 0.3);
 }
 
-/* Responsive Design */
+/* Responsive Design - Optimized for space efficiency */
 @media (max-width: 1200px) {
-    .album-grid-compact {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.2rem;
+    .album-grid-ultra-compact {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.8rem;
     }
 }
 
 @media (max-width: 900px) {
-    .album-grid-compact {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
+    .album-grid-ultra-compact {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.8rem;
     }
 }
 
@@ -407,9 +407,9 @@ body {
         --container-padding: 1rem;
     }
     
-    .album-grid-compact {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+    .album-grid-ultra-compact {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.6rem;
     }
     
     .current-embed-container {
@@ -417,8 +417,9 @@ body {
         padding: 3px;
     }
     
-    .compact-embed-container {
-        padding: 2px;
+    .ultra-compact-embed-container {
+        padding: 1px;
+        margin: 0.3rem 0;
     }
     
     .section-toggle {
@@ -437,6 +438,17 @@ body {
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
+    
+    .ultra-compact-card {
+        padding: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .album-grid-ultra-compact {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
 }
 
 /* Lazy loading placeholder */
@@ -450,14 +462,16 @@ body {
 .lazy-embed[data-src]::before {
     content: "Loading...";
     color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
 }
 
 /* No embed fallback */
 .no-embed {
     text-align: center;
-    padding: 1.5rem;
+    padding: 1rem;
     opacity: 0.5;
     font-style: italic;
+    font-size: 0.8rem;
 }
 
 /* Accessibility */
