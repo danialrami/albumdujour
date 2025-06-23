@@ -1,9 +1,10 @@
-// Album du Jour - Interactive Functionality with Fixed Collapsible Sections
+// Album du Jour - Interactive Functionality with Dynamic Responsive Embeds
 class AlbumSections {
     constructor() {
         this.initializeCollapsibleSections();
         this.initializeLazyLoading();
         this.initializeAccessibility();
+        this.initializeDynamicEmbeds();
     }
     
     initializeCollapsibleSections() {
@@ -15,10 +16,8 @@ class AlbumSections {
             });
         });
         
-        // Restore saved states after a short delay
-        setTimeout(() => {
-            this.restoreSectionStates();
-        }, 100);
+        // Restore saved states
+        this.restoreSectionStates();
     }
     
     toggleSection(button) {
@@ -32,16 +31,19 @@ class AlbumSections {
         
         if (!isExpanded) {
             // Expanding
-            content.style.maxHeight = 'none';
-            content.style.overflow = 'visible';
+            content.style.maxHeight = content.scrollHeight + 'px';
             icon.style.transform = 'rotate(180deg)';
             
             // Load any lazy embeds in this section
             this.loadLazyEmbedsInSection(section);
+            
+            // Trigger dynamic embed resize after content is visible
+            setTimeout(() => {
+                this.resizeDynamicEmbeds(section);
+            }, 300);
         } else {
             // Collapsing
             content.style.maxHeight = '0';
-            content.style.overflow = 'hidden';
             icon.style.transform = 'rotate(0deg)';
         }
         
@@ -55,9 +57,10 @@ class AlbumSections {
             const savedState = localStorage.getItem(`section-${section.dataset.section}`);
             if (savedState === 'true') {
                 const button = section.querySelector('.section-toggle');
-                if (button && button.getAttribute('aria-expanded') !== 'true') {
+                // Delay to ensure DOM is ready
+                setTimeout(() => {
                     this.toggleSection(button);
-                }
+                }, 100);
             }
         });
     }
@@ -93,6 +96,9 @@ class AlbumSections {
             iframe.addEventListener('load', () => {
                 iframe.style.transition = 'opacity 0.3s ease';
                 iframe.style.opacity = '1';
+                
+                // Resize embed after load
+                this.resizeSingleEmbed(iframe);
             });
         }
     }
@@ -102,6 +108,69 @@ class AlbumSections {
         lazyEmbeds.forEach(iframe => {
             this.loadEmbed(iframe);
         });
+    }
+    
+    initializeDynamicEmbeds() {
+        // Handle responsive embed sizing on window resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.resizeDynamicEmbeds();
+            }, 150);
+        });
+        
+        // Initial resize after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                this.resizeDynamicEmbeds();
+            }, 500);
+        });
+        
+        // Initial adjustment
+        this.resizeDynamicEmbeds();
+    }
+    
+    resizeDynamicEmbeds(container = document) {
+        const embedContainers = container.querySelectorAll('.embed-container');
+        
+        embedContainers.forEach(embedContainer => {
+            const iframe = embedContainer.querySelector('.dynamic-embed');
+            if (iframe) {
+                this.resizeSingleEmbed(iframe);
+            }
+        });
+    }
+    
+    resizeSingleEmbed(iframe) {
+        const embedContainer = iframe.closest('.embed-container');
+        if (!embedContainer) return;
+        
+        const albumCard = iframe.closest('.album-card');
+        if (!albumCard) return;
+        
+        // Calculate available space
+        const cardHeight = albumCard.offsetHeight;
+        const header = albumCard.querySelector('.card-header');
+        const links = albumCard.querySelector('.card-links');
+        
+        const headerHeight = header ? header.offsetHeight : 0;
+        const linksHeight = links ? links.offsetHeight : 0;
+        const padding = 32; // Account for card padding and margins
+        
+        // Calculate ideal embed height
+        const availableHeight = cardHeight - headerHeight - linksHeight - padding;
+        const minHeight = iframe.classList.contains('current-embed') ? 300 : 160;
+        const maxHeight = iframe.classList.contains('current-embed') ? 500 : 300;
+        
+        const idealHeight = Math.max(minHeight, Math.min(maxHeight, availableHeight));
+        
+        // Apply the calculated height
+        embedContainer.style.height = idealHeight + 'px';
+        iframe.style.height = idealHeight + 'px';
+        
+        // Log for debugging (remove in production)
+        console.log(`Resized embed: ${idealHeight}px (card: ${cardHeight}px, available: ${availableHeight}px)`);
     }
     
     initializeAccessibility() {
@@ -180,7 +249,7 @@ function initializeEmbedErrorHandling() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎵 Album du Jour - Initializing with fixed collapsible sections...');
+    console.log('🎵 Album du Jour - Initializing with dynamic responsive embeds...');
     
     try {
         new AlbumSections();

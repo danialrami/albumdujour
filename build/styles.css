@@ -295,7 +295,7 @@ body {
     }
 }
 
-/* Album Cards - Better styling to match embeds */
+/* Album Cards - Now larger with better proportions */
 .album-card {
     background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
@@ -306,23 +306,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 480px;
-}
-
-.album-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(120, 190, 186, 0.1);
-    border-color: rgba(120, 190, 186, 0.3);
-}
-
-/* Remove card border for better embed integration */
-.album-card .embed-container {
-    margin: 1rem -1.5rem; /* Negative margins to touch card edges */
-    border-radius: 0; /* Remove border radius to match card */
-}
-
-.album-card .embed-container iframe {
-    border-radius: 0; /* Remove iframe border radius */
+    min-height: 480px; /* Increased minimum height for better proportions */
 }
 
 .album-card:hover {
@@ -365,21 +349,15 @@ body {
     color: var(--lufs-yellow);
 }
 
-/* Dynamic Embed Containers - Better integration */
+/* Dynamic Embed Containers */
 .embed-container {
     margin: 1rem 0;
-    border-radius: 0; /* Remove border radius for seamless integration */
+    border-radius: var(--border-radius);
     overflow: hidden;
-    background: transparent; /* Let Spotify provide the background */
-    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    flex: 1; /* This makes the embed container grow to fill available space */
     display: flex;
     flex-direction: column;
-}
-
-/* Special styling for currently listening */
-.album-du-jour .album-card .embed-container {
-    margin: 1rem 0; /* Normal margins for currently listening */
-    border-radius: var(--border-radius); /* Keep border radius for currently listening */
 }
 
 /* Currently Listening Embeds - Large and prominent */
