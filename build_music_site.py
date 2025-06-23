@@ -19,8 +19,8 @@ class MusicSiteBuilder:
         self.website_dir = Path(__file__).parent  # Current directory
         
         # Alternative credential paths (external to repo)
-        self.alt_credentials_path = Path("/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json")
-        self.alt_apple_tokens_path = Path("/Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit")
+        self.alt_credentials_path = Path("/mnt/barracuda/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json")
+        self.alt_apple_tokens_path = Path("/mnt/barracuda/Nextcloud/ore/Notes/Life/utilities/musickit")
         
         # Temporary credential paths (copied during build, never committed)
         self.temp_credentials_path = self.website_dir / 'temp_credentials.json'

@@ -22,8 +22,8 @@ readonly PYTHON_SCRIPT="$WEBSITE_DIR/build_music_site.py"
 readonly VENV_DIR="$WEBSITE_DIR/venv"
 
 # Alternative credential paths (external to repo)
-readonly ALT_CREDENTIALS_PATH="/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json"
-readonly ALT_APPLE_TOKENS_PATH="/Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit"
+readonly ALT_CREDENTIALS_PATH="/mnt/barracuda/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json"
+readonly ALT_APPLE_TOKENS_PATH="/mnt/barracuda/Nextcloud/ore/Notes/Life/utilities/musickit"
 
 # Global variables
 CLEANUP_NEEDED=false
