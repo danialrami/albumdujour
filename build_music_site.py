@@ -2,7 +2,7 @@
 """
 Enhanced Music Library Website Builder
 Reads from Google Sheets and generates a static website with embedded music players
-Enhanced with timestamp-based categorization and responsive embed sizing
+Enhanced with timestamp-based categorization and truly responsive embed sizing
 """
 
 import gspread
@@ -364,17 +364,17 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card with responsive embed sizing"""
+        """Generate HTML for a single album card with truly responsive embed sizing"""
         # Determine which embed to show (prefer Spotify, fallback to Apple)
         embed_html = ""
         if is_current:
-            # For current music (album du jour), show embeds prominently with responsive sizing
+            # For current music (album du jour), show embeds prominently
             if album['spotify_embed']:
                 embed_html = f"""
-                <div class="embed-container">
+                <div class="embed-container current-embed-container">
                     <iframe src="{album['spotify_embed']}" 
                             width="100%" 
-                            class="responsive-embed current-embed spotify-embed" 
+                            class="dynamic-embed current-embed spotify-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
                             allow="encrypted-media"
@@ -384,10 +384,10 @@ class MusicSiteBuilder:
                 """
             elif album['apple_embed']:
                 embed_html = f"""
-                <div class="embed-container">
+                <div class="embed-container current-embed-container">
                     <iframe src="{album['apple_embed']}" 
                             width="100%" 
-                            class="responsive-embed current-embed apple-embed" 
+                            class="dynamic-embed current-embed apple-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
                             style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;"
@@ -396,15 +396,15 @@ class MusicSiteBuilder:
                 </div>
                 """
             else:
-                embed_html = '<div class="embed-container"><p class="no-embed">No embed available</p></div>'
+                embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use responsive grid embeds
+            # For other sections (Recently Added/Finished), use dynamic grid embeds
             if album['spotify_embed']:
                 embed_html = f"""
-                <div class="embed-container">
+                <div class="embed-container grid-embed-container">
                     <iframe data-src="{album['spotify_embed']}" 
                             width="100%" 
-                            class="responsive-embed grid-embed spotify-embed lazy-embed" 
+                            class="dynamic-embed grid-embed spotify-embed lazy-embed" 
                             frameborder="0" 
                             allowtransparency="true" 
                             allow="encrypted-media"
@@ -414,10 +414,10 @@ class MusicSiteBuilder:
                 """
             elif album['apple_embed']:
                 embed_html = f"""
-                <div class="embed-container">
+                <div class="embed-container grid-embed-container">
                     <iframe data-src="{album['apple_embed']}" 
                             width="100%" 
-                            class="responsive-embed grid-embed apple-embed lazy-embed" 
+                            class="dynamic-embed grid-embed apple-embed lazy-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
                             style="overflow: hidden; border-radius: 10px;"
@@ -425,7 +425,7 @@ class MusicSiteBuilder:
                 </div>
                 """
             else:
-                embed_html = '<div class="embed-container"><p class="no-embed">No embed available</p></div>'
+                embed_html = '<div class="embed-container grid-embed-container"><p class="no-embed">No embed available</p></div>'
         
         # Build links
         links_html = ""
@@ -466,10 +466,10 @@ class MusicSiteBuilder:
         """
     
     def generate_css(self):
-        """Generate the simplified CSS file with LUFS branding and responsive embeds"""
-        print("🎨 Generating simplified CSS with responsive embeds...")
+        """Generate CSS with truly dynamic responsive embeds that fill available space"""
+        print("🎨 Generating CSS with dynamic responsive embeds...")
         
-        css_content = """/* LUFS Brand Colors and Simplified Design with Responsive Embeds */
+        css_content = """/* LUFS Brand Colors and Dynamic Responsive Design */
 :root {
     /* LUFS Brand Colors */
     --lufs-teal: #78BEBA;
@@ -493,14 +493,6 @@ class MusicSiteBuilder:
     --container-padding: 2rem;
     --border-radius: 12px;
     --transition: all 0.3s ease;
-    
-    /* Responsive Embed Heights */
-    --current-embed-height-mobile: 350px;
-    --current-embed-height-tablet: 420px;
-    --current-embed-height-desktop: 450px;
-    --grid-embed-height-mobile: 200px;
-    --grid-embed-height-tablet: 220px;
-    --grid-embed-height-desktop: 240px;
 }
 
 /* Reset and base styles */
@@ -730,15 +722,51 @@ body {
     max-height: none;
 }
 
-/* Album Grid */
+/* Dynamic Album Grid - Now fills available space */
 .album-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     padding: 1.5rem;
 }
 
-/* Simplified Album Cards */
+/* Mobile: Single column, full width */
+@media (max-width: 767px) {
+    .album-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+}
+
+/* Tablet: Two columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Desktop: Three columns */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+/* Large Desktop: Four columns */
+@media (min-width: 1440px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+/* Ultra-wide: Five columns */
+@media (min-width: 1920px) {
+    .album-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+}
+
+/* Album Cards - Now expand to fill grid cells */
 .album-card {
     background: rgba(251, 249, 226, 0.03);
     border-radius: var(--border-radius);
@@ -747,6 +775,9 @@ body {
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px; /* Minimum height for consistency */
 }
 
 .album-card:hover {
@@ -757,6 +788,7 @@ body {
 
 .card-header {
     margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 .album-title {
@@ -788,117 +820,56 @@ body {
     color: var(--lufs-yellow);
 }
 
-/* Responsive Embed Container */
+/* Dynamic Embed Containers */
 .embed-container {
     margin: 1rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
     background: rgba(0, 0, 0, 0.2);
+    flex: 1; /* This makes the embed container grow to fill available space */
+    display: flex;
+    flex-direction: column;
 }
 
-.embed-container iframe {
+/* Currently Listening Embeds - Large and prominent */
+.current-embed-container {
+    min-height: 380px;
+}
+
+.current-embed-container .dynamic-embed {
+    height: 100%;
+    min-height: 380px;
+}
+
+/* Grid Embeds - Dynamically sized based on card space */
+.grid-embed-container {
+    min-height: 200px;
+}
+
+.grid-embed-container .dynamic-embed {
+    height: 100%;
+    min-height: 200px;
+}
+
+/* Dynamic embeds fill their containers */
+.dynamic-embed {
     width: 100%;
     border: none;
     border-radius: var(--border-radius);
+    flex: 1;
 }
 
-/* Responsive Embed Heights - Mobile First */
-.responsive-embed {
-    transition: height 0.3s ease;
+/* Apple Music gets a bit more height */
+.apple-embed {
+    min-height: calc(100% + 30px) !important;
 }
 
-/* Mobile: Default heights */
-.responsive-embed.current-embed {
-    height: var(--current-embed-height-mobile);
+.current-embed-container .apple-embed {
+    min-height: 430px !important;
 }
 
-.responsive-embed.grid-embed {
-    height: var(--grid-embed-height-mobile);
-}
-
-/* Tablet: 768px and up */
-@media (min-width: 768px) {
-    .responsive-embed.current-embed {
-        height: var(--current-embed-height-tablet);
-    }
-    
-    .responsive-embed.grid-embed {
-        height: var(--grid-embed-height-tablet);
-    }
-    
-    /* Wider grid cards for better embed visibility */
-    .album-grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    }
-}
-
-/* Desktop: 1024px and up */
-@media (min-width: 1024px) {
-    .responsive-embed.current-embed {
-        height: var(--current-embed-height-desktop);
-    }
-    
-    .responsive-embed.grid-embed {
-        height: var(--grid-embed-height-desktop);
-    }
-    
-    /* Even wider grid cards for desktop */
-    .album-grid {
-        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    }
-}
-
-/* Large Desktop: 1440px and up */
-@media (min-width: 1440px) {
-    :root {
-        --current-embed-height-desktop: 480px;
-        --grid-embed-height-desktop: 260px;
-    }
-    
-    .album-grid {
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    }
-}
-
-/* Ultra-wide screens: 1920px and up */
-@media (min-width: 1920px) {
-    :root {
-        --current-embed-height-desktop: 520px;
-        --grid-embed-height-desktop: 280px;
-    }
-}
-
-/* Apple Music specific adjustments (they tend to need more height) */
-.responsive-embed.apple-embed.current-embed {
-    height: calc(var(--current-embed-height-mobile) + 50px);
-}
-
-@media (min-width: 768px) {
-    .responsive-embed.apple-embed.current-embed {
-        height: calc(var(--current-embed-height-tablet) + 50px);
-    }
-}
-
-@media (min-width: 1024px) {
-    .responsive-embed.apple-embed.current-embed {
-        height: calc(var(--current-embed-height-desktop) + 50px);
-    }
-}
-
-.responsive-embed.apple-embed.grid-embed {
-    height: calc(var(--grid-embed-height-mobile) + 25px);
-}
-
-@media (min-width: 768px) {
-    .responsive-embed.apple-embed.grid-embed {
-        height: calc(var(--grid-embed-height-tablet) + 25px);
-    }
-}
-
-@media (min-width: 1024px) {
-    .responsive-embed.apple-embed.grid-embed {
-        height: calc(var(--grid-embed-height-desktop) + 25px);
-    }
+.grid-embed-container .apple-embed {
+    min-height: 230px !important;
 }
 
 .no-embed {
@@ -906,13 +877,18 @@ body {
     color: rgba(251, 249, 226, 0.5);
     padding: 2rem;
     font-style: italic;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Simplified Music Links */
+/* Music Links */
 .card-links {
     display: flex;
     gap: 0.75rem;
     margin-top: 1rem;
+    flex-shrink: 0;
 }
 
 .music-link {
@@ -981,19 +957,30 @@ body {
     font-size: 0.9rem;
 }
 
-/* Responsive Design Adjustments */
+/* Mobile Specific Adjustments */
 @media (max-width: 767px) {
     :root {
         --container-padding: 1rem;
-        /* Mobile-specific embed heights for smaller screens */
-        --current-embed-height-mobile: 320px;
-        --grid-embed-height-mobile: 180px;
     }
     
-    .album-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 1rem;
+    .album-card {
+        min-height: 350px;
+    }
+    
+    .current-embed-container {
+        min-height: 300px;
+    }
+    
+    .current-embed-container .dynamic-embed {
+        min-height: 300px;
+    }
+    
+    .grid-embed-container {
+        min-height: 180px;
+    }
+    
+    .grid-embed-container .dynamic-embed {
+        min-height: 180px;
     }
     
     .stats-badges {
@@ -1025,10 +1012,9 @@ body {
 }
 
 @media (max-width: 480px) {
-    :root {
-        /* Extra small mobile adjustments */
-        --current-embed-height-mobile: 300px;
-        --grid-embed-height-mobile: 160px;
+    .album-card {
+        padding: 1rem;
+        min-height: 320px;
     }
     
     .site-header {
@@ -1036,8 +1022,12 @@ body {
         padding: 1rem 0;
     }
     
-    .album-card {
-        padding: 1rem;
+    .current-embed-container {
+        min-height: 280px;
+    }
+    
+    .grid-embed-container {
+        min-height: 160px;
     }
 }
 
@@ -1083,13 +1073,9 @@ body {
     .animated-background::before {
         animation: none;
     }
-    
-    .responsive-embed {
-        transition: none;
-    }
 }
 
-/* Custom scrollbar for embed containers */
+/* Scrollbar styling for embed containers */
 .embed-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -1113,19 +1099,19 @@ body {
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(css_content)
         
-        print(f"✅ CSS generated with responsive embeds: {output_file}")
+        print(f"✅ CSS generated with dynamic responsive embeds: {output_file}")
     
     def generate_javascript(self):
-        """Generate JavaScript for interactions with responsive embed support"""
-        print("⚡ Generating JavaScript with responsive embed support...")
+        """Generate JavaScript for interactions with dynamic responsive embeds"""
+        print("⚡ Generating JavaScript with dynamic responsive embed support...")
         
-        js_content = """// Album du Jour - Interactive Functionality with Responsive Embeds
+        js_content = """// Album du Jour - Interactive Functionality with Dynamic Responsive Embeds
 class AlbumSections {
     constructor() {
         this.initializeCollapsibleSections();
         this.initializeLazyLoading();
         this.initializeAccessibility();
-        this.initializeResponsiveEmbeds();
+        this.initializeDynamicEmbeds();
     }
     
     initializeCollapsibleSections() {
@@ -1157,6 +1143,11 @@ class AlbumSections {
             
             // Load any lazy embeds in this section
             this.loadLazyEmbedsInSection(section);
+            
+            // Trigger dynamic embed resize after content is visible
+            setTimeout(() => {
+                this.resizeDynamicEmbeds(section);
+            }, 300);
         } else {
             // Collapsing
             content.style.maxHeight = '0';
@@ -1212,6 +1203,9 @@ class AlbumSections {
             iframe.addEventListener('load', () => {
                 iframe.style.transition = 'opacity 0.3s ease';
                 iframe.style.opacity = '1';
+                
+                // Resize embed after load
+                this.resizeSingleEmbed(iframe);
             });
         }
     }
@@ -1223,30 +1217,67 @@ class AlbumSections {
         });
     }
     
-    initializeResponsiveEmbeds() {
+    initializeDynamicEmbeds() {
         // Handle responsive embed sizing on window resize
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                this.adjustEmbedHeights();
-            }, 250);
+                this.resizeDynamicEmbeds();
+            }, 150);
+        });
+        
+        // Initial resize after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                this.resizeDynamicEmbeds();
+            }, 500);
         });
         
         // Initial adjustment
-        this.adjustEmbedHeights();
+        this.resizeDynamicEmbeds();
     }
     
-    adjustEmbedHeights() {
-        // This function ensures embeds are properly sized
-        // CSS handles most of the responsive behavior, but we can add
-        // any JavaScript-based adjustments here if needed
-        const embeds = document.querySelectorAll('.responsive-embed');
+    resizeDynamicEmbeds(container = document) {
+        const embedContainers = container.querySelectorAll('.embed-container');
         
-        embeds.forEach(embed => {
-            // Force a reflow to ensure CSS changes are applied
-            embed.style.height = embed.style.height;
+        embedContainers.forEach(embedContainer => {
+            const iframe = embedContainer.querySelector('.dynamic-embed');
+            if (iframe) {
+                this.resizeSingleEmbed(iframe);
+            }
         });
+    }
+    
+    resizeSingleEmbed(iframe) {
+        const embedContainer = iframe.closest('.embed-container');
+        if (!embedContainer) return;
+        
+        const albumCard = iframe.closest('.album-card');
+        if (!albumCard) return;
+        
+        // Calculate available space
+        const cardHeight = albumCard.offsetHeight;
+        const header = albumCard.querySelector('.card-header');
+        const links = albumCard.querySelector('.card-links');
+        
+        const headerHeight = header ? header.offsetHeight : 0;
+        const linksHeight = links ? links.offsetHeight : 0;
+        const padding = 32; // Account for card padding and margins
+        
+        // Calculate ideal embed height
+        const availableHeight = cardHeight - headerHeight - linksHeight - padding;
+        const minHeight = iframe.classList.contains('current-embed') ? 300 : 160;
+        const maxHeight = iframe.classList.contains('current-embed') ? 500 : 300;
+        
+        const idealHeight = Math.max(minHeight, Math.min(maxHeight, availableHeight));
+        
+        // Apply the calculated height
+        embedContainer.style.height = idealHeight + 'px';
+        iframe.style.height = idealHeight + 'px';
+        
+        // Log for debugging (remove in production)
+        console.log(`Resized embed: ${idealHeight}px (card: ${cardHeight}px, available: ${availableHeight}px)`);
     }
     
     initializeAccessibility() {
@@ -1325,7 +1356,7 @@ function initializeEmbedErrorHandling() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎵 Album du Jour - Initializing with responsive embeds...');
+    console.log('🎵 Album du Jour - Initializing with dynamic responsive embeds...');
     
     try {
         new AlbumSections();
@@ -1344,88 +1375,112 @@ document.addEventListener('DOMContentLoaded', () => {
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(js_content)
         
-        print(f"✅ JavaScript generated with responsive embed support: {output_file}")
+        print(f"✅ JavaScript generated with dynamic responsive embed support: {output_file}")
     
     def generate_build_readme(self):
         """Generate README for build folder"""
         print("📝 Generating build README...")
         
-        readme_content = f"""# Album du Jour - Build Files
+        readme_content = """# Album du Jour - Build Files
 
 This directory contains the generated static website files for Album du Jour.
 
 ## Generated Files
 
-- `index.html` - Main website page with simplified design and responsive embeds
-- `styles.css` - Stylesheet with LUFS branding and responsive embed sizing
-- `scripts.js` - Interactive functionality for collapsible sections and embed management
-- `assets/` - Images and static assets including simplified favicon
+- `index.html` - Main website page with dynamic responsive design
+- `styles.css` - Stylesheet with LUFS branding and flexible layout system
+- `scripts.js` - Interactive functionality with intelligent embed resizing
+- `assets/` - Images and static assets including favicon
 - `favicon.svg` - Clean, abstract vinyl record favicon
 
 ## Features
 
+### Dynamic Responsive Layout
+- **Mobile**: Single column layout with touch-optimized embeds
+- **Tablet**: Two-column grid with balanced sizing
+- **Desktop**: Three-column layout with larger embeds
+- **Large Desktop**: Four-column grid maximizing screen real estate
+- **Ultra-wide**: Five columns for maximum content density
+
+### Intelligent Embed Sizing
+- **CSS Flexbox**: Cards automatically fill available grid space
+- **JavaScript Calculation**: Embeds resize based on actual card dimensions
+- **Dynamic Heights**: No hardcoded sizes - embeds adapt to content
+- **Minimum/Maximum Constraints**: Ensures usability across all screen sizes
+
 ### Content Organization
-- **Currently Listening**: Prominently displayed "album du jour" with large embed
-- **Recently Added**: Last 20 albums added (collapsible)
-- **Recently Finished**: Last 20 albums completed (collapsible)
+- **Currently Listening**: Prominently displayed with large embed
+- **Recently Added**: Last 20 albums (collapsible, sorted by date added)
+- **Recently Finished**: Last 20 albums (collapsible, sorted by date finished)
 
-### Responsive Embed Sizing
-- **Mobile (< 768px)**: Optimized heights for small screens
-  - Current listening: 350px (320px on very small screens)
-  - Grid embeds: 200px (180px on very small screens)
-- **Tablet (768px+)**: Balanced sizing for medium screens
-  - Current listening: 420px
-  - Grid embeds: 220px
-- **Desktop (1024px+)**: Larger embeds for desktop viewing
-  - Current listening: 450px
-  - Grid embeds: 240px
-- **Large Desktop (1440px+)**: Maximum sizing for large screens
-  - Current listening: 480px
-  - Grid embeds: 260px
-
-### Design Features
-- LUFS brand colors with simplified background animation
-- Clean album cards that let Spotify embeds provide color
-- Responsive design for all devices with optimized embed containers
+### Interactive Features
+- LUFS brand colors with animated background
 - Collapsible sections with localStorage persistence
-- Lazy loading for music embeds with performance optimization
+- Lazy loading for performance optimization
 - Accessibility features and keyboard navigation
+- Touch-friendly interactions on mobile devices
 
 ### Music Integration
-- Apple Music and Spotify embeds with responsive sizing
+- Apple Music and Spotify embeds with optimal sizing
 - Direct links to music services
-- Optimized embed heights for different screen sizes and sections
-- Enhanced embed loading with error handling
+- Error handling for failed embeds
+- Service-specific height adjustments (Apple Music gets extra space)
+
+## Technical Implementation
+
+### CSS Grid System
+```css
+/* Mobile: 1 column */
+@media (max-width: 767px) {
+    .album-grid { grid-template-columns: 1fr; }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .album-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .album-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* Large Desktop: 4 columns */
+@media (min-width: 1440px) {
+    .album-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+}
+```
+
+### Dynamic Embed Sizing
+```javascript
+// JavaScript calculates optimal embed height based on:
+// - Album card height
+// - Header and footer space
+// - Minimum/maximum constraints
+// - Screen size considerations
+```
 
 ## Deployment
 
-These files are ready for deployment to any static hosting service:
+Ready for deployment to any static hosting service:
 
-- **Netlify**: Drag and drop this folder
-- **Vercel**: Connect to Git repository
-- **GitHub Pages**: Push to gh-pages branch
-- **Traditional hosting**: Upload via FTP/SFTP
+- **Netlify**: Direct folder upload or Git integration
+- **Vercel**: Connect to repository, automatic deployments
+- **GitHub Pages**: Serve from build branch
+- **Traditional Hosting**: Upload files via FTP/SFTP
 
-## Browser Support
+## Performance Features
 
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-- Progressive enhancement for older browsers
-- Responsive design tested across multiple screen sizes
-
-## Performance
-
-- Optimized for fast loading with responsive embeds
-- Lazy loading for embeds based on viewport intersection
-- Minimal JavaScript footprint with efficient resize handling
-- Responsive images and assets
-- CSS-based responsive sizing for smooth performance
+- **Lazy Loading**: Embeds load only when visible
+- **Efficient Resizing**: Debounced resize calculations
+- **Minimal JavaScript**: Lightweight interactive enhancements
+- **CSS-First Approach**: Layout handled by CSS for best performance
 
 ---
 
-**Generated on:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
-**Source:** Album du Jour Enhanced Build System v2 with Responsive Embeds  
-**Version:** 2.1  
+**Generated on:** """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """
+**Source:** Album du Jour Dynamic Responsive Build System  
+**Version:** 2.2 - Dynamic Responsive Layout  
 """
         
         output_file = self.output_dir / "README.md"
@@ -1437,7 +1492,7 @@ These files are ready for deployment to any static hosting service:
     def run(self):
         """Main execution method"""
         try:
-            print("🚀 Starting Album du Jour Enhanced Build Process v2.1 with Responsive Embeds...")
+            print("🚀 Starting Album du Jour Enhanced Build Process v2.2 with Dynamic Responsive Layout...")
             
             # Setup temporary credentials from alternative paths
             self.setup_temporary_credentials()
@@ -1457,10 +1512,10 @@ These files are ready for deployment to any static hosting service:
             # Clean up temporary credentials
             self.cleanup_temporary_credentials()
             
-            print("🎉 Album du Jour Enhanced Build Complete with Responsive Embeds!")
+            print("🎉 Album du Jour Enhanced Build Complete with Dynamic Responsive Layout!")
             print(f"📁 Output directory: {self.output_dir}")
             print(f"🌐 Open {self.output_dir}/index.html to view the site")
-            print("📱 Responsive embed sizing now optimized for mobile, tablet, and desktop!")
+            print("📱 Dynamic responsive sizing now optimized for all screen sizes!")
             
         except Exception as e:
             print(f"❌ Build failed: {str(e)}")
