@@ -45,18 +45,11 @@ A static site generator that creates a beautiful, responsive website showcasing 
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/danialrami/albumdujour
    cd albumdujour
    ```
 
-2. **Set up credentials at alternative paths**
-   ```bash
-   # Ensure your credentials are at these external paths:
-   # /Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json
-   # /Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit (optional)
-   ```
-
-3. **Complete build and deployment**
+2. **Complete build and deployment**
    ```bash
    ./master-build.sh
    ```
@@ -90,14 +83,6 @@ A static site generator that creates a beautiful, responsive website showcasing 
 - Commits source changes to main branch
 - Uses git subtree split to create build branch safely
 - Pushes both branches to remote repository
-- No risk of deleting repository
-
-### Benefits of v3 Architecture
-- **Safe Deployment**: Uses git subtree split (no repo deletion risk)
-- **Master Pipeline**: Single command for complete automation
-- **Modular Development**: Individual scripts for testing and development
-- **Enhanced Security**: External credentials with comprehensive verification
-- **Repeatable Process**: Safe to run multiple times
 
 ## 📊 Data Format
 
@@ -111,16 +96,9 @@ Your Google Sheets spreadsheet should have the following columns:
 | Status | Current/Open/Done | `Current` |
 | Date Added | ISO 8601 timestamp | `2025-01-15T10:30:00Z` |
 | Date Finished | ISO 8601 timestamp | `2025-01-20T15:45:00Z` |
-| 🌞 | Rating (optional) | `⭐⭐⭐⭐⭐` |
+| 🌞 | Rating (optional) | `🌞` |
 
-### Credential Security v3
-- **External Paths Only**: Credentials never stored in repository
-- **Alternative Locations**: Supports external credential storage
-- **Build Verification**: Automated security scanning prevents leaks
-- **Gitignore Protection**: Comprehensive patterns for sensitive files
-- **Safe Deployment**: Git subtree split prevents credential exposure
-
-## 🎨 Design System v3
+## 🎨 Design System
 
 ### LUFS Brand Colors
 ```css
@@ -147,8 +125,7 @@ Your Google Sheets spreadsheet should have the following columns:
 - **Tablet**: 768px - 1024px (two columns, hybrid interactions)
 - **Desktop**: > 1024px (multi-column, hover effects)
 
-### Performance v3
-- **Mobile-First**: CSS written for mobile, enhanced for desktop
+### Performance
 - **Lazy Loading**: Embeds load only when visible
 - **Reduced Motion**: Respects user preferences for animations
 - **External Credentials**: No credential processing during build
@@ -156,7 +133,7 @@ Your Google Sheets spreadsheet should have the following columns:
 
 ## 🔧 Development
 
-### File Structure v3
+### File Structure
 ```
 albumdujour/
 ├── master-build.sh             # Master pipeline script
@@ -174,11 +151,7 @@ albumdujour/
 └── README.md                   # This documentation
 ```
 
-### Credential Paths (External)
-- **Google Sheets**: `/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json`
-- **Apple Music**: `/Users/danielramirez/Nextcloud/ore/Notes/Life/utilities/musickit`
-
-### Git Workflow v3
+### Git Workflow
 1. **Main Branch**: Source code and development files
 2. **Build Branch**: Generated using `git subtree split --prefix build`
 3. **Safe Deployment**: No risk of repository deletion
@@ -231,7 +204,7 @@ The build branch is ready for deployment to any static hosting service:
 3. Choose "build" branch
 4. Site will be available at `username.github.io/repository`
 
-## 🔒 Security v3
+## 🔒 Security
 
 ### Enhanced Credential Protection
 - **External Storage**: Credentials never stored in repository
@@ -257,7 +230,7 @@ The build branch is ready for deployment to any static hosting service:
 - [ ] Page loads in under 3 seconds
 - [ ] Accessibility features work with keyboard navigation
 
-### Build Testing v3
+### Build Testing
 ```bash
 # Test master pipeline
 ./master-build.sh --build-only
@@ -273,7 +246,7 @@ grep -r "concrete-spider" build/ || echo "✅ No credentials found"
 git branch -a
 ```
 
-## 🐛 Troubleshooting v3
+## 🐛 Troubleshooting
 
 ### Common Issues
 
@@ -285,31 +258,6 @@ ls -la *.sh
 # Run individual steps for debugging
 ./build.sh
 ./deploy.sh
-```
-
-#### Build Fails with Credentials Error
-```bash
-# Check external credential paths
-ls -la "/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json"
-
-# Verify Google Sheets access
-python3 -c "
-import gspread
-import shutil
-from pathlib import Path
-
-# Copy credentials temporarily
-alt_path = Path('/Users/danielramirez/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json')
-temp_path = Path('temp_test_creds.json')
-shutil.copy2(alt_path, temp_path)
-
-# Test connection
-gc = gspread.service_account('temp_test_creds.json')
-print('✅ Credentials valid')
-
-# Clean up
-temp_path.unlink()
-"
 ```
 
 #### Git Deployment Fails
@@ -339,7 +287,7 @@ git branch -D test-build
 
 ## 🤝 Contributing
 
-### Development Setup v3
+### Development Setup
 1. Fork the repository
 2. Create a feature branch
 3. Test with `./master-build.sh --build-only`
@@ -351,32 +299,13 @@ git branch -D test-build
 - **CSS**: Use CSS custom properties for theming
 - **Shell**: Follow shellcheck recommendations
 
-## 📄 License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
 ## 🙏 Acknowledgments
 
-- **LUFS Audio**: Brand design and color palette
 - **Google Sheets API**: Data source integration
 - **Apple Music**: Embedded player functionality
 - **Spotify**: Rich preview embeds
 - **Git Subtree**: Safe deployment methodology
-- **Modern Web Standards**: CSS Grid, Intersection Observer, and more
-
-## 📞 Support
-
-For issues, questions, or contributions:
-
-1. **GitHub Issues**: Report bugs and request features
-2. **Documentation**: Check this README and inline code comments
-3. **Community**: Share your Album du Jour sites and customizations
 
 ---
 
-**Built with ❤️ by LUFS Audio**  
-*Showcasing music discovery through beautiful, functional design*
-
-**Version**: 3.0  
-**Enhanced**: Safe Git deployment, master pipeline, minimal favicon
-
+**Built with 🩷**
