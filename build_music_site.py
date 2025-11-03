@@ -18,8 +18,8 @@ class MusicSiteBuilder:
         # Set up paths for local credential structure
         self.website_dir = Path(__file__).parent  # Current directory
         
-        # Alternative credential paths (external to repo)
-        self.alt_credentials_path = Path("/mnt/barracuda/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json")
+        # Local credential paths (stored in repo but gitignored for security)
+        self.alt_credentials_path = self.website_dir / "concrete-spider-446700-f9-4646496845d1.json"
         self.alt_apple_tokens_path = Path("/mnt/barracuda/Nextcloud/ore/Notes/Life/utilities/musickit")
         
         # Temporary credential paths (copied during build, never committed)
