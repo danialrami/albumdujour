@@ -21,8 +21,8 @@ readonly BUILD_DIR="$WEBSITE_DIR/build"
 readonly PYTHON_SCRIPT="$WEBSITE_DIR/build_music_site.py"
 readonly VENV_DIR="$WEBSITE_DIR/venv"
 
-# Alternative credential paths (external to repo)
-readonly ALT_CREDENTIALS_PATH="/mnt/barracuda/Nextcloud/ore/Notes/Life/concrete-spider-446700-f9-4646496845d1.json"
+# Local credential paths (stored in repo but gitignored for security)
+readonly ALT_CREDENTIALS_PATH="$WEBSITE_DIR/concrete-spider-446700-f9-4646496845d1.json"
 readonly ALT_APPLE_TOKENS_PATH="/mnt/barracuda/Nextcloud/ore/Notes/Life/utilities/musickit"
 
 # Global variables
@@ -140,8 +140,8 @@ setup_python_environment() {
     
     # Install/upgrade required packages
     log_step "Installing required packages..."
-    pip install --quiet --upgrade pip
-    pip install --quiet gspread
+    pip install --quiet --upgrade pip --break-system-packages
+    pip install --quiet gspread --break-system-packages
     log_success "All dependencies ready"
 }
 
