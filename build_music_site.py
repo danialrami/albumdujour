@@ -281,7 +281,7 @@ class MusicSiteBuilder:
             return ""
     
     def generate_html(self, categorized_data):
-        """Generate the main HTML file with simplified design"""
+        """Generate the main HTML file with retro style"""
         print("🎨 Generating HTML...")
         
         current_listening = categorized_data['current_listening']
@@ -290,6 +290,16 @@ class MusicSiteBuilder:
         is_fallback = categorized_data['is_fallback']
         
         total_albums = len(current_listening) + len(recently_added) + len(recently_finished)
+        
+        # Read favicon SVG for use in headers
+        favicon_svg = ""
+        try:
+            favicon_path = self.assets_dir / "favicon.svg"
+            if favicon_path.exists():
+                with open(favicon_path, 'r') as f:
+                    favicon_svg = f.read().strip()
+        except:
+            pass
         
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -300,35 +310,74 @@ class MusicSiteBuilder:
     <meta name="description" content="Personal music library showcase featuring currently listening, recently added, and recently finished albums.">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="animated-background"></div>
+    <!-- Sticky Header -->
+    <div class="sticky-header" id="sticky-header">
+        <div class="header-content">
+            <a href="#top" class="logo-link" id="logo-top">
+                <div class="logo">{favicon_svg}</div>
+            </a>
+            <div class="header-text">
+                <h1>Album du Jour</h1>
+                <p>LUFS Audio</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="animated-background" id="animated-background"></div>
+
     <div class="container">
-        <header class="site-header">
-            <h1><img src="assets/favicon.svg" alt="Album du Jour" class="title-icon"> Album du Jour</h1>
-            <p class="subtitle">🤖💕</p>
-            <p class="generation-time">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        <!-- Main Header -->
+        <div class="main-header" id="top">
+            <div class="header-content">
+                <div class="logo-section">
+                    <a href="#top" class="logo-link">
+                        <div class="logo">{favicon_svg}</div>
+                    </a>
+                    <div class="header-text">
+                        <h1>Album du Jour</h1>
+                        <p>Music Discovery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
             <div class="stats-badges">
                 <span class="badge current">{len(current_listening)} Current</span>
                 <span class="badge added">{len(recently_added)} Recently Added</span>
                 <span class="badge finished">{len(recently_finished)} Recently Finished</span>
                 <span class="badge total">{total_albums} Total</span>
             </div>
-        </header>
-        
+            <p class="generation-time">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        </div>
+
+        <!-- Main Content -->
         <main class="content">
             {self.generate_currently_listening_section(current_listening, is_fallback)}
             {self.generate_collapsible_section("recently-added", "📀 Recently Added", recently_added)}
             {self.generate_collapsible_section("recently-finished", "✅ Recently Finished", recently_finished)}
         </main>
-        
-        <footer class="site-footer">
-            <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
-               target="_blank" class="sheets-link">
-                📊 View Full Library
-            </a>
-            <p>Built with 🩷</p>
-        </footer>
+
+        <!-- Retro Buttons Section -->
+        <div class="retro-buttons">
+            <div class="buttons-container">
+                <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
+                   target="_blank" class="webring-button library-button">
+                    📊 View Full Library
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; <span id="current-year"></span> LUFS Audio — Built with 🩷</p>
+        </div>
     </div>
     
     <script src="scripts.js"></script>
