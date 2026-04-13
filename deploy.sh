@@ -196,6 +196,7 @@ commit_source_changes() {
 import gspread
 from pathlib import Path
 from datetime import datetime
+import sys
 
 try:
     creds_path = Path('$WEBSITE_DIR/concrete-spider-446700-f9-4646496845d1.json')
@@ -207,7 +208,7 @@ try:
     for r in records:
         if r.get('Status', '').strip().lower() == 'current':
             print(r.get('Music', 'Latest Album'))
-            exit(0)
+            sys.exit(0)
     
     # Second: find most recent timestamp (Date Added OR Date Finished)
     latest = None
@@ -252,7 +253,7 @@ try:
         
 except:
     print('Latest Album')
-" 2>/dev/null) || current_album="Latest Album"
+" 2>/dev/null | head -n1) || current_album="Latest Album"
     fi
     
     # Handle empty/blank results
