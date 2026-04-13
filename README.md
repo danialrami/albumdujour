@@ -1,8 +1,8 @@
-# Album du Jour - Enhanced Music Discovery Website v3
+# Album du Jour - Music Discovery Website
 
-A static site generator that creates a beautiful, responsive website showcasing your personal music library with embedded Apple Music and Spotify players. Features simplified design with LUFS branding, clean album cards, and robust Git deployment using subtree split.
+A static site generator that creates a beautiful, responsive website showcasing your personal music library with embedded Apple Music and Spotify players.
 
-## ✨ Features v3
+## ✨ Features
 
 ### 🎨 Minimal Visual Design
 - **LUFS Brand Integration**: Subtle background animation with brand colors
@@ -25,7 +25,7 @@ A static site generator that creates a beautiful, responsive website showcasing 
 - **Lazy Loading**: Performance-optimized embed loading
 - **Responsive Embeds**: Optimized sizes for different screen sizes
 
-### 🔧 Technical Features v3
+### 🔧 Technical Features
 - **Master Build Pipeline**: Single command for complete automation
 - **Safe Git Deployment**: Uses git subtree split (no repo deletion risk)
 - **External Credentials**: Uses only alternative credential paths (never in repo)
@@ -36,7 +36,7 @@ A static site generator that creates a beautiful, responsive website showcasing 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11 or higher
+- Python 3.13 or higher (matching NextCloud Docker container)
 - Git with push access to your repository
 - Google Sheets API credentials at alternative path
 - Apple Music and/or Spotify links in your music library
@@ -139,15 +139,17 @@ albumdujour/
 ├── master-build.sh             # Master pipeline script
 ├── build.sh                    # Website build script (no Git)
 ├── deploy.sh                   # Git deployment script (subtree split)
-├── build_music_site.py         # Enhanced Python build script
+├── build_music_site.py         # Python build script
+├── concrete-spider-*.json      # Google Sheets credentials (gitignored)
 ├── .gitignore                  # Comprehensive credential protection
 ├── assets/
 │   ├── favicon.svg             # Minimal abstract favicon
 │   └── [other assets]          # Additional images and graphics
 ├── fonts/                      # Custom fonts
-├── venv/                       # Python virtual environment
+├── venv/                       # Python virtual environment (gitignored)
 ├── build/                      # Generated website files
-├── docs/                       # Planning and technical documentation
+├── docs/                       # Implementation documentation
+│   └── IMPLEMENTATION.md       # Detailed technical documentation
 └── README.md                   # This documentation
 ```
 
@@ -298,6 +300,26 @@ git branch -D test-build
 - **JavaScript**: Use modern ES6+ features
 - **CSS**: Use CSS custom properties for theming
 - **Shell**: Follow shellcheck recommendations
+
+## 🔗 Related Projects
+
+### obsidian-scripts (~/repos/obsidian-scripts)
+
+This project is closely related to [obsidian-scripts](https://github.com/danialrami/obsidian-scripts), which also reads from the same Google Sheets ("2025-media"):
+
+- **media.py**: Generates the "Du Jour" section in daily notes showing current music/TV
+- **sync.py**: Syncs music library between Apple Music and Google Sheets
+- **mark_music_done.py**: Marks current album as "Done" when finished
+
+**Key Difference**:
+- **albumdujour**: Creates a **public** static website showcasing your music library
+- **obsidian-scripts**: Creates **private** daily notes in Obsidian Vault
+
+### Python Version Parity
+
+Both projects use Python 3.13.2 (via pyenv) to match the NextCloud Docker container's Python version. This ensures consistency when running scripts inside the container.
+
+See [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for detailed technical documentation.
 
 ## 🙏 Acknowledgments
 

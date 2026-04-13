@@ -185,16 +185,34 @@ commit_source_changes() {
         return 0
     fi
     
-    # Commit changes
+    # Get current album info for commit message
+    local current_album="Unknown"
+    if [ -f "$WEBSITE_DIR/venv/bin/python3" ]; then
+        current_album=$("$WEBSITE_DIR/venv/bin/python3" -c "
+import gspread
+from pathlib import Path
+try:
+    creds_path = Path('$WEBSITE_DIR/concrete-spider-446700-f9-4646496845d1.json')
+    gc = gspread.service_account(filename=str(creds_path))
+    sheet = gc.open('2025-media').get_worksheet(0)
+    records = sheet.get_all_records()
+    for r in records:
+        if r.get('Status', '').strip().lower() == 'current':
+            print(r.get('Music', 'Unknown'))
+            break
+except:
+    print('Unknown')
+" 2>/dev/null) || current_album="Unknown"
+    fi
+    
+    # Commit changes with album info
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    git commit -m "Enhanced Album du Jour website v3 - $timestamp
-
-- Fixed Git deployment using subtree split
-- Minimal abstract favicon design
-- Improved embed functionality
-- Modular build and deployment scripts
-- Enhanced security with external credentials"
+    git commit -m "Album du Jour build: $current_album - $timestamp
+    
+- Updated website with current album: $current_album
+- Build generated from Google Sheets data
+- Deployed via git subtree split to build branch"
     
     log_success "Source changes committed to main"
 }
