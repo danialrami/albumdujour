@@ -1,9 +1,112 @@
-// Album du Jour - Enhanced Interactions
+// Album du Jour - Retro Brutalist Styling
+// Based on echo-bridge-manual
+// LUFS Audio
+
 document.addEventListener('DOMContentLoaded', function() {
+    initializeStickyHeader();
+    initializeScrollEffects();
     initializeCollapsibleSections();
-    initializeAccessibility();
+    initializeRetroButtons();
+    initializeAnimatedBackground();
+    setCurrentYear();
 });
 
+// Sticky Header Functionality
+function initializeStickyHeader() {
+    const stickyHeader = document.getElementById('sticky-header');
+    const mainHeader = document.querySelector('.main-header');
+    if (!stickyHeader || !mainHeader) return;
+    
+    let lastScrollTop = 0;
+    let headerVisible = false;
+
+    function updateStickyHeader() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const mainHeaderBottom = mainHeader.offsetTop + mainHeader.offsetHeight;
+        
+        if (scrollTop > mainHeaderBottom && !headerVisible) {
+            stickyHeader.classList.add('visible');
+            headerVisible = true;
+        } else if (scrollTop <= mainHeaderBottom && headerVisible) {
+            stickyHeader.classList.remove('visible');
+            headerVisible = false;
+        }
+        
+        lastScrollTop = scrollTop;
+    }
+
+    let ticking = false;
+    function handleScroll() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                updateStickyHeader();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // Smooth scroll to top functionality
+    const logoLinks = document.querySelectorAll('.logo-link');
+    logoLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+}
+
+// Scroll Effects
+function initializeScrollEffects() {
+    initializeScrollReveal();
+    initializeProgressBar();
+}
+
+// Simple scroll reveal
+function initializeScrollReveal() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    const elementsToReveal = document.querySelectorAll('.collapsible-section h2, .currently-listening h2');
+    
+    elementsToReveal.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(10px)';
+        element.style.transition = 'all 0.3s ease';
+        observer.observe(element);
+    });
+}
+
+// Progress Bar
+function initializeProgressBar() {
+    const progressBar = document.getElementById('scroll-progress');
+    if (!progressBar) return;
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = scrollPercent + '%';
+    });
+}
+
+// Collapsible Sections (from original albumdujour)
 function initializeCollapsibleSections() {
     const toggles = document.querySelectorAll('.section-toggle');
     
@@ -13,37 +116,28 @@ function initializeCollapsibleSections() {
             const content = section.querySelector('.section-content');
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
             
-            // Toggle state
             this.setAttribute('aria-expanded', !isExpanded);
             
             if (!isExpanded) {
                 content.classList.add('expanded');
                 content.style.maxHeight = content.scrollHeight + 'px';
-                
-                // Save state
                 localStorage.setItem(`section-${section.dataset.section}`, 'expanded');
             } else {
                 content.classList.remove('expanded');
                 content.style.maxHeight = '0';
-                
-                // Save state
                 localStorage.setItem(`section-${section.dataset.section}`, 'collapsed');
             }
         });
         
-        // Restore saved state
         const section = toggle.closest('.collapsible-section');
         const savedState = localStorage.getItem(`section-${section.dataset.section}`);
         
         if (savedState === 'expanded') {
-            // Simulate click to expand
             setTimeout(() => toggle.click(), 100);
         }
     });
-}
-
-function initializeAccessibility() {
-    // Add keyboard navigation for collapsible sections
+    
+    // Add keyboard navigation
     document.querySelectorAll('.section-toggle').forEach(toggle => {
         toggle.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -52,27 +146,110 @@ function initializeAccessibility() {
             }
         });
     });
+}
+
+// Retro Button Effects
+function initializeRetroButtons() {
+    const buttons = document.querySelectorAll('.webring-button');
     
-    // Add focus management
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
-            document.body.classList.add('keyboard-navigation');
-        }
-    });
-    
-    document.addEventListener('mousedown', function() {
-        document.body.classList.remove('keyboard-navigation');
+    buttons.forEach(button => {
+        button.addEventListener('mousedown', function() {
+            this.style.transform = 'translate(2px, 2px)';
+            this.style.boxShadow = 'none';
+        });
+        
+        button.addEventListener('mouseup', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '2px 2px 0 #888888';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '2px 2px 0 #888888';
+        });
     });
 }
 
-// Utility function to handle window resize
-window.addEventListener('resize', debounce(function() {
-    // Recalculate expanded section heights
-    document.querySelectorAll('.section-content.expanded').forEach(content => {
-        content.style.maxHeight = content.scrollHeight + 'px';
-    });
-}, 250));
+// Animated Background with Floating Shapes
+function initializeAnimatedBackground() {
+    const background = document.getElementById('animated-background');
+    if (!background) return;
+    
+    createFloatingShapes(background);
+    createPulsingElements(background);
+}
 
+function createFloatingShapes(container) {
+    const shapes = ['square', 'circle', 'triangle', 'diamond'];
+    const animations = ['floatAround', 'floatSlow', 'floatFast'];
+    
+    for (let i = 0; i < 15; i++) {
+        const shape = document.createElement('div');
+        const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+        const animation = animations[Math.floor(Math.random() * animations.length)];
+        
+        shape.className = `floating-shape ${shapeType}`;
+        
+        const size = Math.random() * 17 + 8;
+        if (shapeType !== 'triangle') {
+            shape.style.width = size + 'px';
+            shape.style.height = size + 'px';
+        }
+        
+        shape.style.left = Math.random() * 100 + '%';
+        shape.style.top = Math.random() * 100 + '%';
+        
+        const duration = Math.random() * 10 + 10;
+        const delay = Math.random() * 5;
+        
+        shape.style.animation = `${animation} ${duration}s ease-in-out infinite`;
+        shape.style.animationDelay = delay + 's';
+        
+        container.appendChild(shape);
+    }
+}
+
+function createPulsingElements(container) {
+    for (let i = 0; i < 5; i++) {
+        const pulse = document.createElement('div');
+        pulse.className = 'pulse-element';
+        
+        const size = Math.random() * 100 + 50;
+        pulse.style.width = size + 'px';
+        pulse.style.height = size + 'px';
+        
+        pulse.style.left = Math.random() * 100 + '%';
+        pulse.style.top = Math.random() * 100 + '%';
+        
+        const delay = Math.random() * 8;
+        pulse.style.animationDelay = delay + 's';
+        
+        container.appendChild(pulse);
+    }
+}
+
+// Set current year
+function setCurrentYear() {
+    const yearElement = document.getElementById('current-year');
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp' && e.ctrlKey) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    if (e.key === 'ArrowDown' && e.ctrlKey) {
+        e.preventDefault();
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+});
+
+// Debounce utility
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -84,3 +261,31 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+// Resize handler
+window.addEventListener('resize', debounce(function() {
+    document.querySelectorAll('.section-content.expanded').forEach(content => {
+        content.style.maxHeight = content.scrollHeight + 'px';
+    });
+}, 250));
+
+// Console message
+console.log(`
+╔══════════════════════════════════════╗
+║  Album du Jour - Retro Edition        ║
+║  ────────────────────────────────     ║
+║  LUFS Audio - Brutalist Style         ║
+║                                      ║
+║  Features:                           ║
+║  • Sticky header navigation          ║
+║  • Animated floating shapes          ║
+║  • Scroll progress bar               ║
+║  • Retro brutalist styling           ║
+║                                      ║
+║  Keyboard shortcuts:                 ║
+║  Ctrl + ↑  : Scroll to top           ║
+║  Ctrl + ↓  : Scroll to bottom        ║
+╚══════════════════════════════════════╝
+
+Built with ♥ by LUFS Audio
+`);
