@@ -370,7 +370,7 @@ class MusicSiteBuilder:
         """
     
     def generate_collapsible_section(self, section_id, title, albums):
-        """Generate a collapsible section with compact grid layout"""
+        """Generate a collapsible section with horizontal carousel layout"""
         if not albums:
             return f"""
             <section class="collapsible-section" data-section="{section_id}">
@@ -388,7 +388,7 @@ class MusicSiteBuilder:
         
         album_cards = ""
         for album in albums:
-            album_cards += self.generate_album_card_html(album, is_current=False)
+            album_cards += self.generate_album_card_html(album, is_current=False, section=section_id)
         
         return f"""
         <section class="collapsible-section" data-section="{section_id}">
@@ -397,14 +397,17 @@ class MusicSiteBuilder:
                 <span class="toggle-icon">▼</span>
             </button>
             <div class="section-content">
-                <div class="album-grid-compact">
+                <div class="album-carousel">
                     {album_cards}
+                </div>
+                <div class="carousel-scroll-indicator">
+                    <span class="scroll-hint">← Scroll →</span>
                 </div>
             </div>
         </section>
         """
     
-    def generate_album_card_html(self, album, is_current=False):
+    def generate_album_card_html(self, album, is_current=False, section=None):
         """Generate HTML for a single album card with Apple Music embeds only"""
         # Apple Music only - Spotify deprecated as of Feb 2026 (requires Premium for Developer Mode API)
         embed_html = ""
@@ -415,7 +418,7 @@ class MusicSiteBuilder:
                 <div class="embed-container current-embed-container">
                     <iframe src="{album['apple_embed']}" 
                             width="100%" 
-                            height="500"
+                            height="450"
                             class="dynamic-embed current-embed apple-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
@@ -431,10 +434,10 @@ class MusicSiteBuilder:
             if album['apple_embed']:
                 embed_html = f"""
                 <div class="embed-container compact-embed-container">
-                    <iframe data-src="{album['apple_embed']}" 
+                    <iframe src="{album['apple_embed']}" 
                             width="100%" 
-                            height="175"
-                            class="dynamic-embed compact-embed apple-embed lazy-embed" 
+                            height="250"
+                            class="dynamic-embed compact-embed apple-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
                             style="overflow: hidden; border-radius: 8px;"
@@ -450,9 +453,13 @@ class MusicSiteBuilder:
             links_html += f'<a href="{album["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
         # Spotify links retained in sheet for reference but no longer displayed or used
         
-        # Format dates
+        # Format dates - show appropriate date based on section context
         date_display = ""
-        if album['date_added']:
+        if section == 'recently-finished' and album['date_finished']:
+            date_display = f'<span class="date">Finished: {self.format_date_display(album["date_finished"])}</span>'
+        elif section == 'recently-added' and album['date_added']:
+            date_display = f'<span class="date">Added: {self.format_date_display(album["date_added"])}</span>'
+        elif album['date_added']:
             date_display = f'<span class="date">Added: {self.format_date_display(album["date_added"])}</span>'
         elif album['date_finished']:
             date_display = f'<span class="date">Finished: {self.format_date_display(album["date_finished"])}</span>'
@@ -735,12 +742,62 @@ body {
     padding: 2rem;
 }
 
-/* Compact Album Grid - Multiple columns with small embeds */
-.album-grid-compact {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+/* Horizontal Carousel Layout */
+.album-carousel {
+    display: flex;
     gap: 1.5rem;
-    margin-top: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0.5rem 0.25rem 1rem;
+    margin-top: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--lufs-teal) transparent;
+}
+
+.album-carousel::-webkit-scrollbar {
+    height: 6px;
+}
+
+.album-carousel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.album-carousel::-webkit-scrollbar-thumb {
+    background: var(--lufs-teal);
+    border-radius: 3px;
+    opacity: 0.6;
+}
+
+.album-carousel::-webkit-scrollbar-thumb:hover {
+    background: var(--lufs-blue);
+}
+
+.carousel-scroll-indicator {
+    text-align: center;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.scroll-hint {
+    font-size: 0.75rem;
+    color: var(--lufs-white);
+    letter-spacing: 0.1em;
+}
+
+/* Album Cards in Carousel */
+.album-carousel .album-card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+    width: 280px;
+}
+
+.album-carousel .compact-card {
+    width: 280px;
+    flex-shrink: 0;
 }
 
 /* Album Cards */
@@ -866,16 +923,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .album-grid-compact {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.2rem;
+    .album-carousel .album-card {
+        flex: 0 0 260px;
+        width: 260px;
     }
 }
 
 @media (max-width: 900px) {
-    .album-grid-compact {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
+    .album-carousel .album-card {
+        flex: 0 0 240px;
+        width: 240px;
     }
 }
 
@@ -884,9 +941,19 @@ body {
         --container-padding: 1rem;
     }
     
-    .album-grid-compact {
-        grid-template-columns: 1fr;
+    .album-carousel {
         gap: 1rem;
+        padding: 0.5rem 0.25rem 0.75rem;
+    }
+    
+    .album-carousel .album-card {
+        flex: 0 0 200px;
+        width: 200px;
+    }
+    
+    .album-carousel .compact-card {
+        width: 200px;
+        flex-shrink: 0;
     }
     
     .current-embed-container {
@@ -914,19 +981,6 @@ body {
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
-}
-
-/* Lazy loading placeholder */
-.lazy-embed[data-src] {
-    background: rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lazy-embed[data-src]::before {
-    content: "Loading...";
-    color: rgba(255, 255, 255, 0.5);
 }
 
 /* No embed fallback */
@@ -964,13 +1018,12 @@ body {
         print(f"✅ CSS generated: {output_file}")
     
     def generate_javascript(self):
-        """Generate JavaScript for collapsible sections and lazy loading"""
+        """Generate JavaScript for collapsible sections"""
         print("⚡ Generating JavaScript...")
         
         js_content = """// Album du Jour - Enhanced Interactions
 document.addEventListener('DOMContentLoaded', function() {
     initializeCollapsibleSections();
-    initializeLazyLoading();
     initializeAccessibility();
 });
 
@@ -992,9 +1045,6 @@ function initializeCollapsibleSections() {
                 
                 // Save state
                 localStorage.setItem(`section-${section.dataset.section}`, 'expanded');
-                
-                // Load lazy embeds when section is expanded
-                loadLazyEmbedsInSection(section);
             } else {
                 content.classList.remove('expanded');
                 content.style.maxHeight = '0';
@@ -1013,52 +1063,6 @@ function initializeCollapsibleSections() {
             setTimeout(() => toggle.click(), 100);
         }
     });
-}
-
-function initializeLazyLoading() {
-    // Load embeds that are currently visible
-    loadVisibleEmbeds();
-    
-    // Set up intersection observer for lazy loading
-    if ('IntersectionObserver' in window) {
-        const embedObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    loadEmbed(entry.target);
-                    embedObserver.unobserve(entry.target);
-                }
-            });
-        }, {
-            rootMargin: '50px'
-        });
-        
-        // Observe all lazy embeds
-        document.querySelectorAll('.lazy-embed[data-src]').forEach(embed => {
-            embedObserver.observe(embed);
-        });
-    } else {
-        // Fallback for browsers without IntersectionObserver
-        document.querySelectorAll('.lazy-embed[data-src]').forEach(loadEmbed);
-    }
-}
-
-function loadVisibleEmbeds() {
-    // Load embeds in currently visible sections (like Currently Listening)
-    document.querySelectorAll('.currently-listening .lazy-embed[data-src]').forEach(loadEmbed);
-}
-
-function loadLazyEmbedsInSection(section) {
-    // Load all lazy embeds in a specific section
-    section.querySelectorAll('.lazy-embed[data-src]').forEach(loadEmbed);
-}
-
-function loadEmbed(embed) {
-    const src = embed.getAttribute('data-src');
-    if (src) {
-        embed.src = src;
-        embed.removeAttribute('data-src');
-        embed.classList.remove('lazy-embed');
-    }
 }
 
 function initializeAccessibility() {

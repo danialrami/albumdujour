@@ -1,7 +1,6 @@
 // Album du Jour - Enhanced Interactions
 document.addEventListener('DOMContentLoaded', function() {
     initializeCollapsibleSections();
-    initializeLazyLoading();
     initializeAccessibility();
 });
 
@@ -23,9 +22,6 @@ function initializeCollapsibleSections() {
                 
                 // Save state
                 localStorage.setItem(`section-${section.dataset.section}`, 'expanded');
-                
-                // Load lazy embeds when section is expanded
-                loadLazyEmbedsInSection(section);
             } else {
                 content.classList.remove('expanded');
                 content.style.maxHeight = '0';
@@ -44,52 +40,6 @@ function initializeCollapsibleSections() {
             setTimeout(() => toggle.click(), 100);
         }
     });
-}
-
-function initializeLazyLoading() {
-    // Load embeds that are currently visible
-    loadVisibleEmbeds();
-    
-    // Set up intersection observer for lazy loading
-    if ('IntersectionObserver' in window) {
-        const embedObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    loadEmbed(entry.target);
-                    embedObserver.unobserve(entry.target);
-                }
-            });
-        }, {
-            rootMargin: '50px'
-        });
-        
-        // Observe all lazy embeds
-        document.querySelectorAll('.lazy-embed[data-src]').forEach(embed => {
-            embedObserver.observe(embed);
-        });
-    } else {
-        // Fallback for browsers without IntersectionObserver
-        document.querySelectorAll('.lazy-embed[data-src]').forEach(loadEmbed);
-    }
-}
-
-function loadVisibleEmbeds() {
-    // Load embeds in currently visible sections (like Currently Listening)
-    document.querySelectorAll('.currently-listening .lazy-embed[data-src]').forEach(loadEmbed);
-}
-
-function loadLazyEmbedsInSection(section) {
-    // Load all lazy embeds in a specific section
-    section.querySelectorAll('.lazy-embed[data-src]').forEach(loadEmbed);
-}
-
-function loadEmbed(embed) {
-    const src = embed.getAttribute('data-src');
-    if (src) {
-        embed.src = src;
-        embed.removeAttribute('data-src');
-        embed.classList.remove('lazy-embed');
-    }
 }
 
 function initializeAccessibility() {

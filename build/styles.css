@@ -248,12 +248,62 @@ body {
     padding: 2rem;
 }
 
-/* Compact Album Grid - Multiple columns with small embeds */
-.album-grid-compact {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+/* Horizontal Carousel Layout */
+.album-carousel {
+    display: flex;
     gap: 1.5rem;
-    margin-top: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0.5rem 0.25rem 1rem;
+    margin-top: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--lufs-teal) transparent;
+}
+
+.album-carousel::-webkit-scrollbar {
+    height: 6px;
+}
+
+.album-carousel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.album-carousel::-webkit-scrollbar-thumb {
+    background: var(--lufs-teal);
+    border-radius: 3px;
+    opacity: 0.6;
+}
+
+.album-carousel::-webkit-scrollbar-thumb:hover {
+    background: var(--lufs-blue);
+}
+
+.carousel-scroll-indicator {
+    text-align: center;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.scroll-hint {
+    font-size: 0.75rem;
+    color: var(--lufs-white);
+    letter-spacing: 0.1em;
+}
+
+/* Album Cards in Carousel */
+.album-carousel .album-card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+    width: 280px;
+}
+
+.album-carousel .compact-card {
+    width: 280px;
+    flex-shrink: 0;
 }
 
 /* Album Cards */
@@ -379,16 +429,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .album-grid-compact {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.2rem;
+    .album-carousel .album-card {
+        flex: 0 0 260px;
+        width: 260px;
     }
 }
 
 @media (max-width: 900px) {
-    .album-grid-compact {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
+    .album-carousel .album-card {
+        flex: 0 0 240px;
+        width: 240px;
     }
 }
 
@@ -397,9 +447,19 @@ body {
         --container-padding: 1rem;
     }
     
-    .album-grid-compact {
-        grid-template-columns: 1fr;
+    .album-carousel {
         gap: 1rem;
+        padding: 0.5rem 0.25rem 0.75rem;
+    }
+    
+    .album-carousel .album-card {
+        flex: 0 0 200px;
+        width: 200px;
+    }
+    
+    .album-carousel .compact-card {
+        width: 200px;
+        flex-shrink: 0;
     }
     
     .current-embed-container {
@@ -427,19 +487,6 @@ body {
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
-}
-
-/* Lazy loading placeholder */
-.lazy-embed[data-src] {
-    background: rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lazy-embed[data-src]::before {
-    content: "Loading...";
-    color: rgba(255, 255, 255, 0.5);
 }
 
 /* No embed fallback */
