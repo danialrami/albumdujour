@@ -135,7 +135,7 @@ display_final_summary() {
     echo -e "${CYAN}✨ Features Deployed:${NC}"
     echo -e "   • Enhanced Album du Jour website with LUFS branding"
     echo -e "   • Simplified design with clean album cards"
-    echo -e "   • Spotify embeds with natural color accents"
+    echo -e "   • Apple Music embeds only (Spotify deprecated Feb 2026)"
     echo -e "   • Minimal abstract favicon"
     echo -e "   • Collapsible sections with localStorage persistence"
     echo -e "   • Responsive design for all devices"
