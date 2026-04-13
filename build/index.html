@@ -7,34 +7,67 @@
     <meta name="description" content="Personal music library showcase featuring currently listening, recently added, and recently finished albums.">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="animated-background"></div>
+    <!-- Sticky Header -->
+    <div class="sticky-header" id="sticky-header">
+        <div class="header-content">
+            <a href="#top" class="logo-link" id="logo-top">
+                <div class="logo"></div>
+            </a>
+            <div class="header-text">
+                <h1>Album du Jour</h1>
+                <p>LUFS Audio</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="animated-background" id="animated-background"></div>
+
     <div class="container">
-        <header class="site-header">
-            <h1><img src="assets/favicon.svg" alt="Album du Jour" class="title-icon"> Album du Jour</h1>
-            <p class="subtitle">🤖💕</p>
-            <p class="generation-time">Generated on April 13, 2026 at 03:47 PM</p>
+        <!-- Main Header -->
+        <div class="main-header" id="top">
+            <div class="header-content">
+                <div class="logo-section">
+                    <a href="#top" class="logo-link">
+                        <div class="logo"></div>
+                    </a>
+                    <div class="header-text">
+                        <h1>Album du Jour</h1>
+                        <p>Music Discovery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
             <div class="stats-badges">
                 <span class="badge current">1 Current</span>
                 <span class="badge added">20 Recently Added</span>
                 <span class="badge finished">20 Recently Finished</span>
                 <span class="badge total">41 Total</span>
             </div>
-        </header>
-        
+            <p class="generation-time">Generated on April 13, 2026 at 04:02 PM</p>
+        </div>
+
+        <!-- Main Content -->
         <main class="content">
             
         <section class="currently-listening">
-            <h2>🎧 Currently Listening</h2>
+            <h2>🎵 Latest Album</h2>
             <div class="album-du-jour">
                 
-        <div class="album-card current-card" data-status="current">
+        <div class="album-card current-card" data-status="done">
             <div class="card-header">
                 <h3 class="album-title">The Don</h3>
                 <p class="artist-name">Donny Benét</p>
                 <div class="card-meta">
-                    
+                    <span class="date">Finished: Apr 13, 2026</span>
                     
                 </div>
             </div>
@@ -1208,14 +1241,20 @@
         </section>
         
         </main>
-        
-        <footer class="site-footer">
-            <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
-               target="_blank" class="sheets-link">
-                📊 View Full Library
-            </a>
-            <p>Built with 🩷</p>
-        </footer>
+
+        <!-- Retro Buttons Section -->
+        <div class="retro-buttons">
+            <div class="buttons-container">
+                <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
+                   target="_blank" class="webring-button library-button">
+                    📊 View Full Library
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; <span id="current-year"></span> LUFS Audio — Built with 🩷</p>
+        </div>
     </div>
     
     <script src="scripts.js"></script>
