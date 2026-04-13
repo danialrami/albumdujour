@@ -295,7 +295,7 @@ class MusicSiteBuilder:
         # Read favicon SVG for use in headers
         favicon_svg = ""
         try:
-            favicon_path = self.assets_dir / "favicon.svg"
+            favicon_path = self.website_dir / "assets" / "favicon.svg"
             if favicon_path.exists():
                 with open(favicon_path, 'r') as f:
                     favicon_svg = f.read().strip()
@@ -469,7 +469,7 @@ class MusicSiteBuilder:
                             class="dynamic-embed current-embed apple-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
-                            style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;"
+                            style="width:100%;max-width:660px;overflow:hidden;border-radius:0;"
                             sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
                             title="Apple Music - {album['album']}"></iframe>
                 </div>
@@ -487,7 +487,7 @@ class MusicSiteBuilder:
                             class="dynamic-embed compact-embed apple-embed" 
                             frameborder="0" 
                             allow="autoplay *; encrypted-media *" 
-                            style="overflow: hidden; border-radius: 8px;"
+                            style="overflow: hidden; border-radius: 0;"
                             title="Apple Music - {album['album']}"></iframe>
                 </div>
                 """
