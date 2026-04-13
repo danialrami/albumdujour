@@ -208,11 +208,7 @@ except:
     # Commit changes with album info
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    git commit -m "Album du Jour build: $current_album - $timestamp
-    
-- Updated website with current album: $current_album
-- Build generated from Google Sheets data
-- Deployed via git subtree split to build branch"
+    git commit -m "$current_album - $timestamp"
     
     log_success "Source changes committed to main"
 }
