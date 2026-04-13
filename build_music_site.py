@@ -400,9 +400,6 @@ class MusicSiteBuilder:
                 <div class="album-carousel">
                     {album_cards}
                 </div>
-                <div class="carousel-scroll-indicator">
-                    <span class="scroll-hint">← Scroll →</span>
-                </div>
             </div>
         </section>
         """
@@ -734,6 +731,7 @@ body {
 .section-content {
     max-height: 0;
     overflow: hidden;
+    overflow-x: hidden;
     transition: max-height 0.5s ease;
 }
 
@@ -775,19 +773,6 @@ body {
     background: var(--lufs-blue);
 }
 
-.carousel-scroll-indicator {
-    text-align: center;
-    margin-top: -0.5rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-.scroll-hint {
-    font-size: 0.75rem;
-    color: var(--lufs-white);
-    letter-spacing: 0.1em;
-}
-
 /* Album Cards in Carousel */
 .album-carousel .album-card {
     flex: 0 0 280px;
@@ -821,7 +806,7 @@ body {
 }
 
 .compact-card {
-    padding: 1rem;
+    padding: 0.75rem;
 }
 
 .card-header {
@@ -850,10 +835,11 @@ body {
     opacity: 0.7;
 }
 
-/* Compact embed containers - Small and efficient */
+/* Compact embed containers - constrained to card width */
 .compact-embed-container {
     width: 100%;
-    margin: 0.8rem 0;
+    max-width: 280px;
+    margin: 0.6rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -870,7 +856,7 @@ body {
 .card-links {
     display: flex;
     gap: 0.6rem;
-    margin-top: 0.8rem;
+    margin-top: 0.5rem;
     flex-wrap: wrap;
 }
 
@@ -963,6 +949,7 @@ body {
     
     .compact-embed-container {
         padding: 2px;
+        max-width: 200px;
     }
     
     .section-toggle {
