@@ -207,7 +207,7 @@ display_summary() {
     echo -e "${CYAN}✨ New Features:${NC}"
     echo -e "   • Simplified design with clean album cards"
     echo -e "   • LUFS brand colors with subtle background animation"
-    echo -e "   • Spotify embeds provide natural color accents"
+    echo -e "   • Apple Music embeds only (Spotify deprecated)"
     echo -e "   • Abstract vinyl record favicon (no text)"
     echo -e "   • Collapsible sections with localStorage persistence"
     echo -e "   • Responsive design for all devices"
