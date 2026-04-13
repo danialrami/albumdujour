@@ -405,26 +405,12 @@ class MusicSiteBuilder:
         """
     
     def generate_album_card_html(self, album, is_current=False):
-        """Generate HTML for a single album card with optimized embed sizing"""
-        # Determine which embed to show (prefer Spotify, fallback to Apple)
+        """Generate HTML for a single album card with Apple Music embeds only"""
+        # Apple Music only - Spotify deprecated as of Feb 2026 (requires Premium for Developer Mode API)
         embed_html = ""
         if is_current:
             # For current music (album du jour), show embeds prominently
-            if album['spotify_embed']:
-                embed_html = f"""
-                <div class="embed-container current-embed-container">
-                    <iframe src="{album['spotify_embed']}" 
-                            width="100%" 
-                            height="450"
-                            class="dynamic-embed current-embed spotify-embed" 
-                            frameborder="0" 
-                            allowtransparency="true" 
-                            allow="encrypted-media"
-                            title="Spotify - {album['album']}"
-                            style="border-radius: 10px;"></iframe>
-                </div>
-                """
-            elif album['apple_embed']:
+            if album['apple_embed']:
                 embed_html = f"""
                 <div class="embed-container current-embed-container">
                     <iframe src="{album['apple_embed']}" 
@@ -442,21 +428,7 @@ class MusicSiteBuilder:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
             # For other sections (Recently Added/Finished), use compact embeds
-            if album['spotify_embed']:
-                embed_html = f"""
-                <div class="embed-container compact-embed-container">
-                    <iframe data-src="{album['spotify_embed']}" 
-                            width="100%" 
-                            height="152"
-                            class="dynamic-embed compact-embed spotify-embed lazy-embed" 
-                            frameborder="0" 
-                            allowtransparency="true" 
-                            allow="encrypted-media"
-                            title="Spotify - {album['album']}"
-                            style="border-radius: 8px;"></iframe>
-                </div>
-                """
-            elif album['apple_embed']:
+            if album['apple_embed']:
                 embed_html = f"""
                 <div class="embed-container compact-embed-container">
                     <iframe data-src="{album['apple_embed']}" 
@@ -472,12 +444,11 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container compact-embed-container"><p class="no-embed">No embed available</p></div>'
         
-        # Build links
+        # Build links - Apple Music only (Spotify deprecated)
         links_html = ""
         if album['apple_link']:
             links_html += f'<a href="{album["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
-        if album['spotify_link']:
-            links_html += f'<a href="{album["spotify_link"]}" target="_blank" class="music-link spotify">🎵 Spotify</a>'
+        # Spotify links retained in sheet for reference but no longer displayed or used
         
         # Format dates
         date_display = ""
