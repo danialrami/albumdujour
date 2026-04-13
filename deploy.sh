@@ -186,23 +186,78 @@ commit_source_changes() {
     fi
     
     # Get current album info for commit message
-    local current_album="Unknown"
+    # Logic mirrors build_music_site.py:
+    # 1. Look for Status == "Current" → use that album
+    # 2. If no Current, find album with most recent timestamp (Date Added OR Date Finished)
+    # 3. If nothing, use "Latest Album"
+    local current_album="Latest Album"
     if [ -f "$WEBSITE_DIR/venv/bin/python3" ]; then
         current_album=$("$WEBSITE_DIR/venv/bin/python3" -c "
 import gspread
 from pathlib import Path
+from datetime import datetime
+
 try:
     creds_path = Path('$WEBSITE_DIR/concrete-spider-446700-f9-4646496845d1.json')
     gc = gspread.service_account(filename=str(creds_path))
     sheet = gc.open('2025-media').get_worksheet(0)
     records = sheet.get_all_records()
+    
+    # First: look for Status == 'Current'
     for r in records:
         if r.get('Status', '').strip().lower() == 'current':
-            print(r.get('Music', 'Unknown'))
-            break
+            print(r.get('Music', 'Latest Album'))
+            exit(0)
+    
+    # Second: find most recent timestamp (Date Added OR Date Finished)
+    latest = None
+    latest_time = None
+    
+    for r in records:
+        music = r.get('Music', '')
+        date_added = r.get('Date Added', '')
+        date_finished = r.get('Date Finished', '')
+        
+        # Try Date Added
+        if date_added:
+            try:
+                # Handle ISO format
+                if 'T' in str(date_added):
+                    ts = datetime.fromisoformat(str(date_added).replace('Z', '+00:00'))
+                else:
+                    ts = datetime.strptime(str(date_added), '%Y-%m-%d')
+                if latest_time is None or ts > latest_time:
+                    latest = music
+                    latest_time = ts
+            except:
+                pass
+        
+        # Try Date Finished
+        if date_finished:
+            try:
+                if 'T' in str(date_finished):
+                    ts = datetime.fromisoformat(str(date_finished).replace('Z', '+00:00'))
+                else:
+                    ts = datetime.strptime(str(date_finished), '%Y-%m-%d')
+                if latest_time is None or ts > latest_time:
+                    latest = music
+                    latest_time = ts
+            except:
+                pass
+    
+    if latest:
+        print(latest)
+    else:
+        print('Latest Album')
+        
 except:
-    print('Unknown')
-" 2>/dev/null) || current_album="Unknown"
+    print('Latest Album')
+" 2>/dev/null) || current_album="Latest Album"
+    fi
+    
+    # Handle empty/blank results
+    if [ -z "$current_album" ] || [ "$current_album" = "None" ]; then
+        current_album="Latest Album"
     fi
     
     # Commit changes with album info
