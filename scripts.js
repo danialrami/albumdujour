@@ -167,7 +167,30 @@ function initializeRetroButtons() {
             this.style.transform = '';
             this.style.boxShadow = '2px 2px 0 #888888';
         });
+        
+        // Add sparkles to button images (except text buttons)
+        if (button.querySelector('svg') && !button.classList.contains('library-button')) {
+            addSparklesToButton(button);
+        }
     });
+}
+
+// Add sparkle effects to button
+function addSparklesToButton(button) {
+    const sparkleCount = 5;
+    for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        
+        // Random position
+        const left = 10 + Math.floor(Math.random() * 70);
+        const top = 5 + Math.floor(Math.random() * 20);
+        sparkle.style.left = left + 'px';
+        sparkle.style.top = top + 'px';
+        sparkle.style.animationDelay = (i * 0.4) + 's';
+        
+        button.appendChild(sparkle);
+    }
 }
 
 // Animated Background with Floating Shapes
