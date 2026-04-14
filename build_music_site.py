@@ -322,6 +322,7 @@ class MusicSiteBuilder:
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://umami.lufshq.com/script.js" data-website-id="f508b179-67d7-487f-8b22-9f6ba5e820e3"></script>
 </head>
 <body>
     <!-- Sticky Header -->
