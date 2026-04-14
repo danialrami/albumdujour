@@ -273,7 +273,7 @@ class MusicSiteBuilder:
             print("⚠️  No assets directory found, skipping asset copy")
         
         # Copy button HTML files
-        button_files = ['lufs-button.html', 'danialrami-button.html']
+        button_files = ['lufs-button.html', 'danialrami-button.html', 'library-button.html']
         for button_file in button_files:
             source_path = self.website_dir / button_file
             if source_path.exists():
@@ -380,10 +380,7 @@ class MusicSiteBuilder:
             <div class="buttons-container">
                 <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com"></iframe>
                 <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio"></iframe>
-                <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" 
-                   target="_blank" class="webring-button library-button">
-                    📊 View Full Library
-                </a>
+                <iframe src="library-button.html" class="button-iframe" title="View Full Library"></iframe>
             </div>
         </div>
 
