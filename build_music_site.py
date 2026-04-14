@@ -477,22 +477,8 @@ class MusicSiteBuilder:
             else:
                 embed_html = '<div class="embed-container current-embed-container"><p class="no-embed">No embed available</p></div>'
         else:
-            # For other sections (Recently Added/Finished), use compact embeds
-            if album['apple_embed']:
-                embed_html = f"""
-                <div class="embed-container compact-embed-container">
-                    <iframe src="{album['apple_embed']}" 
-                            width="100%" 
-                            height="250"
-                            class="dynamic-embed compact-embed apple-embed" 
-                            frameborder="0" 
-                            allow="autoplay *; encrypted-media *" 
-                            style="overflow: hidden; border-radius: 0;"
-                            title="Apple Music - {album['album']}"></iframe>
-                </div>
-                """
-            else:
-                embed_html = '<div class="embed-container compact-embed-container"><p class="no-embed">No embed available</p></div>'
+            # For other sections (Recently Added/Finished), use only links (no embeds for cleaner look)
+            embed_html = ""
         
         # Build links - Apple Music only (Spotify deprecated)
         links_html = ""
