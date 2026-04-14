@@ -675,6 +675,16 @@ body {
     font-weight: 600;
 }
 
+/* Button iframe styling */
+.button-iframe {
+    width: 88px;
+    height: 31px;
+    border: none;
+    margin: var(--spacing-sm);
+    vertical-align: middle;
+    background: transparent;
+}
+
 /* Sparkle effects */
 .sparkle {
     position: absolute;
