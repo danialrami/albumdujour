@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daniel Ramirez's Retro Button</title>
+  <style>
+    @keyframes dr-pulseShadow {
+      0%, 100% {
+        box-shadow: 2px 2px 0 #b0b0b0;
+      }
+      50% {
+        box-shadow: 4px 4px 0 #888;
+      }
+    }
+    
+    @keyframes dr-float {
+      0%, 100% { 
+        transform: translateY(0px); 
+      }
+      50% { 
+        transform: translateY(-2px); 
+      }
+    }
+    
+    @keyframes dr-eyeBlink {
+      0%, 95%, 100% { transform: scaleY(1); }
+      97% { transform: scaleY(0.1); }
+    }
+    
+    @keyframes dr-sparkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 0.8; transform: scale(1); }
+    }
+    
+    .webring-button {
+      animation: dr-pulseShadow 2s infinite, dr-float 3s ease-in-out infinite;
+      width: 88px;
+      height: 31px;
+      display: inline-block;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      background: #e0e0e0;
+      border: 2px solid #b0b0b0;
+      box-shadow:
+        0 0 0 4px #f8f8f8,
+        0 0 0 6px #888,
+        2px 2px 0 0 #b0b0b0;
+      margin: 8px;
+      padding: 0;
+      transition: background 0.1s;
+      position: relative;
+    }
+    
+    .webring-button:hover {
+      animation-play-state: paused;
+      box-shadow: none;
+      background: #d0d0d0;
+    }
+    
+    .webring-button svg {
+      width: 88px;
+      height: 31px;
+      display: block;
+      margin: 0 auto;
+      background: #e0e0e0;
+    }
+    
+    .dr-sparkle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      z-index: 10;
+      animation: dr-sparkle 2s infinite;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <a href="https://danialrami.com" target="_blank" class="webring-button" title="danialrami.com!">
+    <!-- Add sparkles with JavaScript -->
+    <script>
+      (function() {
+        const addSparkles = function() {
+          const button = document.querySelector('.webring-button');
+          if (!button) return;
+          
+          // Just add a few subtle sparkles
+          for (let i = 0; i < 5; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'dr-sparkle';
+            
+            // Random position
+            const left = 10 + Math.floor(Math.random() * 70);
+            const top = 5 + Math.floor(Math.random() * 20);
+            sparkle.style.left = left + 'px';
+            sparkle.style.top = top + 'px';
+            
+            // Different delays
+            sparkle.style.animationDelay = (i * 0.4) + 's';
+            
+            button.appendChild(sparkle);
+          }
+        };
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', addSparkles);
+        } else {
+          addSparkles();
+        }
+      })();
+    </script>
+    
+    <svg width="88" height="31" viewBox="0 0 88 31" xmlns="http://www.w3.org/2000/svg">
+      <rect width="88" height="31" fill="#e0e0e0"/>
+      <style>
+        .dr-cloud-eye { animation: dr-eyeBlink 4s infinite; transform-origin: center; }
+        .dr-cloud:nth-child(1) .dr-cloud-eye { animation-delay: 0s; }
+        .dr-cloud:nth-child(2) .dr-cloud-eye { animation-delay: 1.5s; }
+        .dr-cloud:nth-child(3) .dr-cloud-eye { animation-delay: 2.7s; }
+      </style>
+      
+      <!-- Cloud 1 -->
+      <g class="dr-cloud">
+        <path d="M15,5 C19,5 22,7 22,11 C26,11 29,14 29,18 C29,22 26,25 22,25 L8,25 C4,25 1,22 1,18 C1,14 4,11 8,11 C8,7 11,5 15,5 Z" 
+              fill="#d8d8d8" stroke="#888" stroke-width="1"/>
+        <circle class="dr-cloud-eye" cx="11" cy="16" r="2" fill="#222"/>
+        <circle class="dr-cloud-eye" cx="19" cy="16" r="2" fill="#222"/>
+      </g>
+      
+      <!-- Cloud 2 -->
+      <g class="dr-cloud">
+        <path d="M44,5 C48,5 51,7 51,11 C55,11 58,14 58,18 C58,22 55,25 51,25 L37,25 C33,25 30,22 30,18 C30,14 33,11 37,11 C37,7 40,5 44,5 Z" 
+              fill="#d8d8d8" stroke="#888" stroke-width="1"/>
+        <circle class="dr-cloud-eye" cx="40" cy="16" r="2" fill="#222"/>
+        <circle class="dr-cloud-eye" cx="48" cy="16" r="2" fill="#222"/>
+      </g>
+      
+      <!-- Cloud 3 -->
+      <g class="dr-cloud">
+        <path d="M73,5 C77,5 80,7 80,11 C84,11 87,14 87,18 C87,22 84,25 80,25 L66,25 C62,25 59,22 59,18 C59,14 62,11 66,11 C66,7 69,5 73,5 Z" 
+              fill="#d8d8d8" stroke="#888" stroke-width="1"/>
+        <circle class="dr-cloud-eye" cx="69" cy="16" r="2" fill="#222"/>
+        <circle class="dr-cloud-eye" cx="77" cy="16" r="2" fill="#222"/>
+      </g>
+    </svg>
+  </a>
+</body>
+</html>
