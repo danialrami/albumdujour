@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Full Library Button</title>
+  <style>
+    @keyframes lib-pulseShadow {
+      0%, 100% {
+        box-shadow: 2px 2px 0 #b0b0b0;
+      }
+      50% {
+        box-shadow: 4px 4px 0 #888;
+      }
+    }
+    
+    @keyframes lib-float {
+      0%, 100% { 
+        transform: translateY(0px); 
+      }
+      50% { 
+        transform: translateY(-2px); 
+      }
+    }
+    
+    @keyframes lib-sparkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 0.8; transform: scale(1); }
+    }
+    
+    .webring-button {
+      animation: lib-pulseShadow 2s infinite, lib-float 3s ease-in-out infinite;
+      width: 88px;
+      height: 31px;
+      display: inline-block;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      background: #e0e0e0;
+      border: 2px solid #b0b0b0;
+      box-shadow:
+        0 0 0 4px #f8f8f8,
+        0 0 0 6px #888,
+        2px 2px 0 0 #b0b0b0;
+      margin: 8px;
+      padding: 0;
+      transition: background 0.1s;
+      position: relative;
+    }
+    
+    .webring-button:hover {
+      animation-play-state: paused;
+      box-shadow: none;
+      background: #d0d0d0;
+    }
+    
+    .webring-button svg {
+      width: 88px;
+      height: 31px;
+      display: block;
+      margin: 0 auto;
+      background: #e0e0e0;
+    }
+    
+    .lib-sparkle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      z-index: 10;
+      animation: lib-sparkle 2s infinite;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <a href="https://docs.google.com/spreadsheets/d/1p8zTsGuQVV81tvuZswIHq-pIXCyZn9ixhg-2HWD9X10/edit?gid=0#gid=0" target="_blank" class="webring-button" title="View Full Library">
+    <script>
+      (function() {
+        const addSparkles = function() {
+          const button = document.querySelector('.webring-button');
+          if (!button) return;
+          
+          for (let i = 0; i < 5; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'lib-sparkle';
+            
+            const left = 10 + Math.floor(Math.random() * 70);
+            const top = 5 + Math.floor(Math.random() * 20);
+            sparkle.style.left = left + 'px';
+            sparkle.style.top = top + 'px';
+            sparkle.style.animationDelay = (i * 0.4) + 's';
+            
+            button.appendChild(sparkle);
+          }
+        };
+        
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', addSparkles);
+        } else {
+          addSparkles();
+        }
+      })();
+    </script>
+    
+    <svg width="88" height="31" viewBox="0 0 88 31" xmlns="http://www.w3.org/2000/svg">
+      <rect width="88" height="31" fill="#e0e0e0"/>
+      <!-- Spreadsheet/Grid Icon -->
+      <g fill="#111">
+        <!-- Left bracket -->
+        <path d="M12 6h-2v19h2V6z"/>
+        <!-- Right bracket -->
+        <path d="M78 6h-2v19h2V6z"/>
+        <!-- Middle dividers -->
+        <path d="M36 6h2v19h-2z"/>
+        <path d="M50 6h2v19h-2z"/>
+        <path d="M64 6h2v19h-2z"/>
+        <!-- Top row lines -->
+        <path d="M12 10h64v2H12z"/>
+        <path d="M12 15h64v2H12z"/>
+        <path d="M12 20h64v2H12z"/>
+      </g>
+      <!-- Spreadsheet icon details -->
+      <g fill="#78beba">
+        <!-- Small cells -->
+        <rect x="14" y="8" width="20" height="4" rx="1"/>
+        <rect x="38" y="8" width="24" height="4" rx="1"/>
+        <rect x="14" y="13" width="12" height="4" rx="1"/>
+        <rect x="28" y="13" width="34" height="4" rx="1"/>
+        <rect x="14" y="18" width="30" height="4" rx="1"/>
+        <rect x="46" y="18" width="16" height="4" rx="1"/>
+      </g>
+    </svg>
+  </a>
+</body>
+</html>
