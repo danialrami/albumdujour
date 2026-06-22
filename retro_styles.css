@@ -525,29 +525,23 @@ a { color: inherit; }
     border-top: 1px solid var(--hairline);
     text-align: center;
 }
-.retro-buttons::before {
-    content: 'Webring ——';
-    display: block;
-    font-family: var(--mono);
-    font-size: 0.66rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-    color: var(--muted);
-    margin-bottom: var(--lg);
-}
 .buttons-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--md);
+    gap: var(--sm);
     flex-wrap: wrap;
 }
+/* Iframe viewport is larger than the 88x31 button so its 2px border +
+   pulsing box-shadow + float never overflow → no scrollbars, no clipping.
+   The button stays visually 88x31, centered inside. */
 .button-iframe {
-    width: 88px;
-    height: 31px;
+    width: 104px;
+    height: 44px;
     border: none;
     background: transparent;
     vertical-align: middle;
+    overflow: hidden;
 }
 
 /* Retain hooks the button iframes / legacy markup may use */

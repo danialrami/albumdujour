@@ -27,10 +27,18 @@
       50% { opacity: 0.8; transform: scale(1); }
     }
     
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
+      overflow: hidden;
       background: transparent;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .webring-button {

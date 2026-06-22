@@ -384,9 +384,9 @@ class MusicSiteBuilder:
         <!-- Retro Buttons Section -->
         <div class="retro-buttons">
             <div class="buttons-container">
-                <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com"></iframe>
-                <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio"></iframe>
-                <iframe src="library-button.html" class="button-iframe" title="View Full Library"></iframe>
+                <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com" scrolling="no" loading="lazy"></iframe>
+                <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio" scrolling="no" loading="lazy"></iframe>
+                <iframe src="library-button.html" class="button-iframe" title="View Full Library" scrolling="no" loading="lazy"></iframe>
             </div>
         </div>
 
