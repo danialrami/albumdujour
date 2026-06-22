@@ -9,14 +9,19 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700;800&family=Public+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
     <script defer src="https://umami.lufshq.com/script.js" data-website-id="f508b179-67d7-487f-8b22-9f6ba5e820e3"></script>
 </head>
 <body>
+    <!-- Custom cursor + scroll progress -->
+    <div class="cur-dot"></div>
+    <div class="cur-ring"></div>
+    <div id="scroll-progress"></div>
+
     <!-- Sticky Header -->
     <div class="sticky-header" id="sticky-header">
         <div class="header-content">
-            <a href="#top" class="logo-link" id="logo-top">
+            <a href="#top" class="logo-link" id="logo-top" data-hover>
                 <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
     <defs>
         <!-- LUFS Brand Colors -->
@@ -60,7 +65,7 @@
         <div class="main-header" id="top">
             <div class="header-content">
                 <div class="logo-section">
-                    <a href="#top" class="logo-link">
+                    <a href="#top" class="logo-link" data-hover>
                         <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
     <defs>
         <!-- LUFS Brand Colors -->
@@ -90,6 +95,7 @@
 </svg></div>
                     </a>
                     <div class="header-text">
+                        <span class="sec-label">A Listening Journal ——</span>
                         <h1>Album du Jour</h1>
                         <p>Music Discovery</p>
                     </div>
@@ -105,14 +111,15 @@
                 <span class="badge finished">20 Recently Finished</span>
                 <span class="badge total">41 Total</span>
             </div>
-            <p class="generation-time">Generated on June 21, 2026 at 10:00 PM</p>
+            <p class="generation-time">Generated on June 22, 2026 at 12:41 AM</p>
         </div>
 
         <!-- Main Content -->
         <main class="content">
             
         <section class="currently-listening">
-            <h2>🎧 Currently Listening</h2>
+            <span class="sec-label">Now Playing ——</span>
+            <h2>Currently Listening</h2>
             <div class="album-du-jour">
                 
         <div class="album-card current-card" data-status="current">
@@ -140,7 +147,7 @@
                 
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/kissing-death/1739112560" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/kissing-death/1739112560" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -149,8 +156,8 @@
         
             
         <section class="collapsible-section" data-section="recently-added">
-            <button class="section-toggle" aria-expanded="false">
-                <h2>📀 Recently Added <span class="count">(20)</span></h2>
+            <button class="section-toggle" aria-expanded="false" data-hover>
+                <h2>Recently Added <span class="count">(20)</span></h2>
                 <span class="toggle-icon">▼</span>
             </button>
             <div class="section-content">
@@ -169,7 +176,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/bully/1888707282" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/bully/1888707282" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -186,7 +193,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/whimsy/1889604366" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/whimsy/1889604366" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -203,7 +210,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/kammerkonzert/1873293289" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/kammerkonzert/1873293289" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -220,7 +227,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/homeward-ep/1632715993" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/homeward-ep/1632715993" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -237,7 +244,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/el-prado-deluxe/1859786789" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/el-prado-deluxe/1859786789" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -254,7 +261,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/home-feat-essie-humberston-ep/1871017989" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/home-feat-essie-humberston-ep/1871017989" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -271,7 +278,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/futuro-fluxo/1713956672" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/futuro-fluxo/1713956672" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -288,7 +295,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/lady-leste/1607610334" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/lady-leste/1607610334" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -305,7 +312,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/batid%C3%A3o-tropical-vol-2/1738280462" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/batid%C3%A3o-tropical-vol-2/1738280462" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -322,7 +329,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/n%C3%A3o-para-n%C3%A3o/1437272358" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/n%C3%A3o-para-n%C3%A3o/1437272358" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -339,7 +346,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/ensaios-da-anitta/1856981004" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/ensaios-da-anitta/1856981004" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -356,7 +363,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/halo/1872819106" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/halo/1872819106" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -373,7 +380,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/alexandra-palace-london-feb-27-2026-dj-mix/1890298647" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/alexandra-palace-london-feb-27-2026-dj-mix/1890298647" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -390,7 +397,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/pompeii-utility/1870867411" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/pompeii-utility/1870867411" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -407,7 +414,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/the-former-site-of/1860402145" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/the-former-site-of/1860402145" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -424,7 +431,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/all-roads-lead-home/1876931503" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/all-roads-lead-home/1876931503" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -441,7 +448,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/still-standing/1885034099" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/still-standing/1885034099" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -458,7 +465,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/ricochet/1862845733" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/ricochet/1862845733" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -475,7 +482,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/me-gusta-ser/188272026" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/me-gusta-ser/188272026" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -492,7 +499,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/ambiguous-desire/1862570378" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/ambiguous-desire/1862570378" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -502,8 +509,8 @@
         
             
         <section class="collapsible-section" data-section="recently-finished">
-            <button class="section-toggle" aria-expanded="false">
-                <h2>✅ Recently Finished <span class="count">(20)</span></h2>
+            <button class="section-toggle" aria-expanded="false" data-hover>
+                <h2>Recently Finished <span class="count">(20)</span></h2>
                 <span class="toggle-icon">▼</span>
             </button>
             <div class="section-content">
@@ -522,7 +529,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/versions-of-me/1618274896" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/versions-of-me/1618274896" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -539,7 +546,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/conflict-dlc/1832593364" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/conflict-dlc/1832593364" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -556,7 +563,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/cocoon-compilation-v/1818893322" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/cocoon-compilation-v/1818893322" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -573,7 +580,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/honeymind/1735440744" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/honeymind/1735440744" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -590,7 +597,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/the-rise-and-fall-of-a-midwest-princess/1698723205" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/the-rise-and-fall-of-a-midwest-princess/1698723205" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -607,7 +614,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/lucid/1487511960" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/lucid/1487511960" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -624,7 +631,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/older-and-wiser/1768859379" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/older-and-wiser/1768859379" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -641,7 +648,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/all-my-demons-greeting-me-as-a-friend-deluxe/1771718369" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/all-my-demons-greeting-me-as-a-friend-deluxe/1771718369" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -658,7 +665,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/find-your-place-of-peace/1746086356" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/find-your-place-of-peace/1746086356" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -675,7 +682,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/geidi-primes-nightcore-edition/1733105796" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/geidi-primes-nightcore-edition/1733105796" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -692,7 +699,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/trvll-w-friends/1727013382" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/trvll-w-friends/1727013382" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -709,7 +716,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/international/1812943332" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/international/1812943332" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -726,7 +733,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/1123/1468031576" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/1123/1468031576" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -743,7 +750,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/pennen-sverdet/1761333623" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/pennen-sverdet/1761333623" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -760,7 +767,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/home-in-another-life/1747360912" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/home-in-another-life/1747360912" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -777,7 +784,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/the-death-of-slim-shady-coup-de-gr%C3%A2ce/1755022177" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/the-death-of-slim-shady-coup-de-gr%C3%A2ce/1755022177" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -794,7 +801,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/gonzo/1743234947" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/gonzo/1743234947" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -811,7 +818,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/the-night-shift/1714903602" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/the-night-shift/1714903602" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -828,7 +835,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/the-don/1345339743" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/the-don/1345339743" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -845,7 +852,7 @@
             
             
             <div class="card-links">
-                <a href="https://music.apple.com/us/album/volcano/1805642752" target="_blank" class="music-link apple">🍎 Apple Music</a>
+                <a href="https://music.apple.com/us/album/volcano/1805642752" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>
             </div>
         </div>
         
@@ -858,14 +865,17 @@
         <!-- Retro Buttons Section -->
         <div class="retro-buttons">
             <div class="buttons-container">
-                <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com"></iframe>
-                <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio"></iframe>
-                <iframe src="library-button.html" class="button-iframe" title="View Full Library"></iframe>
+                <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com" scrolling="no" loading="lazy"></iframe>
+                <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio" scrolling="no" loading="lazy"></iframe>
+                <iframe src="library-button.html" class="button-iframe" title="View Full Library" scrolling="no" loading="lazy"></iframe>
             </div>
         </div>
 
         <div class="footer">
             <p>&copy; <span id="current-year"></span> LUFS Audio — Built with 🩷</p>
+            <span class="squares" aria-hidden="true">
+                <span class="s-yellow"></span><span class="s-teal"></span><span class="s-blue"></span><span class="s-red"></span>
+            </span>
         </div>
     </div>
     
