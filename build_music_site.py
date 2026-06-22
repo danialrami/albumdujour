@@ -290,7 +290,7 @@ class MusicSiteBuilder:
             return ""
     
     def generate_html(self, categorized_data):
-        """Generate the main HTML file with retro style"""
+        """Generate the main HTML file (Quiet Catalog — dark-editorial LUFS theme)"""
         print("🎨 Generating HTML...")
         
         current_listening = categorized_data['current_listening']
@@ -321,14 +321,19 @@ class MusicSiteBuilder:
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700;800&family=Public+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
     <script defer src="https://umami.lufshq.com/script.js" data-website-id="f508b179-67d7-487f-8b22-9f6ba5e820e3"></script>
 </head>
 <body>
+    <!-- Custom cursor + scroll progress -->
+    <div class="cur-dot"></div>
+    <div class="cur-ring"></div>
+    <div id="scroll-progress"></div>
+
     <!-- Sticky Header -->
     <div class="sticky-header" id="sticky-header">
         <div class="header-content">
-            <a href="#top" class="logo-link" id="logo-top">
+            <a href="#top" class="logo-link" id="logo-top" data-hover>
                 <div class="logo">{favicon_svg}</div>
             </a>
             <div class="header-text">
@@ -346,10 +351,11 @@ class MusicSiteBuilder:
         <div class="main-header" id="top">
             <div class="header-content">
                 <div class="logo-section">
-                    <a href="#top" class="logo-link">
+                    <a href="#top" class="logo-link" data-hover>
                         <div class="logo">{favicon_svg}</div>
                     </a>
                     <div class="header-text">
+                        <span class="sec-label">A Listening Journal ——</span>
                         <h1>Album du Jour</h1>
                         <p>Music Discovery</p>
                     </div>
@@ -371,21 +377,24 @@ class MusicSiteBuilder:
         <!-- Main Content -->
         <main class="content">
             {self.generate_currently_listening_section(current_listening, is_fallback)}
-            {self.generate_collapsible_section("recently-added", "📀 Recently Added", recently_added)}
-            {self.generate_collapsible_section("recently-finished", "✅ Recently Finished", recently_finished)}
+            {self.generate_collapsible_section("recently-added", "Recently Added", recently_added)}
+            {self.generate_collapsible_section("recently-finished", "Recently Finished", recently_finished)}
         </main>
 
         <!-- Retro Buttons Section -->
         <div class="retro-buttons">
             <div class="buttons-container">
-                <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com"></iframe>
-                <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio"></iframe>
-                <iframe src="library-button.html" class="button-iframe" title="View Full Library"></iframe>
+                <iframe src="danialrami-button.html" class="button-iframe" title="danialrami.com" scrolling="no" loading="lazy"></iframe>
+                <iframe src="lufs-button.html" class="button-iframe" title="LUFS Audio" scrolling="no" loading="lazy"></iframe>
+                <iframe src="library-button.html" class="button-iframe" title="View Full Library" scrolling="no" loading="lazy"></iframe>
             </div>
         </div>
 
         <div class="footer">
             <p>&copy; <span id="current-year"></span> LUFS Audio — Built with 🩷</p>
+            <span class="squares" aria-hidden="true">
+                <span class="s-yellow"></span><span class="s-teal"></span><span class="s-blue"></span><span class="s-red"></span>
+            </span>
         </div>
     </div>
     
@@ -404,22 +413,25 @@ class MusicSiteBuilder:
         if not current_albums:
             return f"""
             <section class="currently-listening">
-                <h2>🎧 Currently Listening</h2>
+                <span class="sec-label">Now Playing ——</span>
+                <h2>Currently Listening</h2>
                 <div class="empty-section">
                     <p>No album currently being listened to.</p>
                     <p class="subtitle">The album du jour will appear here when selected.</p>
                 </div>
             </section>
             """
-        
+
         # Take the first current album as the "album du jour"
         album = current_albums[0]
-        
+
         # Determine section title based on whether it's a fallback
-        section_title = "🎵 Latest Album" if is_fallback else "🎧 Currently Listening"
-        
+        section_title = "Latest Album" if is_fallback else "Currently Listening"
+        eyebrow = "Latest Addition ——" if is_fallback else "Now Playing ——"
+
         return f"""
         <section class="currently-listening">
+            <span class="sec-label">{eyebrow}</span>
             <h2>{section_title}</h2>
             <div class="album-du-jour">
                 {self.generate_album_card_html(album, is_current=True)}
@@ -432,7 +444,7 @@ class MusicSiteBuilder:
         if not albums:
             return f"""
             <section class="collapsible-section" data-section="{section_id}">
-                <button class="section-toggle" aria-expanded="false">
+                <button class="section-toggle" aria-expanded="false" data-hover>
                     <h2>{title}</h2>
                     <span class="toggle-icon">▼</span>
                 </button>
@@ -450,7 +462,7 @@ class MusicSiteBuilder:
         
         return f"""
         <section class="collapsible-section" data-section="{section_id}">
-            <button class="section-toggle" aria-expanded="false">
+            <button class="section-toggle" aria-expanded="false" data-hover>
                 <h2>{title} <span class="count">({len(albums)})</span></h2>
                 <span class="toggle-icon">▼</span>
             </button>
@@ -491,7 +503,7 @@ class MusicSiteBuilder:
         # Build links - Apple Music only (Spotify deprecated)
         links_html = ""
         if album['apple_link']:
-            links_html += f'<a href="{album["apple_link"]}" target="_blank" class="music-link apple">🍎 Apple Music</a>'
+            links_html += f'<a href="{album["apple_link"]}" target="_blank" rel="noopener noreferrer" class="music-link apple" data-hover>Apple Music ↗</a>'
         # Spotify links retained in sheet for reference but no longer displayed or used
         
         # Format dates - show appropriate date based on section context
@@ -530,8 +542,8 @@ class MusicSiteBuilder:
         """
     
     def generate_css(self):
-        """Generate CSS with retro brutalist styling"""
-        print("🎨 Generating CSS with retro brutalist styling...")
+        """Generate CSS (Quiet Catalog — dark-editorial LUFS theme)"""
+        print("🎨 Generating CSS (Quiet Catalog — dark-editorial)...")
         
         # Read CSS from template file
         template_path = self.script_dir / "retro_styles.css"
@@ -539,7 +551,7 @@ class MusicSiteBuilder:
         if template_path.exists():
             with open(template_path, 'r', encoding='utf-8') as f:
                 css_content = f.read()
-            print(f"📄 Read retro styles from {template_path}")
+            print(f"📄 Read styles from {template_path}")
         else:
             raise FileNotFoundError(f"CSS template not found: {template_path}")
         
@@ -550,8 +562,8 @@ class MusicSiteBuilder:
         print(f"✅ CSS generated: {output_file}")
     
     def generate_javascript(self):
-        """Generate JavaScript with retro brutalist styling"""
-        print("⚡ Generating JavaScript with retro brutalist styling...")
+        """Generate JavaScript (Quiet Catalog — dark-editorial LUFS theme)"""
+        print("⚡ Generating JavaScript (Quiet Catalog — dark-editorial)...")
         
         # Read JS from template file
         template_path = self.script_dir / "retro_scripts.js"
@@ -559,7 +571,7 @@ class MusicSiteBuilder:
         if template_path.exists():
             with open(template_path, 'r', encoding='utf-8') as f:
                 js_content = f.read()
-            print(f"📄 Read retro scripts from {template_path}")
+            print(f"📄 Read scripts from {template_path}")
         else:
             raise FileNotFoundError(f"JS template not found: {template_path}")
         

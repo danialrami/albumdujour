@@ -33,6 +33,20 @@
       50% { opacity: 0.8; transform: scale(1); }
     }
     
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .webring-button {
       animation: dr-pulseShadow 2s infinite, dr-float 3s ease-in-out infinite;
       width: 88px;
